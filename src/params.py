@@ -11,11 +11,6 @@ PI = 3.14159
 
 VERBOSITY = 3
 
-a_si = 5.50
-PRIMITIVE_CELL = [[0,          0.5 * a_si, 0.5 * a_si],
-                  [0.5 * a_si,      0,     0.5 * a_si],
-                  [0.5 * a_si, 0.5 * a_si,     0]]
-
 # Tight-binding empirical parameters taken from
 # Jancu et al., Phys. Rev. B, 57, 6493 (1998) and
 # Zheng et al., IEEE Trans. Electron Dev., 52, 1092 (2005))
@@ -79,6 +74,8 @@ M_QN = {0: 'sigma', 1: 'pi', 2: 'delta'}
 
 # Coordinates of high-symmetry points in the Brillouin zone
 # of the diamond-type crystal lattice
+
+a_si = 5.50
 
 SPECIAL_K_POINTS = {
     'GAMMA': [0, 0, 0],

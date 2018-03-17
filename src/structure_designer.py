@@ -88,7 +88,9 @@ class StructDesigner(StructDesignerXYZ):
 
     def __init__(self):
 
-        si = supercell(1, 1, 1, AFinite=True, BFinite=True, CFinite=True, RemoveSilane=True)
+        a_si = 5.50
+
+        si = supercell(2, 2, 2, AFinite=True, BFinite=True, CFinite=False, RemoveSilane=False)
         si.scale(a_si)
         # si.translate(-A*aSi/2,-B*aSi/2,-C*aSi/2)
         # si.translate(0,0,-C*aSi/2)
@@ -136,7 +138,7 @@ class CyclicTopology(object):
         surfaces_adj = []
 
         thr1 = 0.1
-        thr2 = thr1 + 2
+        thr2 = thr1 + 1.37
 
         for j, item in enumerate(self.pcv):
 
@@ -182,22 +184,22 @@ class CyclicTopology(object):
         if isinstance(query, list) or isinstance(query, np.ndarray):
             ans = self._kd_tree.query(query,
                                       k=5,
-                                      distance_upper_bound=2.39)
+                                      distance_upper_bound=2.4)
         elif isinstance(query, int):
             ans = self._kd_tree.query(self.virtual_and_interfacial_atoms.items()[query][1],
                                       k=5,
-                                      distance_upper_bound=2.39)
+                                      distance_upper_bound=2.4)
         elif isinstance(query, str):
             ans = self._kd_tree.query(self.virtual_and_interfacial_atoms[query],
                                       k=5,
-                                      distance_upper_bound=2.39)
+                                      distance_upper_bound=2.4)
         else:
             raise TypeError('Wrong input type for query')
 
         ans1 = []
 
         for item in zip(ans[0], ans[1]):
-            if 1.47 < item[0] < 2.39 and self.virtual_and_interfacial_atoms.keys()[item[1]].startswith("*"):
+            if 1.47 < item[0] < 2.4 and self.virtual_and_interfacial_atoms.keys()[item[1]].startswith("*"):
                 ans1.append(item[1])
 
         return ans1
@@ -205,11 +207,6 @@ class CyclicTopology(object):
 
 if __name__ == '__main__':
 
-    xyz = '/home/mk/TB_project/src/my_si.xyz'
-
-    with open(xyz, 'rb') as f:
-        xyz = f.read()
-
-    ct = CyclicTopology(PRIMITIVE_CELL, xyz)
-    print ct
+    sd = StructDesigner()
+    print "Done!"
 

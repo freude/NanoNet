@@ -11,7 +11,7 @@ from operator import mul
 import matplotlib.pyplot as plt
 import numpy as np
 from abstract_interfaces import AbstractBasis
-from structure_designer import StructDesigner, StructDesignerXYZ
+from structure_designer import StructDesignerXYZ
 from params import *
 from diatomic_matrix_element import me
 
@@ -95,10 +95,9 @@ class BasisTB(AbstractBasis, StructDesignerXYZ):
 
     num_of_orbitals = {'S': 10, 'H': 1}
 
-    def __init__(self):
+    def __init__(self, xyz, primitive_cell):
 
-        super(BasisTB, self).__init__(xyz='/home/mk/TB_project/src/my_si.xyz',
-                                      primitive_cell=PRIMITIVE_CELL)
+        super(BasisTB, self).__init__(xyz=xyz, primitive_cell=primitive_cell)
 
         self.quantum_numbers_lims = []
 
@@ -139,12 +138,15 @@ class BasisTB(AbstractBasis, StructDesignerXYZ):
 class Hamiltonian(BasisTB):
     """
     Class defines a Hamiltonian matrix as well as a set of member-functions
-    allowing to form, visualize and analyse the matrix.
+    allowing to build, diagonalize and visualize the matrix.
     """
 
-    def __init__(self):
+    def __init__(self, **kwargs):
 
-        super(Hamiltonian, self).__init__()
+        xyz = kwargs.get('xyz', "")
+        primitive_cell = kwargs.get('primitive_cell', [])
+
+        super(Hamiltonian, self).__init__(xyz=xyz, primitive_cell=primitive_cell)
         self.H_matrix = None                            # Hamiltonian for an isolated system
         self.H_matrix_bc_factor = None                  # exponential Bloch factors for pbc
         self.H_matrix_bc_add = None                     # additive Bloch exponentials for pbc
@@ -352,9 +354,63 @@ class Hamiltonian(BasisTB):
                         self.H_matrix_bc_add[ind1, ind2] += phase * self._get_me(j1, ind, l1, l2, coords)
 
 
-if __name__ == '__main__':
+def format_func(value, tick_number):
 
-    from aux_functions import get_k_coords
+    # if value == PI / a_si:
+    #     return r"$\frac{\pi}{2}$"
+    # else:
+    #     return '%.2f' % value
+
+    N = int(np.round(2 * value / np.pi))
+    if N == 0:
+        return "0"
+    elif N == 1:
+        return r"$\pi/2$"
+    elif N == 2:
+        return r"$\pi$"
+    elif N % 2 > 0:
+        return r"${0}\pi/2$".format(N)
+    else:
+        return r"${0}\pi$".format(N // 2)
+
+
+def main():
+
+    a_si = 5.50
+    PRIMITIVE_CELL = [[0, 0, a_si]]
+
+    h = Hamiltonian(xyz='/home/mk/TB_project/src/SiNW.xyz', primitive_cell=PRIMITIVE_CELL)
+    h.initialize()
+
+    num_points = 20
+    kk = np.linspace(0, PI / a_si, num_points, endpoint=True)
+    band_sructure = []
+
+    for jj in xrange(num_points):
+        vals, _ = h.diagonalize_periodic_bc([0.0, 0.0, kk[jj]])
+        band_sructure.append(vals)
+
+    band_sructure = np.array(band_sructure)
+
+    ax = plt.axes()
+    ax.set_ylim(-1.0, 2.7)
+    ax.xaxis.set_major_formatter(plt.FuncFormatter(format_func))
+    ax.plot(kk, np.sort(np.real(band_sructure)))
+    plt.show()
+
+
+def main1():
+
+    from src.aux_functions import get_k_coords
+
+    # ----------------------------------------------------------------------
+
+    a_si = 5.50
+    PRIMITIVE_CELL = [[0, 0.5 * a_si, 0.5 * a_si],
+                      [0.5 * a_si, 0, 0.5 * a_si],
+                      [0.5 * a_si, 0.5 * a_si, 0]]
+
+    # ----------------------------------------------------------------------
 
     sym_points = ['L', 'GAMMA', 'X', 'W', 'K', 'L', 'W', 'X', 'K', 'GAMMA']
     num_points = [15, 20, 15, 10, 15, 15, 15, 15, 20]
@@ -365,7 +421,8 @@ if __name__ == '__main__':
     k = get_k_coords(sym_points, num_points)
     vals = np.zeros((sum(num_points), 20), dtype=np.complex)
 
-    h = Hamiltonian()
+    h = Hamiltonian(xyz='/home/mk/TB_project/src/si.xyz',
+                    primitive_cell=PRIMITIVE_CELL)
     h.initialize()
 
     for jj, i in enumerate(k):
@@ -373,3 +430,8 @@ if __name__ == '__main__':
 
     plt.plot(np.sort(np.real(vals)))
     plt.show()
+
+
+if __name__ == '__main__':
+
+    main()
