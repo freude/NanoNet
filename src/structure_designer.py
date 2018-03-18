@@ -21,7 +21,7 @@ class StructDesignerXYZ(AbstractStructureDesigner):
     The class builds the atomic structure from the xyz file or string.
     """
 
-    def __init__(self, xyz='/home/mk/TB_project/src/my_si.xyz', primitive_cell=[]):
+    def __init__(self, xyz='/home/mk/TB_project/src/my_si.xyz'):
 
         try:
             with open(xyz, 'rb') as read_file:
@@ -29,11 +29,6 @@ class StructDesignerXYZ(AbstractStructureDesigner):
 
         except IOError:
             reader = xyz
-
-        if len(primitive_cell) > 0:
-            self.ct = CyclicTopology(primitive_cell, reader)
-        else:
-            self.ct = None
 
         labels, coords = xyz2np(reader)
         self._num_of_species = count_species(labels)
@@ -117,7 +112,7 @@ class CyclicTopology(object):
     a set of the primitive cell vectors.
     """
 
-    def __init__(self, primitive_cell_vectors, xyz_string):
+    def __init__(self, primitive_cell_vectors, labels, coords):
 
         self.pcv = primitive_cell_vectors
 
@@ -128,7 +123,7 @@ class CyclicTopology(object):
 
         self.interfacial_atoms_ind = []
         self.virtual_and_interfacial_atoms = OrderedDict()
-        self._generate_atom_list(xyz_string)
+        self._generate_atom_list(labels, coords)
 
         self._kd_tree = scipy.spatial.cKDTree(self.virtual_and_interfacial_atoms.values(), leafsize=100)
 
@@ -153,9 +148,8 @@ class CyclicTopology(object):
 
         return surfaces, surfaces_adj
 
-    def _generate_atom_list(self, xyz_string):
+    def _generate_atom_list(self, labels, coords):
 
-        labels, coords = xyz2np(xyz_string)
         count = 0
 
         for j, item in enumerate(coords):

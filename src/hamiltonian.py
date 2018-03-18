@@ -11,7 +11,7 @@ from operator import mul
 import matplotlib.pyplot as plt
 import numpy as np
 from abstract_interfaces import AbstractBasis
-from structure_designer import StructDesignerXYZ
+from structure_designer import StructDesignerXYZ, CyclicTopology
 from params import *
 from diatomic_matrix_element import me
 
@@ -95,9 +95,9 @@ class BasisTB(AbstractBasis, StructDesignerXYZ):
 
     num_of_orbitals = {'S': 10, 'H': 1}
 
-    def __init__(self, xyz, primitive_cell):
+    def __init__(self, xyz):
 
-        super(BasisTB, self).__init__(xyz=xyz, primitive_cell=primitive_cell)
+        super(BasisTB, self).__init__(xyz=xyz)
 
         self.quantum_numbers_lims = []
 
@@ -144,9 +144,8 @@ class Hamiltonian(BasisTB):
     def __init__(self, **kwargs):
 
         xyz = kwargs.get('xyz', "")
-        primitive_cell = kwargs.get('primitive_cell', [])
 
-        super(Hamiltonian, self).__init__(xyz=xyz, primitive_cell=primitive_cell)
+        super(Hamiltonian, self).__init__(xyz=xyz)
         self.H_matrix = None                            # Hamiltonian for an isolated system
         self.H_matrix_bc_factor = None                  # exponential Bloch factors for pbc
         self.H_matrix_bc_add = None                     # additive Bloch exponentials for pbc
@@ -154,6 +153,7 @@ class Hamiltonian(BasisTB):
                                                         # in adacent primitive cells due to pbc)
 
         self.k_vector = 0                               # default value of the wave vector
+        self.ct = None
 
     def initialize(self):
         """
@@ -187,6 +187,13 @@ class Hamiltonian(BasisTB):
                             ind2 = self.qn2ind([('atoms', j2), ('l', l2)], )
 
                             self.H_matrix[ind1, ind2] = self._get_me(j1, j2, l1, l2)
+
+    def set_periodic_bc(self, primitive_cell):
+
+        if len(primitive_cell) > 0:
+            self.ct = CyclicTopology(primitive_cell, self.atom_list.keys(), self.atom_list.values())
+        else:
+            self.ct = None
 
     def diagonalize(self):
         """
@@ -381,6 +388,7 @@ def main():
 
     h = Hamiltonian(xyz='/home/mk/TB_project/src/SiNW.xyz', primitive_cell=PRIMITIVE_CELL)
     h.initialize()
+    h.set_periodic_bc(PRIMITIVE_CELL)
 
     num_points = 20
     kk = np.linspace(0, PI / a_si, num_points, endpoint=True)
@@ -424,6 +432,7 @@ def main1():
     h = Hamiltonian(xyz='/home/mk/TB_project/src/si.xyz',
                     primitive_cell=PRIMITIVE_CELL)
     h.initialize()
+    h.set_periodic_bc(PRIMITIVE_CELL)
 
     for jj, i in enumerate(k):
         vals[jj, :], _ = h.diagonalize_periodic_bc(list(i))
