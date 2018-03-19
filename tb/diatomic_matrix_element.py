@@ -5,11 +5,6 @@ empirical diatomic couplings defined in the module params.
 Computations are based mostly on analytical equations derived in
 A.V. Podolskiy and P. Vogl, Phys. Rev. B. 69, 233101 (2004)
 """
-
-__author__ = "Mike Klymenko"
-__email__ = "mike.klymenko@rmit.edu.au"
-__version__ = "0.0.1"
-
 import math
 import numpy as np
 from params import *
@@ -17,7 +12,7 @@ from params import *
 
 def me_diatomic(atoms, n, l_min, l_max, m):
     """
-    The function looks up into the table of parameters taking a query parametrized by:
+    The function looks up into the table of parameters making a query parametrized by:
 
     :param atoms:  type of bound , it may be "Si-Si" or "Si-H" bound
     :param n:      combination of the principal quantum numbers of atoms
@@ -85,17 +80,20 @@ def a_coef(m, gamma):
     if m == 0:
         return 1.0 / math.sqrt(2)
     else:
-        return ((-1) ** abs(m)) * (tau(m) * math.cos(abs(m) * gamma) - tau(-m) * math.sin(abs(m) * gamma))
+        return ((-1) ** abs(m)) * \
+               (tau(m) * math.cos(abs(m) * gamma) - tau(-m) * math.sin(abs(m) * gamma))
 
 
 def b_coef(m, gamma):
 
-    return ((-1) ** abs(m)) * (tau(m) * math.sin(abs(m) * gamma) + tau(-m) * math.cos(abs(m) * gamma))
+    return ((-1) ** abs(m)) * \
+           (tau(m) * math.sin(abs(m) * gamma) + tau(-m) * math.cos(abs(m) * gamma))
 
 
 def s_me(N, l, m1, m2, gamma):
 
-    return a_coef(m1, gamma) * (((-1) ** abs(m2)) * d_me(N, l, abs(m1), abs(m2)) + d_me(N, l, abs(m1), -abs(m2)))
+    return a_coef(m1, gamma) * \
+           (((-1) ** abs(m2)) * d_me(N, l, abs(m1), abs(m2)) + d_me(N, l, abs(m1), -abs(m2)))
 
 
 def t_me(N, l, m1, m2, gamma):
@@ -103,7 +101,8 @@ def t_me(N, l, m1, m2, gamma):
     if m1 == 0:
         return 0
     else:
-        return b_coef(m1, gamma) * (((-1) ** abs(m2)) * d_me(N, l, abs(m1), abs(m2)) - d_me(N, l, abs(m1), -abs(m2)))
+        return b_coef(m1, gamma) * \
+               (((-1) ** abs(m2)) * d_me(N, l, abs(m1), abs(m2)) - d_me(N, l, abs(m1), -abs(m2)))
 
 
 def me(atoms, n1, l1, m1, n2, l2, m2, coords):
@@ -124,7 +123,8 @@ def me(atoms, n1, l1, m1, n2, l2, m2, coords):
 
     prefactor = (-1) ** ((l1 - l2 + abs(l1 - l2)) * 0.5)
     ans = 2 * a_coef(m1, gamma) * a_coef(m2, gamma) * \
-          d_me(N, l1, abs(m1), 0) * d_me(N, l2, abs(m2), 0) * me_diatomic(atoms, code, l_min, l_max, 0)
+        d_me(N, l1, abs(m1), 0) * d_me(N, l2, abs(m2), 0) * \
+        me_diatomic(atoms, code, l_min, l_max, 0)
 
     for m in xrange(1, l_min+1):
         ans += (s_me(N, l1, m1, m, gamma) * s_me(N, l2, m2, m, gamma) +

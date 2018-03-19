@@ -1,11 +1,6 @@
 """
 The module contains all necessary classes needed to compute th Hamiltonian matrix
 """
-
-__author__ = "Mike Klymenko"
-__email__ = "mike.klymenko@rmit.edu.au"
-__version__ = "0.0.1"
-
 from collections import OrderedDict
 from operator import mul
 import matplotlib.pyplot as plt
@@ -146,9 +141,9 @@ class Hamiltonian(BasisTB):
         xyz = kwargs.get('xyz', "")
 
         super(Hamiltonian, self).__init__(xyz=xyz)
-        self.H_matrix = None                            # Hamiltonian for an isolated system
-        self.H_matrix_bc_factor = None                  # exponential Bloch factors for pbc
-        self.H_matrix_bc_add = None                     # additive Bloch exponentials for pbc
+        self.h_matrix = None                            # Hamiltonian for an isolated system
+        self.h_matrix_bc_factor = None                  # exponential Bloch factors for pbc
+        self.h_matrix_bc_add = None                     # additive Bloch exponentials for pbc
                                                         # (interaction with virtual neighbours
                                                         # in adacent primitive cells due to pbc)
 
@@ -161,9 +156,9 @@ class Hamiltonian(BasisTB):
         """
 
         # initialize Hamiltonian matrices
-        self.H_matrix = np.zeros((self.basis_size, self.basis_size), dtype=np.complex)
-        self.H_matrix_bc_add = np.zeros((self.basis_size, self.basis_size), dtype=np.complex)
-        self.H_matrix_bc_factor = np.ones((self.basis_size, self.basis_size), dtype=np.complex)
+        self.h_matrix = np.zeros((self.basis_size, self.basis_size), dtype=np.complex)
+        self.h_matrix_bc_add = np.zeros((self.basis_size, self.basis_size), dtype=np.complex)
+        self.h_matrix_bc_factor = np.ones((self.basis_size, self.basis_size), dtype=np.complex)
 
         # loop over all nodes
         for j1 in xrange(self.num_of_nodes):
@@ -176,7 +171,7 @@ class Hamiltonian(BasisTB):
                 if j1 == j2:
                     for l1 in xrange(BasisTB.num_of_orbitals[self.atom_list.keys()[j1][0]]):
                         ind1 = self.qn2ind([('atoms', j1), ('l', l1)], )
-                        self.H_matrix[ind1, ind1] = self._get_me(j1, j2, l1, l1)
+                        self.h_matrix[ind1, ind1] = self._get_me(j1, j2, l1, l1)
 
                 # nearest neighbours interaction
                 else:
@@ -186,7 +181,7 @@ class Hamiltonian(BasisTB):
                             ind1 = self.qn2ind([('atoms', j1), ('l', l1)], )
                             ind2 = self.qn2ind([('atoms', j2), ('l', l2)], )
 
-                            self.H_matrix[ind1, ind2] = self._get_me(j1, j2, l1, l2)
+                            self.h_matrix[ind1, ind2] = self._get_me(j1, j2, l1, l2)
 
     def set_periodic_bc(self, primitive_cell):
 
@@ -204,7 +199,7 @@ class Hamiltonian(BasisTB):
         if len(self.k_vector) != 0:
             self._reset_periodic_bc()
 
-        return np.linalg.eig(self.H_matrix)
+        return np.linalg.eig(self.h_matrix)
 
     def diagonalize_periodic_bc(self, k_vector):
         """
@@ -223,7 +218,7 @@ class Hamiltonian(BasisTB):
             self._compute_h_matrix_bc_factor()
             self._compute_h_matrix_bc_add()
 
-        return np.linalg.eig(self.H_matrix_bc_factor * self.H_matrix + self.H_matrix_bc_add)
+        return np.linalg.eig(self.h_matrix_bc_factor * self.h_matrix + self.h_matrix_bc_add)
 
     def is_hermitian(self, visualize=False):
         """
@@ -233,12 +228,12 @@ class Hamiltonian(BasisTB):
         :return:            True is the Hamiltonian is a Hermitian matrix, False otherwise
         """
 
-        H_matrix = self.H_matrix * self.H_matrix_bc_factor + self.H_matrix_bc_add
+        h_matrix = self.h_matrix * self.h_matrix_bc_factor + self.h_matrix_bc_add
 
         if visualize:
-            plt.imshow((np.abs(H_matrix - H_matrix.conj().T)))
+            plt.imshow((np.abs(h_matrix - h_matrix.conj().T)))
 
-        if (np.abs(H_matrix - H_matrix.conj().T) > 0.001).any():
+        if (np.abs(h_matrix - h_matrix.conj().T) > 0.001).any():
             return False
         else:
             return True
@@ -305,8 +300,8 @@ class Hamiltonian(BasisTB):
         :return:
         """
 
-        self.H_matrix_bc_add = np.zeros((self.basis_size, self.basis_size), dtype=np.complex)
-        self.H_matrix_bc_factor = np.ones((self.basis_size, self.basis_size), dtype=np.complex)
+        self.h_matrix_bc_add = np.zeros((self.basis_size, self.basis_size), dtype=np.complex)
+        self.h_matrix_bc_factor = np.ones((self.basis_size, self.basis_size), dtype=np.complex)
         self.k_vector = None
 
     def _compute_h_matrix_bc_factor(self):
@@ -330,8 +325,8 @@ class Hamiltonian(BasisTB):
                             ind1 = self.qn2ind([('atoms', j1), ('l', l1)], )
                             ind2 = self.qn2ind([('atoms', j2), ('l', l2)], )
 
-                            self.H_matrix_bc_factor[ind1, ind2] = phase
-                            # self.H_matrix[ind2, ind1] = self.H_matrix[ind1, ind2]
+                            self.h_matrix_bc_factor[ind1, ind2] = phase
+                            # self.h_matrix[ind2, ind1] = self.h_matrix[ind1, ind2]
 
     def _compute_h_matrix_bc_add(self):
         """
@@ -358,7 +353,8 @@ class Hamiltonian(BasisTB):
                         ind1 = self.qn2ind([('atoms', j1), ('l', l1)])
                         ind2 = self.qn2ind([('atoms', ind), ('l', l2)])
 
-                        self.H_matrix_bc_add[ind1, ind2] += phase * self._get_me(j1, ind, l1, l2, coords)
+                        self.h_matrix_bc_add[ind1, ind2] += phase * \
+                            self._get_me(j1, ind, l1, l2, coords)
 
 
 def format_func(value, tick_number):
@@ -386,7 +382,7 @@ def main():
     a_si = 5.50
     PRIMITIVE_CELL = [[0, 0, a_si]]
 
-    h = Hamiltonian(xyz='/home/mk/TB_project/src/SiNW.xyz', primitive_cell=PRIMITIVE_CELL)
+    h = Hamiltonian(xyz='/home/mk/TB_project/tb/SiNW.xyz', primitive_cell=PRIMITIVE_CELL)
     h.initialize()
     h.set_periodic_bc(PRIMITIVE_CELL)
 
@@ -409,7 +405,7 @@ def main():
 
 def main1():
 
-    from src.aux_functions import get_k_coords
+    from tb.aux_functions import get_k_coords
 
     # ----------------------------------------------------------------------
 
@@ -429,7 +425,7 @@ def main1():
     k = get_k_coords(sym_points, num_points)
     vals = np.zeros((sum(num_points), 20), dtype=np.complex)
 
-    h = Hamiltonian(xyz='/home/mk/TB_project/src/si.xyz',
+    h = Hamiltonian(xyz='/home/mk/TB_project/tb/si.xyz',
                     primitive_cell=PRIMITIVE_CELL)
     h.initialize()
     h.set_periodic_bc(PRIMITIVE_CELL)

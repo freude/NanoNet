@@ -1,12 +1,6 @@
 """
 The module contains a set of auxiliary functions facilitating the tight-binding computations
 """
-
-__author__ = "Mike Klymenko"
-__email__ = "mike.klymenko@rmit.edu.au"
-__version__ = "0.0.1"
-
-
 from itertools import islice
 import numpy as np
 from params import SPECIAL_K_POINTS
@@ -80,7 +74,8 @@ def get_k_coords(special_points, num_of_points):
         sequence3 = np.linspace(SPECIAL_K_POINTS[special_points[j]][2],
                                 SPECIAL_K_POINTS[special_points[j+1]][2], num_of_points[j])
 
-        k_vectors[offset:offset + num_of_points[j], :] = np.vstack((sequence1, sequence2, sequence3)).T
+        k_vectors[offset:offset + num_of_points[j], :] = \
+            np.vstack((sequence1, sequence2, sequence3)).T
 
         offset += num_of_points[j]
 

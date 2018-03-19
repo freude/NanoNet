@@ -2,11 +2,6 @@
 The module contains empirical tight-binding parameters and auxiliary global variables.
 """
 
-__author__ = "Mike Klymenko"
-__email__ = "mike.klymenko@rmit.edu.au"
-__version__ = "0.0.1"
-
-
 PI = 3.14159
 
 VERBOSITY = 3

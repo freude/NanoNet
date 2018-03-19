@@ -2,18 +2,12 @@
 The module contains classes serving to define
 geometrical structure and boundary conditions of the problem.
 """
-
-__author__ = "Mike Klymenko"
-__email__ = "mike.klymenko@rmit.edu.au"
-__version__ = "0.0.1"
-
 from collections import OrderedDict
 import numpy as np
 import scipy.spatial
-from src.third_party.cluster_100 import supercell
-from src.aux_functions import xyz2np, count_species
+from third_party.cluster_100 import supercell
+from aux_functions import xyz2np, count_species
 from abstract_interfaces import AbstractStructureDesigner
-from params import *
 
 
 class StructDesignerXYZ(AbstractStructureDesigner):
@@ -21,7 +15,7 @@ class StructDesignerXYZ(AbstractStructureDesigner):
     The class builds the atomic structure from the xyz file or string.
     """
 
-    def __init__(self, xyz='/home/mk/TB_project/src/my_si.xyz'):
+    def __init__(self, xyz='/home/mk/TB_project/tb/my_si.xyz'):
 
         try:
             with open(xyz, 'rb') as read_file:
@@ -125,7 +119,8 @@ class CyclicTopology(object):
         self.virtual_and_interfacial_atoms = OrderedDict()
         self._generate_atom_list(labels, coords)
 
-        self._kd_tree = scipy.spatial.cKDTree(self.virtual_and_interfacial_atoms.values(), leafsize=100)
+        self._kd_tree = scipy.spatial.cKDTree(self.virtual_and_interfacial_atoms.values(),
+                                              leafsize=100)
 
     def belong_to_surfaces(self, coord):
 
@@ -162,7 +157,9 @@ class CyclicTopology(object):
 
                 for surf in s_base:
                     atom_coords = item + self.pcv[surf]
-                    self.virtual_and_interfacial_atoms.update({"*_" + str(count) + "_" + str(j) + "_" + labels[j]: atom_coords})
+                    self.virtual_and_interfacial_atoms.update({"*_" + str(count) +
+                                                               "_" + str(j) + "_" +
+                                                               labels[j]: atom_coords})
                     count += 1
 
             if len(s_adj) > 0:
@@ -170,7 +167,9 @@ class CyclicTopology(object):
                 self.interfacial_atoms_ind.append(j)
                 for surf in s_adj:
                     atom_coords = item - self.pcv[surf]
-                    self.virtual_and_interfacial_atoms.update({"*_" + str(count) + "_" + str(j) + "_" + labels[j]: atom_coords})
+                    self.virtual_and_interfacial_atoms.update({"*_" + str(count) +
+                                                               "_" + str(j) + "_" +
+                                                               labels[j]: atom_coords})
                     count += 1
 
     def get_neighbours(self, query):
@@ -193,7 +192,8 @@ class CyclicTopology(object):
         ans1 = []
 
         for item in zip(ans[0], ans[1]):
-            if 1.47 < item[0] < 2.4 and self.virtual_and_interfacial_atoms.keys()[item[1]].startswith("*"):
+            if 1.47 < item[0] < 2.4 and \
+                    self.virtual_and_interfacial_atoms.keys()[item[1]].startswith("*"):
                 ans1.append(item[1])
 
         return ans1

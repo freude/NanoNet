@@ -3,11 +3,6 @@ The module contains abstract interfaces of the classes.
 The interfaces are aimed to be schemas for further classes implementations.
 Following these schemas will ensure compatibility of the code with the entire project.
 """
-
-__author__ = "Mike Klymenko"
-__email__ = "mike.klymenko@rmit.edu.au"
-__version__ = "0.0.1"
-
 from abc import ABCMeta, abstractmethod
 
 

@@ -14,31 +14,49 @@ from tb import Hamiltonian
 ```
 
 Normally, computations are performed in three stages, 
-each stage can be represented by one line of code:
+each stage can be represented by one or two lines of code:
 
 1. Specify geometry of the system - determine position if atoms
 and specify periodic boundary conditions if any. This is done by creating an object of 
 the class Hamiltonian with proper arguments. 
-
-```python
-h = Hamiltonian(xyz='path_to_xyz_file', primitive_cell=[0, 0, 1])
-```
+    ```python
+    h = Hamiltonian(xyz='path_to_xyz_file')
+    ```
 
 2. Initialize the Hamiltonian - compute Hamiltonian matrix elements
-```python
-h.initialize()
-```
+
+    For isolated system:
+    
+    ```python
+    h.initialize()
+    ```
+    
+    In order to specify periodic boundary conditions add the lines:
+    
+    ```python
+    a_si = 5.50
+    PRIMITIVE_CELL = [[0, 0.5 * a_si, 0.5 * a_si],
+                      [0.5 * a_si, 0, 0.5 * a_si],
+                      [0.5 * a_si, 0.5 * a_si, 0]]
+    h.set_periodic_bc(PRIMITIVE_CELL)
+    ```
 
 3. Find the eigenvalues and eigenstates of the Hamiltonian
-```python
-eigenvalues, eigenvectors = h.diagonalize_periodic_bc([0, 0, 0])
-```
+
+    For the isolated system:
+    ```python
+    eigenvalues, eigenvectors = h.diagonalize()
+    ```
+    
+    For the system with periodic boundary conditions:
+    ```python
+    wave_vector = [0, 0, 0]
+    eigenvalues, eigenvectors = h.diagonalize_periodic_bc(wave_vector)
+    ```
 
 Optionally data post-processing may be performed over the obtained results of computations 
 that includes data visualization, computing DOS etc.
  
- 
-
 ### Prerequisites
 
 What things you need to install the software and how to install them
