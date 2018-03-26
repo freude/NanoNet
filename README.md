@@ -20,7 +20,7 @@ each stage can be represented by one or two lines of code:
 and specify periodic boundary conditions if any. This is done by creating an object of 
 the class Hamiltonian with proper arguments. 
     ```python
-    h = Hamiltonian(xyz='path_to_xyz_file')
+   h = Hamiltonian(xyz='path_to_xyz_file')
     ```
 
 2. Initialize the Hamiltonian - compute Hamiltonian matrix elements
@@ -28,30 +28,30 @@ the class Hamiltonian with proper arguments.
     For isolated system:
     
     ```python
-    h.initialize()
+   h.initialize()
     ```
     
     In order to specify periodic boundary conditions add the lines:
     
     ```python
-    a_si = 5.50
-    PRIMITIVE_CELL = [[0, 0.5 * a_si, 0.5 * a_si],
-                      [0.5 * a_si, 0, 0.5 * a_si],
-                      [0.5 * a_si, 0.5 * a_si, 0]]
-    h.set_periodic_bc(PRIMITIVE_CELL)
+   a_si = 5.50
+   PRIMITIVE_CELL = [[0, 0.5 * a_si, 0.5 * a_si],
+                     [0.5 * a_si, 0, 0.5 * a_si],
+                     [0.5 * a_si, 0.5 * a_si, 0]]
+   h.set_periodic_bc(PRIMITIVE_CELL)
     ```
 
 3. Find the eigenvalues and eigenstates of the Hamiltonian
 
     For the isolated system:
     ```python
-    eigenvalues, eigenvectors = h.diagonalize()
+   eigenvalues, eigenvectors = h.diagonalize()
     ```
     
     For the system with periodic boundary conditions:
     ```python
-    wave_vector = [0, 0, 0]
-    eigenvalues, eigenvectors = h.diagonalize_periodic_bc(wave_vector)
+   wave_vector = [0, 0, 0]
+   eigenvalues, eigenvectors = h.diagonalize_periodic_bc(wave_vector)
     ```
 
 Optionally data post-processing may be performed over the obtained results of computations 

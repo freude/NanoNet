@@ -198,6 +198,21 @@ class CyclicTopology(object):
 
         return ans1
 
+    @staticmethod
+    def atom_classifier(coords, leads):
+
+        distance_to_surface1 = np.inner(coords, leads) / np.linalg.norm(leads)
+        distance_to_surface2 = np.inner(coords - leads, leads) / np.linalg.norm(leads)
+
+        flag = None
+
+        if distance_to_surface1 < 0:
+            flag = 'L'
+        if distance_to_surface2 >= 0:
+            flag = 'R'
+
+        return flag
+
 
 if __name__ == '__main__':
 
