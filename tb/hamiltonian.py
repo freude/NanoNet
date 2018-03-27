@@ -431,7 +431,7 @@ def main():
 
 def main1():
 
-    from tb.aux_functions import get_k_coords
+    from aux_functions import get_k_coords
 
     # ----------------------------------------------------------------------
 
@@ -448,13 +448,13 @@ def main1():
     # sym_points = ['L', 'GAMMA', 'X', 'K', 'GAMMA']
     # num_points = [15, 20, 5, 10]
 
-    k = get_k_coords(sym_points, num_points)
-    vals = np.zeros((sum(num_points), 20), dtype=np.complex)
-
-    h = Hamiltonian(xyz='/home/mk/TB_project/tb/si.xyz',
+    h = Hamiltonian(xyz='/home/mk/TB_project/tb/my_si.xyz',
                     primitive_cell=PRIMITIVE_CELL)
     h.initialize()
     h.set_periodic_bc(PRIMITIVE_CELL)
+
+    k = get_k_coords(sym_points, num_points)
+    vals = np.zeros((sum(num_points), h.h_matrix.shape[0]), dtype=np.complex)
 
     for jj, i in enumerate(k):
         vals[jj, :], _ = h.diagonalize_periodic_bc(list(i))

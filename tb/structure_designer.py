@@ -127,7 +127,7 @@ class CyclicTopology(object):
         surfaces = []
         surfaces_adj = []
 
-        thr1 = 0.1
+        thr1 = 0.6
         thr2 = thr1 + 1.37
 
         for j, item in enumerate(self.pcv):
