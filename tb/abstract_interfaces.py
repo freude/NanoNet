@@ -77,3 +77,9 @@ class AbstractBasis(object):
 
         qn = 0
         return qn
+
+    @property
+    @abstractmethod
+    def orbitals_dict(self):
+
+        return dict()

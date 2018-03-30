@@ -1,0 +1,66 @@
+# Parameter file for the TB_project for Si
+
+VERBOSITY:                   3
+
+# --------------------------------------------------------
+
+lattice_constant:           5.50
+
+xyz:
+    num_atoms:               2
+    title:                "Si2 cell"
+    atoms:
+        - Si1:       [0.0000000000,    0.0000000000,    0.0000000000]
+        - Si2:       [1.3750000000,    1.3750000000,    1.3750000000]
+
+# ---------------------------------------------------------
+
+orbital_sets:
+    Si:                'SiliconSP3D5S'
+    H:                   'HydrogenS'
+
+# ---------------------------------------------------------
+
+primitive_cell:
+    - [0, 0.5, 0.5]               # first vector
+    - [0.5, 0, 0.5]               # second vector
+    - [0.5, 0.5, 0]               # third vector
+
+# Tight-binding empirical parameters taken from
+# Jancu et al., Phys. Rev. B, 57, 6493 (1998) and
+# Zheng et al., IEEE Trans. Electron Dev., 52, 1092 (2005))
+
+#  On-site Si
+PARAMS_ON_SITE_SI:
+    s:                    -2.0196
+    c:                    19.6748
+    p:                     4.5448
+    d:                    14.1836
+
+#  On-site H
+PARAMS_ON_SITE_H:
+    s:                     0.9998
+
+#  NN - Si-Si
+PARAMS_SI_SI:
+    ss_sigma:             -1.9413
+    cc_sigma:             -3.3081
+    cs_sigma:             -1.6933
+    sp_sigma:              2.7836
+    cp_sigma:              2.8428
+    sd_sigma:             -2.7998
+    cd_sigma:             -0.7003
+    pp_sigma:              4.1068
+    pp_pi:                -1.5934
+    pd_sigma:             -2.1073
+    pd_pi:                 1.9977
+    dd_sigma:             -1.2327
+    dd_pi:                 2.5145
+    dd_delta:             -2.4734
+
+#  NN - Si-H
+PARAMS_SI_H:
+    ss_sigma:             -3.9997
+    cs_sigma:             -1.6977
+    sp_sigma:              4.2518
+    sd_sigma:             -2.1055

@@ -5,16 +5,41 @@ empirical diatomic couplings defined in the module params.
 Computations are based mostly on analytical equations derived in
 A.V. Podolskiy and P. Vogl, Phys. Rev. B. 69, 233101 (2004)
 """
+import sys
 import math
 import numpy as np
-from params import *
+from constants import *
 
 
-def me_diatomic(atoms, n, l_min, l_max, m):
+#  NN - Si-Si
+PARAMS_SI_SI = {'ss_sigma': -1.9413,
+                'cc_sigma': -3.3081,
+                'cs_sigma': -1.6933,
+                'sp_sigma': 2.7836,
+                'cp_sigma': 2.8428,
+                'sd_sigma': -2.7998,
+                'cd_sigma': -0.7003,
+                'pp_sigma': 4.1068,
+                'pp_pi': -1.5934,
+                'pd_sigma': -2.1073,
+                'pd_pi': 1.9977,
+                'dd_sigma': -1.2327,
+                'dd_pi': 2.5145,
+                'dd_delta': -2.4734}
+
+
+#  NN - Si-H
+PARAMS_SI_H = {'ss_sigma': -3.9997,
+               'cs_sigma': -1.6977,
+               'sp_sigma': 4.2518,
+               'sd_sigma': -2.1055}
+
+
+def me_diatomic(bond, n, l_min, l_max, m):
     """
     The function looks up into the table of parameters making a query parametrized by:
 
-    :param atoms:  type of bound , it may be "Si-Si" or "Si-H" bound
+    :param bond:   a bond type represented by a list of atom labels
     :param n:      combination of the principal quantum numbers of atoms
     :param l_min:  min(l1, l2), where l1 and l2 are orbital quantum numbers of atoms
     :param l_max:  max(l1, l2), where l1 and l2 are orbital quantum numbers of atoms
@@ -33,12 +58,7 @@ def me_diatomic(atoms, n, l_min, l_max, m):
     else:
         raise ValueError('Wrong value of the value variable')
 
-    if atoms == "Si-Si":
-        return PARAMS_SI_SI[label]
-    elif atoms == "Si-H":
-        return PARAMS_SI_H[label]
-    else:
-        raise ValueError('Wrong value of the iter variable')
+    return getattr(sys.modules[__name__], 'PARAMS_' + bond)[label]
 
 
 def d_me(N, l, m1, m2):
@@ -105,15 +125,28 @@ def t_me(N, l, m1, m2, gamma):
                (((-1) ** abs(m2)) * d_me(N, l, abs(m1), abs(m2)) - d_me(N, l, abs(m1), -abs(m2)))
 
 
-def me(atoms, n1, l1, m1, n2, l2, m2, coords):
+def me(atom1, ll1, atom2, ll2, coords):
+
+    # determine type of bonds
+    atoms = sorted([item.upper() for item in [atom1.title, atom2.title]])
+    atoms = atoms[0] + '_' + atoms[1]
+
+    # quantum numbers for the first atom
+    n1 = atom1.orbitals[ll1]['n']
+    l1 = atom1.orbitals[ll1]['l']
+    m1 = atom1.orbitals[ll1]['m']
+
+    # quantum numbers for the second atom
+    n2 = atom2.orbitals[ll2]['n']
+    l2 = atom2.orbitals[ll2]['l']
+    m2 = atom2.orbitals[ll2]['m']
 
     L = coords[0]
     M = coords[1]
     N = coords[2]
 
-    print atoms, n1, l1, m1, n2, l2, m2, N, M
+    # print atoms, n1, l1, m1, n2, l2, m2, N, M
 
-    # gamma = math.asin(M / math.sqrt(1.0 - N ** 2))
     gamma = math.atan2(L, M)
 
     code = str(min(n1, n2)) + str(max(n1, n2))

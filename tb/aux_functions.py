@@ -3,7 +3,8 @@ The module contains a set of auxiliary functions facilitating the tight-binding 
 """
 from itertools import islice
 import numpy as np
-from params import SPECIAL_K_POINTS
+import yaml
+from constants import SPECIAL_K_POINTS
 
 
 def xyz2np(xyz):
@@ -43,10 +44,13 @@ def count_species(list_of_labels):
     counter = {}
 
     for item in list_of_labels:
+
+        key = ''.join([i for i in item if not i.isdigit()])
+
         try:
-            counter[item[0]] += 1
+            counter[key] += 1
         except KeyError:
-            counter[item[0]] = 1
+            counter[key] = 1
 
     return counter
 
@@ -80,6 +84,54 @@ def get_k_coords(special_points, num_of_points):
         offset += num_of_points[j]
 
     return k_vectors
+
+
+def dict2xyz(input_data):
+    """
+
+    :param input_data:
+    :return:
+    """
+
+    if not isinstance(input_data, dict):
+        return input_data
+
+    output = str(input_data['num_atoms']) + '\n'
+    output += str(input_data['title']) + '\n'
+
+    for j in xrange(input_data['num_atoms']):
+        output += input_data['atoms'][j].keys()[0] + \
+                  "    " + str(input_data['atoms'][j].values()[0][0]) +\
+                  "    " + str(input_data['atoms'][j].values()[0][1]) + \
+                  "    " + str(input_data['atoms'][j].values()[0][2]) + "\n"
+
+    return output
+
+
+def yaml_parser(input_data):
+    """
+
+    :param input_data:
+    :return:
+    """
+
+    output = None
+
+    if input_data.lower().endswith(('.yml', '.yaml')):
+        with open(input_data, 'r') as stream:
+            try:
+                output = yaml.load(stream)
+            except yaml.YAMLError as exc:
+                print(exc)
+    else:
+        try:
+            output = yaml.load(input_data)
+        except yaml.YAMLError as exc:
+            print(exc)
+
+    output['primitive_cell'] = np.array(output['primitive_cell']) * output['lattice_constant']
+
+    return output
 
 
 if __name__ == "__main__":
