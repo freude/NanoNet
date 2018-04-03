@@ -41,53 +41,70 @@ in the directory `jupyter_notebooks` inside the source directory.
 If the package is properly installed, the work starts with the import of all necessary modules:
 
 ```python
-import Hamil
+import tb
 ```
 
-Normally, computations are performed in three stages, 
-each stage can be represented by one or two lines of code:
+Below we demostarate band structure computation for bulk silicon using empirical tight-binding method.
 
-1. Specify geometry of the system - determine position if atoms
-and specify periodic boundary conditions if any. This is done by creating an object of 
-the class Hamiltonian with proper arguments. 
+1. First, one needs to specify atomic species and corresponding basis sets. It is possible to use custom basis set as
+ is shown in examples in the ipython notebooks. Here we use predefined basis sets.
+    
     ```python
-   h = Hamiltonian(xyz='path_to_xyz_file')
+    tb.Atom.orbital_sets = {'Si': 'SiliconSP3D5S'}
+    ```
+
+2. Specify geometry of the system - determine position if atoms
+and specify periodic boundary conditions if any. This is done by creating an object of 
+the class Hamiltonian with proper arguments.
+ 
+    ```python
+    xyz_file = """2
+    Si cell
+    Si1       0.0000000000    0.0000000000    0.0000000000
+    Si2       0.0000000000    0.000000000     1.3750000000
+    """
+    
+    h = tb.Hamiltonian(xyz=xyz_file, nn_distance=2.0)
     ```
 
 2. Initialize the Hamiltonian - compute Hamiltonian matrix elements
 
     For isolated system:
-    
+        
     ```python
-   h.initialize()
+    h.initialize()
     ```
-    
-    In order to specify periodic boundary conditions add the lines:
-    
+3. Specify periodic boundary conditions:
+        
     ```python
-   a_si = 5.50
-   PRIMITIVE_CELL = [[0, 0.5 * a_si, 0.5 * a_si],
+    a_si = 5.50
+    PRIMITIVE_CELL = [[0, 0.5 * a_si, 0.5 * a_si],
                      [0.5 * a_si, 0, 0.5 * a_si],
                      [0.5 * a_si, 0.5 * a_si, 0]]
-   h.set_periodic_bc(PRIMITIVE_CELL)
+    h.set_periodic_bc(PRIMITIVE_CELL)
     ```
-
-3. Find the eigenvalues and eigenstates of the Hamiltonian
-
-    For the isolated system:
-    ```python
-   eigenvalues, eigenvectors = h.diagonalize()
-    ```
+5. Specify wave vectors:
     
-    For the system with periodic boundary conditions:
     ```python
-   wave_vector = [0, 0, 0]
-   eigenvalues, eigenvectors = h.diagonalize_periodic_bc(wave_vector)
+    sym_points = ['L', 'GAMMA', 'X', 'W', 'K', 'L', 'W', 'X', 'K', 'GAMMA']
+    num_points = [15, 20, 15, 10, 15, 15, 15, 15, 20]
+    k = tb.get_k_coords(sym_points, num_points)
     ```
 
-Optionally data post-processing may be performed over the obtained results of computations 
-that includes data visualization, computing DOS etc.
+6. Find the eigenvalues and eigenstates of the Hamiltonian for each wave vector.
+    
+    ```python
+    vals = np.zeros((sum(num_points), h.h_matrix.shape[0]), dtype=np.complex)
+    
+    for jj, i in enumerate(k):
+        vals[jj, :], _ = h.diagonalize_periodic_bc(list(i))
+   
+    import matplotlib.pyplot as plt 
+    plt.plot(np.sort(np.real(vals)))
+    plt.show()
+    ```
 
+7. Done.
 
 ### Command line interface
 

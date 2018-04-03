@@ -401,9 +401,6 @@ def main1():
     sym_points = ['L', 'GAMMA', 'X', 'W', 'K', 'L', 'W', 'X', 'K', 'GAMMA']
     num_points = [15, 20, 15, 10, 15, 15, 15, 15, 20]
 
-    # sym_points = ['L', 'GAMMA', 'X', 'K', 'GAMMA']
-    # num_points = [15, 20, 5, 10]
-
     h = Hamiltonian(xyz='/home/mk/TB_project/tb/my_si.xyz')
     h.initialize()
     h.set_periodic_bc(PRIMITIVE_CELL)
