@@ -5,6 +5,7 @@ VERBOSITY:                   1
 # --------------------------------------------------------
 
 lattice_constant:           5.50
+nn_distance:                2.7
 
 xyz:
     num_atoms:               2
