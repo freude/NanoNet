@@ -1,6 +1,7 @@
 """
 The module contains all necessary classes needed to compute the Hamiltonian matrix
 """
+from __future__ import print_function, division
 import sys
 from collections import OrderedDict
 from operator import mul
@@ -11,9 +12,10 @@ from structure_designer import StructDesignerXYZ, CyclicTopology
 import constants
 import diatomic_matrix_element as dme
 from atoms import Atom
+from aux_functions import dict2xyz, yaml_parser, get_k_coords
 
 
-VERBOSITY = 3
+VERBOSITY = 1
 
 
 class BasisTB(AbstractBasis, StructDesignerXYZ):
@@ -24,10 +26,10 @@ class BasisTB(AbstractBasis, StructDesignerXYZ):
     into a raw index and vise versa.
     """
 
-    def __init__(self, xyz):
+    def __init__(self, xyz, nn_distance):
 
         # parent class StructDesignerXYZ stores atom list initialized from xyz-file
-        super(BasisTB, self).__init__(xyz=xyz)
+        super(BasisTB, self).__init__(xyz=xyz, nn_distance=nn_distance)
 
         # each entry of the dictionary stores a label of the atom species as a key and
         # corresponding Atom object as a value. Each atom object contains infomation about number,
@@ -85,8 +87,9 @@ class Hamiltonian(BasisTB):
     def __init__(self, **kwargs):
 
         xyz = kwargs.get('xyz', "")
+        nn_distance = kwargs.get('nn_distance', 2.39)
 
-        super(Hamiltonian, self).__init__(xyz=xyz)
+        super(Hamiltonian, self).__init__(xyz=xyz, nn_distance=nn_distance)
         self.h_matrix = None                            # Hamiltonian for an isolated system
         self.h_matrix_bc_factor = None                  # exponential Bloch factors for pbc
         self.h_matrix_bc_add = None                     # additive Bloch exponentials for pbc
@@ -134,7 +137,7 @@ class Hamiltonian(BasisTB):
     def set_periodic_bc(self, primitive_cell):
 
         if len(primitive_cell) > 0:
-            self.ct = CyclicTopology(primitive_cell, self.atom_list.keys(), self.atom_list.values())
+            self.ct = CyclicTopology(primitive_cell, self.atom_list.keys(), self.atom_list.values(), self._nn_distance)
         else:
             self.ct = None
 
@@ -143,9 +146,6 @@ class Hamiltonian(BasisTB):
         Diagonalize the Hamiltonian matrix for the finite isolated system
         :return:
         """
-
-        if len(self.k_vector) != 0:
-            self._reset_periodic_bc()
 
         return np.linalg.eig(self.h_matrix)
 
@@ -203,11 +203,11 @@ class Hamiltonian(BasisTB):
         """
 
         # on site (pick right table of parameters for a certain atom)
-        if atom1 == atom2 and l1 == l2:
+        if atom1 == atom2 and l1 == l2 and coords is None:
             return self.orbitals_dict[self.atom_list.keys()[atom1]].orbitals[l1]['energy']
 
         # nearest neighbours (define bound type and atomic quantum numbers)
-        if atom1 != atom2:
+        if atom1 != atom2 or coords is not None:
 
             atom_kind1 = self.orbitals_dict[self.atom_list.keys()[atom1]]
             atom_kind2 = self.orbitals_dict[self.atom_list.keys()[atom2]]
@@ -221,12 +221,12 @@ class Hamiltonian(BasisTB):
             coords /= np.linalg.norm(coords)
 
             if VERBOSITY > 1:
-                print "coords = ", coords
-                print self.atom_list.values()[atom1]
-                print self.atom_list.keys()[atom1]
-                print self.atom_list.values()[atom2]
-                print self.atom_list.keys()[atom2]
-                print atom_kind1.title, atom_kind2.title
+                print("coords = ", coords)
+                print(self.atom_list.values()[atom1])
+                print(self.atom_list.keys()[atom1])
+                print(self.atom_list.values()[atom2])
+                print(self.atom_list.keys()[atom2])
+                print(atom_kind1.title, atom_kind2.title)
 
             return dme.me(atom_kind1, l1, atom_kind2, l2, coords)
 
@@ -256,7 +256,7 @@ class Hamiltonian(BasisTB):
                     phase = np.exp(1j * np.dot(self.k_vector, coords))
 
                     for l1 in xrange(self.orbitals_dict[self.atom_list.keys()[j1]].num_of_orbitals):
-                        for l2 in xrange(self.orbitals_dict[self.atom_list.keys()[j1]].num_of_orbitals):
+                        for l2 in xrange(self.orbitals_dict[self.atom_list.keys()[j2]].num_of_orbitals):
 
                             ind1 = self.qn2ind([('atoms', j1), ('l', l1)], )
                             ind2 = self.qn2ind([('atoms', j2), ('l', l2)], )
@@ -339,16 +339,30 @@ def format_func(value, tick_number):
 
 def initializer(**kwargs):
 
+    set_tb_params(**kwargs)
     Atom.orbital_sets = kwargs.get('orbital_sets', {'Si': 'SiliconSP3D5S', 'H': 'HydrogenS'})
-    dme.PARAMS_SI_SI = kwargs.get('PARAMS_SI_SI', {})
-    dme.PARAMS_SI_H = kwargs.get('PARAMS_SI_H', {})
-    sys.modules[__name__].VERBOSITY = kwargs.get('VERBOSITY', 3)
+    sys.modules[__name__].VERBOSITY = kwargs.get('VERBOSITY', 1)
+
+    xyz = kwargs.get('xyz', {})
+    nn_distance = kwargs.get('nn_distance', 2.7)
+
+    h = Hamiltonian(xyz=dict2xyz(xyz), nn_distance=nn_distance)
+    h.initialize()
+
+    return h
+
+
+def set_tb_params(**kwargs):
+    for item in kwargs:
+        if item.startswith('PARAMS_'):
+            setattr(dme, item, kwargs[item])
 
 
 def main():
 
     a_si = 5.50
     PRIMITIVE_CELL = [[0, 0, a_si]]
+    Atom.orbital_sets = {'Si': 'SiliconSP3D5S', 'H': 'HydrogenS'}
 
     h = Hamiltonian(xyz='/home/mk/TB_project/tb/SiNW.xyz')
     h.initialize()
@@ -406,25 +420,24 @@ def main1():
 
 def main2():
 
-    from aux_functions import dict2xyz, yaml_parser, get_k_coords
-
     sym_points = ['L', 'GAMMA', 'X', 'W', 'K', 'L', 'W', 'X', 'K', 'GAMMA']
     num_points = [15, 20, 15, 10, 15, 15, 15, 15, 20]
     kk = get_k_coords(sym_points, num_points)
 
-    params = yaml_parser("input.yaml")
-    initializer(**params)
-    xyz_file = dict2xyz(params['xyz'])
+    params = yaml_parser("../input_samples/input.yaml")
+    h = initializer(**params)
 
-    h = Hamiltonian(xyz=xyz_file)
     h.initialize()
     h.set_periodic_bc(primitive_cell=params['primitive_cell'])
 
     band_sructure = []
+    num_of_bands = 8
 
-    for jj in kk:
+    for j, jj in enumerate(kk):
         vals, _ = h.diagonalize_periodic_bc(list(jj))
+        vals = np.sort(np.real(vals))[:num_of_bands]
         band_sructure.append(vals)
+        print('#{} '.format(j), len(vals) * '{:2f} '.format(*np.real(vals)))
 
     band_sructure = np.array(band_sructure)
 
@@ -435,6 +448,77 @@ def main2():
     plt.show()
 
 
+def main3():
+
+    a = Atom('A')
+    a.add_orbital('pz', -9, )
+
+    Atom.orbital_sets = {'H': 'HydrogenS', 'A': a}
+
+    set_tb_params(PARAMS_A_H={'ss_sigma': -3.0})
+
+    xyz_file = """2
+    H cell
+    H1       0.0000000000    0.0000000000    0.0000000000
+    A       0.0000000000    0.000000000     2.75
+    """
+
+    h = Hamiltonian(xyz=xyz_file, nn_distance=2.8)
+    h.initialize()
+    a_si = 5.50
+    PRIMITIVE_CELL = [[0, 0, a_si]]
+    h.set_periodic_bc(PRIMITIVE_CELL)
+    num_points = 20
+    kk = np.linspace(0, 3.14 / (a_si), num_points, endpoint=True)
+    band_sructure = []
+
+    for jj in xrange(num_points):
+        vals, _ = h.diagonalize_periodic_bc([0.0, 0.0, kk[jj]])
+        band_sructure.append(vals)
+
+    band_sructure = np.array(band_sructure)
+
+    ax = plt.axes()
+    ax.plot(kk, np.sort(np.real(band_sructure)))
+    plt.show()
+
+def main4():
+    import tb
+    a = tb.Atom('A')
+    a.add_orbital(title='s', energy=-1, )
+    b = tb.Atom('B')
+    b.add_orbital(title='s', energy=-2, )
+
+    tb.Atom.orbital_sets = {'A': a, 'B': b}
+
+    xyz_file = """2
+    H cell
+    A       0.0000000000    0.0000000000    0.0000000000
+    B       0.0000000000    0.0000000000    1.0000000000
+    """
+    tb.set_tb_params(PARAMS_A_B={'ss_sigma': -1.5})
+    h = tb.Hamiltonian(xyz=xyz_file, nn_distance=1.1)
+    h.initialize()
+
+    PRIMITIVE_CELL = [[0, 0, 2.0]]
+    h.set_periodic_bc(PRIMITIVE_CELL)
+
+    num_points = 20
+    kk = np.linspace(0, 3.14 / 2, num_points, endpoint=True)
+
+    band_sructure = []
+
+    for jj in xrange(num_points):
+        vals, _ = h.diagonalize_periodic_bc([0.0, 0.0, kk[jj]])
+        band_sructure.append(vals)
+
+    band_sructure = np.array(band_sructure)
+
+    ax = plt.axes()
+    ax.plot(kk, np.sort(np.real(band_sructure)))
+    plt.show()
+
 if __name__ == '__main__':
 
-    main2()
+    main4()
+

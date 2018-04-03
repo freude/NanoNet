@@ -22,13 +22,14 @@ def xyz2np(xyz):
     j = 0
     atoms = []
 
-    for line in islice(xyz, 2, num_of_atoms + 2):
-        temp = line.split()
-        atoms.append(temp[0])
-        ans[j, 0] = float(temp[1])
-        ans[j, 1] = float(temp[2])
-        ans[j, 2] = float(temp[3])
-        j += 1
+    for line in xyz[2:]:
+        if len(line.strip()) > 0:
+            temp = line.split()
+            atoms.append(temp[0])
+            ans[j, 0] = float(temp[1])
+            ans[j, 1] = float(temp[2])
+            ans[j, 2] = float(temp[3])
+            j += 1
 
     return atoms, ans
 

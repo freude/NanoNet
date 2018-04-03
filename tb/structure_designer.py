@@ -5,7 +5,7 @@ geometrical structure and boundary conditions of the problem.
 from collections import OrderedDict
 import numpy as np
 import scipy.spatial
-from third_party.cluster_100 import supercell
+# from third_party.cluster_100 import supercell
 from aux_functions import xyz2np, count_species
 from abstract_interfaces import AbstractStructureDesigner
 
@@ -15,7 +15,7 @@ class StructDesignerXYZ(AbstractStructureDesigner):
     The class builds the atomic structure from the xyz file or string.
     """
 
-    def __init__(self, xyz='/home/mk/TB_project/tb/my_si.xyz'):
+    def __init__(self, xyz='/home/mk/TB_project/tb/my_si.xyz', nn_distance=2.39):
 
         try:
             with open(xyz, 'rb') as read_file:
@@ -25,6 +25,7 @@ class StructDesignerXYZ(AbstractStructureDesigner):
             reader = xyz
 
         labels, coords = xyz2np(reader)
+        self._nn_distance = nn_distance
         self._num_of_species = count_species(labels)
         self._num_of_nodes = sum(self.num_of_species.values())
         self._atom_list = OrderedDict(zip(labels, coords))
@@ -47,55 +48,55 @@ class StructDesignerXYZ(AbstractStructureDesigner):
         if isinstance(query, list):
             ans = self._kd_tree.query(query,
                                       k=5,
-                                      distance_upper_bound=2.39)
+                                      distance_upper_bound=self._nn_distance)
         elif isinstance(query, int):
             ans = self._kd_tree.query(self.atom_list.items()[query][1],
                                       k=5,
-                                      distance_upper_bound=2.39)
+                                      distance_upper_bound=self._nn_distance)
         elif isinstance(query, str):
             ans = self._kd_tree.query(self.atom_list[query],
                                       k=5,
-                                      distance_upper_bound=2.39)
+                                      distance_upper_bound=self._nn_distance)
         else:
             raise TypeError('Wrong input type for query')
 
         ans1 = [ans[1][0]]
 
         for item in zip(ans[0], ans[1]):
-            if 1.47 < item[0] < 2.39:
+            if self._nn_distance * 0.25 < item[0] < self._nn_distance:
                 ans1.append(item[1])
 
         return ans1
 
 
-class StructDesigner(StructDesignerXYZ):
-    """
-    The class builds the atomic structure using
-    a third party generating function supercell
-    from the module cluster100.
-    """
-
-    def __init__(self):
-
-        a_si = 5.50
-
-        si = supercell(2, 2, 2, AFinite=True, BFinite=True, CFinite=False, RemoveSilane=False)
-        si.scale(a_si)
-        # si.translate(-A*aSi/2,-B*aSi/2,-C*aSi/2)
-        # si.translate(0,0,-C*aSi/2)
-        # si.translate(0, 0, 0)
-
-        if si.closeatoms():
-            print "Close contacts: ", si.closeatoms()
-        a = si.toxyz()
-
-        open('si.xyz', 'w').write(a)
-
-        labels, coords = xyz2np(a)
-        self._num_of_species = count_species(labels)
-        self._num_of_nodes = sum(self.num_of_species.values())
-        self._atom_list = OrderedDict(zip(labels, coords))
-        self._kd_tree = scipy.spatial.cKDTree(coords, leafsize=100)
+# class StructDesigner(StructDesignerXYZ):
+#     """
+#     The class builds the atomic structure using
+#     a third party generating function supercell
+#     from the module cluster100.
+#     """
+#
+#     def __init__(self):
+#
+#         a_si = 5.50
+#
+#         si = supercell(2, 2, 2, AFinite=True, BFinite=True, CFinite=False, RemoveSilane=False)
+#         si.scale(a_si)
+#         # si.translate(-A*aSi/2,-B*aSi/2,-C*aSi/2)
+#         # si.translate(0,0,-C*aSi/2)
+#         # si.translate(0, 0, 0)
+#
+#         if si.closeatoms():
+#             print "Close contacts: ", si.closeatoms()
+#         a = si.toxyz()
+#
+#         open('si.xyz', 'w').write(a)
+#
+#         labels, coords = xyz2np(a)
+#         self._num_of_species = count_species(labels)
+#         self._num_of_nodes = sum(self.num_of_species.values())
+#         self._atom_list = OrderedDict(zip(labels, coords))
+#         self._kd_tree = scipy.spatial.cKDTree(coords, leafsize=100)
 
 
 class CyclicTopology(object):
@@ -106,8 +107,9 @@ class CyclicTopology(object):
     a set of the primitive cell vectors.
     """
 
-    def __init__(self, primitive_cell_vectors, labels, coords):
+    def __init__(self, primitive_cell_vectors, labels, coords, nn_distance):
 
+        self._nn_distance = nn_distance
         self.pcv = primitive_cell_vectors
 
         # compute vectors' lengths
@@ -122,50 +124,39 @@ class CyclicTopology(object):
         self._kd_tree = scipy.spatial.cKDTree(self.virtual_and_interfacial_atoms.values(),
                                               leafsize=100)
 
-    def belong_to_surfaces(self, coord):
-
-        surfaces = []
-        surfaces_adj = []
-
-        thr1 = 0.6
-        thr2 = thr1 + 1.37
-
-        for j, item in enumerate(self.pcv):
-
-            distance_to_surface = np.inner(coord, item) / self.sizes[j]
-            distance_to_adj_surface = np.inner(coord - item, item) / self.sizes[j]
-
-            if abs(distance_to_surface) < thr1:
-                surfaces.append(j)
-
-            if abs(distance_to_adj_surface) < thr2 and distance_to_adj_surface < 0:
-                surfaces_adj.append(j)
-
-        return surfaces, surfaces_adj
-
     def _generate_atom_list(self, labels, coords):
+
+        distances1 = np.empty((len(coords), len(self.pcv)), dtype=np.float)
+        distances2 = np.empty((len(coords), len(self.pcv)), dtype=np.float)
+
+        for j1, coord in enumerate(coords):
+            for j2, basis_vec in enumerate(self.pcv):
+
+                distances1[j1, j2] = np.inner(coord, basis_vec) / self.sizes[j2]
+                distances2[j1, j2] = np.inner(coord - basis_vec, basis_vec) / self.sizes[j2]
+
+        distances1 = np.abs(distances1 - np.min(distances1)) < self._nn_distance * 0.25
+        distances2 = np.abs(np.abs(distances2) - np.min(np.abs(distances2))) < self._nn_distance * 0.25
 
         count = 0
 
         for j, item in enumerate(coords):
 
-            s_base, s_adj = self.belong_to_surfaces(item)
-
-            if len(s_base) > 0:
+            if any(distances1[j]):
                 self.virtual_and_interfacial_atoms.update({str(j) + "_" + labels[j]: item})
                 self.interfacial_atoms_ind.append(j)
 
-                for surf in s_base:
+                for surf in np.where(distances1[j])[0]:
                     atom_coords = item + self.pcv[surf]
                     self.virtual_and_interfacial_atoms.update({"*_" + str(count) +
                                                                "_" + str(j) + "_" +
                                                                labels[j]: atom_coords})
                     count += 1
 
-            if len(s_adj) > 0:
+            if any(distances2[j]):
                 self.virtual_and_interfacial_atoms.update({str(j) + "_" + labels[j]: item})
                 self.interfacial_atoms_ind.append(j)
-                for surf in s_adj:
+                for surf in np.where(distances2[j])[0]:
                     atom_coords = item - self.pcv[surf]
                     self.virtual_and_interfacial_atoms.update({"*_" + str(count) +
                                                                "_" + str(j) + "_" +
@@ -177,22 +168,22 @@ class CyclicTopology(object):
         if isinstance(query, list) or isinstance(query, np.ndarray):
             ans = self._kd_tree.query(query,
                                       k=5,
-                                      distance_upper_bound=2.4)
+                                      distance_upper_bound=self._nn_distance)
         elif isinstance(query, int):
             ans = self._kd_tree.query(self.virtual_and_interfacial_atoms.items()[query][1],
                                       k=5,
-                                      distance_upper_bound=2.4)
+                                      distance_upper_bound=self._nn_distance)
         elif isinstance(query, str):
             ans = self._kd_tree.query(self.virtual_and_interfacial_atoms[query],
                                       k=5,
-                                      distance_upper_bound=2.4)
+                                      distance_upper_bound=self._nn_distance)
         else:
             raise TypeError('Wrong input type for query')
 
         ans1 = []
 
         for item in zip(ans[0], ans[1]):
-            if 1.47 < item[0] < 2.4 and \
+            if self._nn_distance * 0.25 < item[0] < self._nn_distance and \
                     self.virtual_and_interfacial_atoms.keys()[item[1]].startswith("*"):
                 ans1.append(item[1])
 
@@ -216,6 +207,6 @@ class CyclicTopology(object):
 
 if __name__ == '__main__':
 
-    sd = StructDesigner()
+    sd = StructDesignerXYZ()
     print "Done!"
 

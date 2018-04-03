@@ -1,0 +1,6 @@
+recursive-include docs/build *.pdf
+recursive-include jupyter_notebooks *.ipynb
+recursive-include jupyter_notebooks *.yaml
+recursive-include jupyter_notebooks *.txt
+recursive-include jupyter_notebooks *.xyz
+include requirements.txt

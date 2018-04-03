@@ -9,6 +9,7 @@ import sys
 import math
 import numpy as np
 from constants import *
+import warnings
 
 
 #  NN - Si-Si
@@ -29,10 +30,12 @@ PARAMS_SI_SI = {'ss_sigma': -1.9413,
 
 
 #  NN - Si-H
-PARAMS_SI_H = {'ss_sigma': -3.9997,
+PARAMS_H_SI = {'ss_sigma': -3.9997,
                'cs_sigma': -1.6977,
                'sp_sigma': 4.2518,
                'sd_sigma': -2.1055}
+
+PARAMS_H_H = {'ss_sigma': 1}
 
 
 def me_diatomic(bond, n, l_min, l_max, m):
@@ -58,7 +61,12 @@ def me_diatomic(bond, n, l_min, l_max, m):
     else:
         raise ValueError('Wrong value of the value variable')
 
-    return getattr(sys.modules[__name__], 'PARAMS_' + bond)[label]
+    try:
+        return getattr(sys.modules[__name__], 'PARAMS_' + bond)[label]
+    except KeyError:
+        warnings.warn('There is no parameter PARAMS_' +
+                      bond + '[' + label + ']' + ' in the dictionary', UserWarning)
+        return 0
 
 
 def d_me(N, l, m1, m2):
@@ -144,8 +152,6 @@ def me(atom1, ll1, atom2, ll2, coords):
     L = coords[0]
     M = coords[1]
     N = coords[2]
-
-    # print atoms, n1, l1, m1, n2, l2, m2, N, M
 
     gamma = math.atan2(L, M)
 

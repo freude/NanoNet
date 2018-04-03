@@ -1,0 +1,54 @@
+#!/usr/bin/env python
+import argparse
+
+
+def main(param_file, k_poins_file):
+
+    import matplotlib.pyplot as plt
+    import numpy as np
+    import hamiltonian as hm
+    from aux_functions import dict2xyz, yaml_parser, get_k_coords
+
+    params = yaml_parser(param_file)
+
+    if k_poins_file is None:
+        if len(params['primitive_cell']) == 3:
+            sym_points = ['L', 'GAMMA', 'X', 'W', 'K', 'L', 'W', 'X', 'K', 'GAMMA']
+            num_points = [15, 20, 15, 10, 15, 15, 15, 15, 20]
+            kk = get_k_coords(sym_points, num_points)
+        else:
+            kk = [[0.0, 0.0, 0.0]]
+    else:
+        kk = np.loadtxt(k_poins_file)
+
+    hm.initializer(**params)
+    xyz_file = dict2xyz(params['xyz'])
+
+    h = hm.Hamiltonian(xyz=xyz_file)
+    h.initialize()
+    h.set_periodic_bc(primitive_cell=params['primitive_cell'])
+
+    band_sructure = []
+
+    for jj in kk:
+        vals, _ = h.diagonalize_periodic_bc(jj)
+        band_sructure.append(vals)
+        print vals
+
+    band_sructure = np.array(band_sructure)
+
+    ax = plt.axes()
+    ax.plot(np.sort(np.real(band_sructure)))
+    plt.show()
+
+
+parser = argparse.ArgumentParser()
+
+parser.add_argument('param_file', type=str,
+                    help='path to the yaml file containing parameters')
+
+parser.add_argument('--k_points_file', type=str, default=None,
+                    help='path to the file containing k points coordinates')
+
+args = parser.parse_args()
+main(args.param_file, args.k_points_file)

@@ -7,10 +7,41 @@ and periodic system translated in one, two or three dimensions.
 
 ## Getting Started
 
+### Prerequisites
+
+The source distribution archive has to be unpacked first:
+
+```bash
+tar -xvzf tb-0.1.tar.gz
+cd tb-0.1
+```
+
+All dependencies may be installed at once by invoking the following command
+ from within the source directory:
+
+```bash
+pip install -r requirements.txt
+```
+
+### Installing
+
+In order to install the package `tb` just invoke
+the following line in the bash from within the source directory:
+
+```
+pip install .
+```
+
+### Python interface
+
+Below is a short example demonstrating usage of the `tb` package.
+More illustrative examples can be found in the ipython notebooks
+in the directory `jupyter_notebooks` inside the source directory.
+
 If the package is properly installed, the work starts with the import of all necessary modules:
 
 ```python
-from tb import Hamiltonian
+import Hamil
 ```
 
 Normally, computations are performed in three stages, 
@@ -56,86 +87,46 @@ the class Hamiltonian with proper arguments.
 
 Optionally data post-processing may be performed over the obtained results of computations 
 that includes data visualization, computing DOS etc.
+
+
+### Command line interface
+
+The package is equipped with the command line tool `tb` the usage of which reads:
  
-### Prerequisites
+```tb [-h] [--k_points_file K_POINTS_FILE] param_file```
+ 
+    Mandatory argument:
+    
+    param_file
+        is an file in the yaml-format containing all parameters
+        needed to run computations.
+    
+    Optional arguments and parameters:
 
-What things you need to install the software and how to install them
+    --k_points_file K_POINTS_FILE
+        path to the txt file containing coordinates of
+        wave vectors for the band structure computations. 
+        If not specified, default values will be used. 
+    -h
+        with this parameter the information about 
+        command usage will be output.
 
-```
-Give examples
-```
-
-### Installing
-
-A step by step series of examples that tell you have to get a development env running
-
-Say what the step will be
-
-```
-Give the example
-```
-
-And repeat
-
-```
-until finished
-```
-
-End with an example of getting some data out of the system or using it for a little demo
+The results of computations will be stored in `band_structure.pkl` file in the current directory.
 
 ## Running the tests
 
-Explain how to run the automated tests for this system
-
-### Break down into end to end tests
-
-Explain what these tests test and why
-
-```
-Give an example
-```
-
-### And coding style tests
-
-Explain what these tests test and why
-
-```
-Give an example
-```
-
 ## Deployment
-
-Add additional notes about how to deploy this on a live system
-
-## Built With
-
-* [Dropwizard](http://www.dropwizard.io/1.0.2/docs/) - The web framework used
-* [Maven](https://maven.apache.org/) - Dependency Management
-* [ROME](https://rometools.github.io/rome/) - Used to generate RSS Feeds
 
 ## Contributing
 
-Please read [CONTRIBUTING.md](https://gist.github.com/PurpleBooth/b24679402957c63ec426) for details on our code of conduct, and the process for submitting pull requests to us.
-
-## Versioning
-
-We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/your/project/tags). 
+## Versioning 
 
 ## Authors
 
-* **Billie Thompson** - *Initial work* - [PurpleBooth](https://github.com/PurpleBooth)
-
-See also the list of [contributors](https://github.com/your/project/contributors) who participated in this project.
-
 ## License
-
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
 
 ## Acknowledgments
 
-* Hat tip to anyone who's code was used
-* Inspiration
-* etc
 
 
 

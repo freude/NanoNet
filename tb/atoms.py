@@ -56,11 +56,19 @@ class Atom(object):
         output = {}
 
         for label in labels:
-            if label.lower().startswith('si'):
-                atom = getattr(sys.modules[__name__], Atom.orbital_sets['Si'])()
 
-            if label.lower().startswith('h'):
-                atom = getattr(sys.modules[__name__], Atom.orbital_sets['H'])()
+            try:
+                key = ''.join([i for i in label if not i.isdigit()])
+                atom = Atom.orbital_sets[key]
+                if not isinstance(atom, Atom):
+                    raise KeyError
+            except KeyError:
+                if label.lower().startswith('si'):
+                    atom = getattr(sys.modules[__name__], Atom.orbital_sets['Si'])()
+                elif label.lower().startswith('h'):
+                    atom = getattr(sys.modules[__name__], Atom.orbital_sets['H'])()
+                else:
+                    raise ValueError("There is no library entry for the atom " + label)
 
             output[atom.title] = atom
 
