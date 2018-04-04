@@ -61,7 +61,7 @@ the class Hamiltonian with proper arguments.
     xyz_file = """2
     Si cell
     Si1       0.0000000000    0.0000000000    0.0000000000
-    Si2       0.0000000000    0.000000000     1.3750000000
+    Si2       1.3750000000    1.3750000000    1.3750000000
     """
     
     h = tb.Hamiltonian(xyz=xyz_file, nn_distance=2.0)
