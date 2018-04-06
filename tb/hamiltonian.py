@@ -147,7 +147,10 @@ class Hamiltonian(BasisTB):
         :return:
         """
 
-        return np.linalg.eig(self.h_matrix)
+        vals, vects = np.linalg.eig(self.h_matrix)
+        vals = np.real(vals)
+        ind = np.argsort(vals)
+        return vals[ind], vects[:, ind]
 
     def diagonalize_periodic_bc(self, k_vector):
         """
@@ -168,7 +171,11 @@ class Hamiltonian(BasisTB):
             self._compute_h_matrix_bc_factor()
             self._compute_h_matrix_bc_add()
 
-        return np.linalg.eig(self.h_matrix_bc_factor * self.h_matrix + self.h_matrix_bc_add)
+        vals, vects = np.linalg.eig(self.h_matrix_bc_factor * self.h_matrix + self.h_matrix_bc_add)
+        vals = np.real(vals)
+        ind = np.argsort(vals)
+
+        return vals[ind], vects[:, ind]
 
     def is_hermitian(self, visualize=False):
         """
@@ -515,7 +522,44 @@ def main4():
     ax.plot(kk, np.sort(np.real(band_sructure)))
     plt.show()
 
+
+def main5():
+    import tb
+    a = tb.Atom('A')
+    a.add_orbital(title='s', energy=-1, )
+    b = tb.Atom('B')
+    b.add_orbital(title='s', energy=-1, )
+
+    tb.Atom.orbital_sets = {'A': a, 'B': b}
+
+    xyz_file = """1
+    H cell
+    A       0.0000000000    0.0000000000    0.0000000000
+    """
+    tb.set_tb_params(PARAMS_A_A={'ss_sigma': -2.5}, PARAMS_A_B={'ss_sigma': -1.7}, PARAMS_B_B={'ss_sigma': -2.5})
+    h = tb.Hamiltonian(xyz=xyz_file, nn_distance=1.1)
+    h.initialize()
+
+    PRIMITIVE_CELL = [[0, 0, 1.0]]
+    h.set_periodic_bc(PRIMITIVE_CELL)
+
+    num_points = 20
+    kk = np.linspace(0, 3.14, num_points, endpoint=True)
+
+    band_sructure = []
+
+    for jj in xrange(num_points):
+        vals, _ = h.diagonalize_periodic_bc([0.0, 0.0, kk[jj]])
+        band_sructure.append(vals)
+
+    band_sructure = np.array(band_sructure)
+
+    ax = plt.axes()
+    ax.plot(kk, np.sort(np.real(band_sructure)))
+    plt.show()
+
+
 if __name__ == '__main__':
 
-    main4()
+    main5()
 
