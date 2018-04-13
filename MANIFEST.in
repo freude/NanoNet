@@ -4,3 +4,4 @@ recursive-include input_samples *.yaml
 recursive-include input_samples *.txt
 recursive-include input_samples *.xyz
 include requirements.txt
+include LICENSE
