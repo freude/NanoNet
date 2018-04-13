@@ -1,45 +1,149 @@
-**Edit a file, create a new file, and clone from Bitbucket in under 2 minutes**
+# TB project
 
-When you're done, you can delete the content in this README and update the file with details for others getting started with your repository.
+The project represents an extendable Python framework for 
+the electronic structure computations based on 
+the tight-binding method. The code can deal with both finite
+and periodic system translated in one, two or three dimensions.
 
-*We recommend that you open this README in another tab as you perform the tasks below. You can [watch our video](https://youtu.be/0ocf7u76WSo) for a full demo of all the steps in this tutorial. Open the video in a new tab to avoid leaving Bitbucket.*
+## Getting Started
 
----
+### Prerequisites
 
-## Edit a file
+The source distribution archive has to be unpacked first:
 
-You’ll start by editing this README file to learn how to edit a file in Bitbucket.
+```bash
+tar -xvzf tb-0.1.tar.gz
+cd tb-0.1
+```
 
-1. Click **Source** on the left side.
-2. Click the README.md link from the list of files.
-3. Click the **Edit** button.
-4. Delete the following text: *Delete this line to make a change to the README from Bitbucket.*
-5. After making your change, click **Commit** and then **Commit** again in the dialog. The commit page will open and you’ll see the change you just made.
-6. Go back to the **Source** page.
+All dependencies may be installed at once by invoking the following command
+ from within the source directory:
 
----
+```bash
+pip install -r requirements.txt
+```
 
-## Create a file
+### Installing
 
-Next, you’ll add a new file to this repository.
+In order to install the package `tb` just invoke
+the following line in the bash from within the source directory:
 
-1. Click the **New file** button at the top of the **Source** page.
-2. Give the file a filename of **contributors.txt**.
-3. Enter your name in the empty file space.
-4. Click **Commit** and then **Commit** again in the dialog.
-5. Go back to the **Source** page.
+```
+pip install .
+```
 
-Before you move on, go ahead and explore the repository. You've already seen the **Source** page, but check out the **Commits**, **Branches**, and **Settings** pages.
+### Python interface
 
----
+Below is a short example demonstrating usage of the `tb` package.
+More illustrative examples can be found in the ipython notebooks
+in the directory `jupyter_notebooks` inside the source directory.
 
-## Clone a repository
+If the package is properly installed, the work starts with the import of all necessary modules:
 
-Use these steps to clone from SourceTree, our client for using the repository command-line free. Cloning allows you to work on your files locally. If you don't yet have SourceTree, [download and install first](https://www.sourcetreeapp.com/). If you prefer to clone from the command line, see [Clone a repository](https://confluence.atlassian.com/x/4whODQ).
+```python
+import tb
+```
 
-1. You’ll see the clone button under the **Source** heading. Click that button.
-2. Now click **Check out in SourceTree**. You may need to create a SourceTree account or log in.
-3. When you see the **Clone New** dialog in SourceTree, update the destination path and name if you’d like to and then click **Clone**.
-4. Open the directory you just created to see your repository’s files.
+Below we demostarate band structure computation for bulk silicon using empirical tight-binding method.
 
-Now that you're more familiar with your Bitbucket repository, go ahead and add a new file locally. You can [push your change back to Bitbucket with SourceTree](https://confluence.atlassian.com/x/iqyBMg), or you can [add, commit,](https://confluence.atlassian.com/x/8QhODQ) and [push from the command line](https://confluence.atlassian.com/x/NQ0zDQ).
+1. First, one needs to specify atomic species and corresponding basis sets. It is possible to use custom basis set as
+ is shown in examples in the ipython notebooks. Here we use predefined basis sets.
+    
+    ```python
+    tb.Atom.orbital_sets = {'Si': 'SiliconSP3D5S'}
+    ```
+
+2. Specify geometry of the system - determine position if atoms
+and specify periodic boundary conditions if any. This is done by creating an object of 
+the class Hamiltonian with proper arguments.
+ 
+    ```python
+    xyz_file = """2
+    Si cell
+    Si1       0.0000000000    0.0000000000    0.0000000000
+    Si2       1.3750000000    1.3750000000    1.3750000000
+    """
+    
+    h = tb.Hamiltonian(xyz=xyz_file, nn_distance=2.0)
+    ```
+
+2. Initialize the Hamiltonian - compute Hamiltonian matrix elements
+
+    For isolated system:
+        
+    ```python
+    h.initialize()
+    ```
+3. Specify periodic boundary conditions:
+        
+    ```python
+    a_si = 5.50
+    PRIMITIVE_CELL = [[0, 0.5 * a_si, 0.5 * a_si],
+                     [0.5 * a_si, 0, 0.5 * a_si],
+                     [0.5 * a_si, 0.5 * a_si, 0]]
+    h.set_periodic_bc(PRIMITIVE_CELL)
+    ```
+5. Specify wave vectors:
+    
+    ```python
+    sym_points = ['L', 'GAMMA', 'X', 'W', 'K', 'L', 'W', 'X', 'K', 'GAMMA']
+    num_points = [15, 20, 15, 10, 15, 15, 15, 15, 20]
+    k = tb.get_k_coords(sym_points, num_points)
+    ```
+
+6. Find the eigenvalues and eigenstates of the Hamiltonian for each wave vector.
+    
+    ```python
+    vals = np.zeros((sum(num_points), h.h_matrix.shape[0]), dtype=np.complex)
+    
+    for jj, i in enumerate(k):
+        vals[jj, :], _ = h.diagonalize_periodic_bc(list(i))
+   
+    import matplotlib.pyplot as plt 
+    plt.plot(np.sort(np.real(vals)))
+    plt.show()
+    ```
+
+7. Done.
+
+### Command line interface
+
+The package is equipped with the command line tool `tb` the usage of which reads:
+ 
+```tb [-h] [--k_points_file K_POINTS_FILE] param_file```
+ 
+    Mandatory argument:
+    
+    param_file
+        is an file in the yaml-format containing all parameters
+        needed to run computations.
+    
+    Optional arguments and parameters:
+
+    --k_points_file K_POINTS_FILE
+        path to the txt file containing coordinates of
+        wave vectors for the band structure computations. 
+        If not specified, default values will be used. 
+    -h
+        with this parameter the information about 
+        command usage will be output.
+
+The results of computations will be stored in `band_structure.pkl` file in the current directory.
+
+## Running the tests
+
+## Deployment
+
+## Contributing
+
+## Versioning 
+
+## Authors
+
+## License
+
+## Acknowledgments
+
+
+
+
