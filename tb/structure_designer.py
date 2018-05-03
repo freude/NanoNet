@@ -125,21 +125,31 @@ class CyclicTopology(object):
                                               leafsize=100)
 
     def _generate_atom_list(self, labels, coords):
+        """
 
+        :param labels:    labels of atoms
+        :param coords:    coordinates of atoms
+        :return:
+        """
+
+        # matrices of distances between atoms and interfaces
         distances1 = np.empty((len(coords), len(self.pcv)), dtype=np.float)
         distances2 = np.empty((len(coords), len(self.pcv)), dtype=np.float)
 
-        for j1, coord in enumerate(coords):
-            for j2, basis_vec in enumerate(self.pcv):
+        for j1, coord in enumerate(coords):    # for each atom in the unit cell
+            for j2, basis_vec in enumerate(self.pcv):    # for lattice basis vector
 
+                # compute distance to the primary plane of the unit cell
                 distances1[j1, j2] = np.inner(coord, basis_vec) / self.sizes[j2]
+                # compute distance to the adjacent plane of the  unit cell
                 distances2[j1, j2] = np.inner(coord - basis_vec, basis_vec) / self.sizes[j2]
 
+        # transform distance to the boolean variable defining whether atom belongs to the interface or not
         distances1 = np.abs(distances1 - np.min(distances1)) < self._nn_distance * 0.25
         distances2 = np.abs(np.abs(distances2) - np.min(np.abs(distances2))) < self._nn_distance * 0.25
 
+        # form new lists of atoms
         count = 0
-
         for j, item in enumerate(coords):
 
             if any(distances1[j]):
@@ -162,6 +172,9 @@ class CyclicTopology(object):
                                                                "_" + str(j) + "_" +
                                                                labels[j]: atom_coords})
                     count += 1
+
+        # remove non-unique elements
+        self.interfacial_atoms_ind = list(set(self.interfacial_atoms_ind))
 
     def get_neighbours(self, query):
 

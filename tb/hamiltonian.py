@@ -371,7 +371,7 @@ def main():
     PRIMITIVE_CELL = [[0, 0, a_si]]
     Atom.orbital_sets = {'Si': 'SiliconSP3D5S', 'H': 'HydrogenS'}
 
-    h = Hamiltonian(xyz='/home/mk/TB_project/tb/SiNW.xyz')
+    h = Hamiltonian(xyz='/home/mk/TB_project/input_samples/SiNW.xyz')
     h.initialize()
     h.set_periodic_bc(PRIMITIVE_CELL)
 
@@ -561,5 +561,5 @@ def main5():
 
 if __name__ == '__main__':
 
-    main5()
+    main()
 
