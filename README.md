@@ -1,5 +1,8 @@
 # TB project
 
+[![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+<a href='https://travis-ci.org/sebdah/git-pylint-commit-hook'><img src='https://secure.travis-ci.org/<github-username>/<github-project-name>.png?branch=<branch-name>'></a>
+
 The project represents an extendable Python framework for 
 the electronic structure computations based on 
 the tight-binding method. The code can deal with both finite
