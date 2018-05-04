@@ -1,14 +1,13 @@
 language: python
 python:
-    - "2.6"
     - "2.7"
 # command to install dependencies
 install:
-    - pip install Cython
     - pip install -r requirements.txt
+    - pip install .
 # command to run tests
 script:
-    - nosetests --with-doctest && pylint --errors-only
+    - nosetests --with-doctest
 branches:
     only:
-        - master
+        - develop
