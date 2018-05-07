@@ -2,6 +2,7 @@
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Build Status](https://travis-ci.org/freude/tb.svg)](https://travis-ci.org/freude)
+[![Coverage Status](https://coveralls.io/repos/github/freude/tb/badge.svg?branch=develop)](https://coveralls.io/github/freude/tb?branch=develop)
 
 The project represents an extendable Python framework for 
 the electronic structure computations based on 
@@ -138,10 +139,10 @@ The results of computations will be stored in `band_structure.pkl` file in the c
 ## Examples of usage
 
 - [Atomic chain](jupyter_notebooks/atom_chains.ipynb)
-- [Huckel model](jupyter_notebooks/Hukel model.ipynb)
+- [Huckel model](jupyter_notebooks/Hukel_model.ipynb)
 - [Bulk silicon](jupyter_notebooks/bulk_silicon.ipynb)
 - [Bulk silicon - initialization via an input file](jupyter_notebooks/bulk_silicon_with_input_file.ipynb)
-- [Silicon nanowire](jupyter_notebooks/silicon nanowire.ipynb)
+- [Silicon nanowire](jupyter_notebooks/silicon_nanowire.ipynb)
 
 ## Computational methods
 
