@@ -134,8 +134,6 @@ The package is equipped with the command line tool `tb` the usage of which reads
 
 The results of computations will be stored in `band_structure.pkl` file in the current directory.
 
-## Running the tests
-
 ## Examples of usage
 
 - [Atomic chain](jupyter_notebooks/atom_chains.ipynb)
@@ -146,8 +144,30 @@ The results of computations will be stored in `band_structure.pkl` file in the c
 
 ## Computational methods
 
-The code implements a family of tight-binding method for solids (empirical tight-binding method) [] and molecules (Huckel method) []. All computations are performed from known coupling coeficiens and energy spectrum of species. The Hamiltonian matrices are build from a xyz-file containing atomic coordinates. The atomic coordinates are stored in the kd-tree which facilitates fast neighbour searching. The criteria of being neoghbours is specified by the nearst neighbour distance. The anglar dependnece of the hoping matrix elements for two orbitals with different orbital and magnetic quantum numbers is computed using semi-analytical aproach proposed by [Podolskiy]. 
+The code implements a family of tight-binding method for solids 
+(empirical tight-binding method) [] and molecules (Huckel method) []. 
+All computations are performed from known coupling coefficients and 
+energy spectrum of species. The Hamiltonian matrices are build from 
+a xyz-file containing atomic coordinates. The atomic coordinates are stored
+ in the kd-tree which facilitates fast neighbour searching. 
+ The criteria of being neighbours is specified by the nearst neighbour distance.
+  The angular dependence of the hoping matrix elements for two orbitals with
+   different orbital and magnetic quantum numbers is computed using 
+   semi-analytical approach proposed by [Podolskiy]. 
 
+## Customize your tight-binding code
+
+### Cu stomize atomic properties
+
+### Add distance dependence to hopping parameters
+
+## Running the tests
+
+All tests may be run by invoking the command:
+
+```
+nosetests --with-doctest
+```
 ## Deployment
 
 ## Contributing
