@@ -3,4 +3,5 @@ matplotlib
 numpy
 scipy
 PyYAML
+nose
 
