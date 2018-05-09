@@ -1,4 +1,4 @@
-# QuantumGraph
+# NanoNet
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Build Status](https://travis-ci.org/freude/QuantumGraph.svg)](https://travis-ci.org/freude)
@@ -7,7 +7,7 @@
 The project represents an extendable Python framework for 
 the electronic structure computations based on 
 the tight-binding method. The code can deal with both finite
-and periodic system translated in one, two or three dimensions.
+and periodic systems translated in one, two or three dimensions.
 
 ## Getting Started
 
@@ -157,9 +157,9 @@ a xyz-file containing atomic coordinates. The atomic coordinates are stored
 
 ## Customize your tight-binding code
 
-### Cu stomize atomic properties
+### Customize atomic properties
 
-### Add distance dependence to hopping parameters
+### Add distance dependence for hopping parameters
 
 ## Running the tests
 
