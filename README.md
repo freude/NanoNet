@@ -1,8 +1,8 @@
-# TB project
+# QuantumGraph
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
-[![Build Status](https://travis-ci.org/freude/tb.svg)](https://travis-ci.org/freude)
-[![Coverage Status](https://coveralls.io/repos/github/freude/tb/badge.svg?branch=develop)](https://coveralls.io/github/freude/tb?branch=develop)
+[![Build Status](https://travis-ci.org/freude/QuantumGraph.svg)](https://travis-ci.org/freude)
+[![Coverage Status](https://coveralls.io/repos/github/freude/QuantumGraph/badge.svg?branch=develop)](https://coveralls.io/github/freude/QuantumGraph?branch=develop)
 
 The project represents an extendable Python framework for 
 the electronic structure computations based on 
