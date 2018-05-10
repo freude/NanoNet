@@ -1,4 +1,5 @@
 import sys
+import matplotlib.pyplot as plt
 import numpy as np
 import tb
 
@@ -474,6 +475,195 @@ def expected_tr_of_complex_chain():
                      1.27529176e-09, -4.01940117e-10, 8.64875296e-11, -7.58459961e-10,
                      6.25752240e-10, -1.61717618e-09, -4.04421204e-10, 3.56904960e-10,
                      3.64201443e-10, -1.02242500e-09, 4.11720643e-10, -3.92885224e-10])
+
+
+def inverse_bs_problem():
+    import sys
+    sys.path.insert(0, '/home/mk/TB_project/tb')
+    import tb
+
+    # a = tb.Atom('A')
+    # a.add_orbital('s', -0.7)
+    # b = tb.Atom('B')
+    # b.add_orbital('s', -0.5)
+    # c = tb.Atom('C')
+    # c.add_orbital('s', -0.3)
+    #
+    # tb.Atom.orbital_sets = {'A': a, 'B': b, 'C': c}
+    #
+    # tb.set_tb_params(PARAMS_A_A={'ss_sigma': -0.5},
+    #                  PARAMS_B_B={'ss_sigma': -0.5},
+    #                  PARAMS_C_C={'ss_sigma': -0.5},
+    #                  PARAMS_A_B={'ss_sigma': -0.5},
+    #                  PARAMS_B_C={'ss_sigma': -0.5},
+    #                  PARAMS_A_C={'ss_sigma': -0.5})
+    #
+    # xyz_file = """6
+    # H cell
+    # A1       0.0000000000    0.0000000000    0.0000000000
+    # B2       0.0000000000    0.0000000000    1.0000000000
+    # C3       0.0000000000    0.0000000000    2.0000000000
+    # A4       0.0000000000    1.0000000000    0.0000000000
+    # B5       0.0000000000    1.0000000000    1.0000000000
+    # C6       0.0000000000    1.0000000000    2.0000000000
+    # """
+    #
+    # h = tb.Hamiltonian(xyz=xyz_file, nn_distance=1.1)
+    # h.initialize()
+    # h.set_periodic_bc([[0, 0, 3.0]])
+
+    tb.Atom.orbital_sets = {'Si': 'SiliconSP3D5S', 'H': 'HydrogenS'}
+    h = tb.Hamiltonian(xyz='/home/mk/TB_project/input_samples/SiNW.xyz', nn_distance=2.4)
+    h.initialize()
+    h.set_periodic_bc([[0, 0, 5.50]])
+
+    h_l, h_0, h_r = h.get_coupling_hamiltonians()
+
+    energy = np.linspace(2.13, 2.15, 20)
+    # energy = np.linspace(-2.1, 1.0, 50)
+    energy = np.linspace(2.05, 2.5, 100)[70:85]
+
+    energy = np.linspace(2.07, 2.3, 50) + 0.2
+    # energy = np.linspace(2.3950, 2.4050, 20)
+
+    energy = energy[20:]
+
+    eigs = []
+
+    for E in energy:
+
+        print E
+
+        vals, vects = tb.surface_greens_function_poles(E, h_l, h_0, h_r)
+
+        vals = np.diag(vals)
+        vals.setflags(write=1)
+
+        for j, v in enumerate(vals):
+
+            if np.abs(np.absolute(v) - 1.0) > 0.01:
+                vals[j] = float('nan')
+            else:
+                vals[j] = np.angle(v)
+                print "The element number is", j, vals[j]
+
+        eigs.append(vals)
+
+    plt.plot(energy, np.array(eigs), 'o')
+    plt.show()
+
+
+def main2():
+    import sys
+    sys.path.insert(0, '/home/mk/TB_project/tb')
+    import tb
+
+    a = tb.Atom('A')
+    a.add_orbital('s', -0.7)
+
+    tb.Atom.orbital_sets = {'A': a}
+
+    tb.set_tb_params(PARAMS_A_A={'ss_sigma': -0.5},
+                     PARAMS_B_B={'ss_sigma': -0.5},
+                     PARAMS_A_B={'ss_sigma': -0.5},
+                     PARAMS_B_C={'ss_sigma': -0.5},
+                     PARAMS_A_C={'ss_sigma': -0.5})
+
+    xyz_file = """1
+    H cell
+    A1       0.0000000000    0.0000000000    0.0000000000                                                                                                      
+    """
+
+    h = tb.Hamiltonian(xyz=xyz_file, nn_distance=2.1)
+    h.initialize()
+    h.set_periodic_bc([[0, 0, 1.0]])
+    h_l, h_0, h_r = h.get_coupling_hamiltonians()
+
+    energy = np.linspace(-3.0, 1.5, 700)
+
+    sgf_l = []
+    sgf_r = []
+
+    for E in energy:
+        L, R, _, _, _ = tb.surface_greens_function(E, h_l, h_0, h_r)
+        # L, R = surface_greens_function_poles_Shur(E, h_l, h_0, h_r)
+        sgf_l.append(L)
+        sgf_r.append(R)
+
+    sgf_l = np.array(sgf_l)
+    sgf_r = np.array(sgf_r)
+
+    num_sites = h_0.shape[0]
+    gf = np.linalg.pinv(np.multiply.outer(energy, np.identity(num_sites)) - h_0 - sgf_l - sgf_r)
+
+    dos = -np.trace(np.imag(gf), axis1=1, axis2=2)
+
+    tr = np.zeros((energy.shape[0]), dtype=np.complex)
+
+    for j, E in enumerate(energy):
+        gf0 = np.matrix(gf[j, :, :])
+        gamma_l = 1j * (np.matrix(sgf_l[j, :, :]) - np.matrix(sgf_l[j, :, :]).H)
+        gamma_r = 1j * (np.matrix(sgf_r[j, :, :]) - np.matrix(sgf_r[j, :, :]).H)
+        tr[j] = np.real(np.trace(gamma_l * gf0 * gamma_r * gf0.H))
+        dos[j] = np.real(np.trace(1j * (gf0 - gf0.H)))
+    print sgf_l.shape
+
+
+def main3():
+    import sys
+    sys.path.insert(0, '/home/mk/TB_project/tb')
+    import tb
+
+    a = tb.Atom('A')
+    a.add_orbital('s', -0.7)
+
+    tb.Atom.orbital_sets = {'A': a}
+
+    tb.set_tb_params(PARAMS_A_A={'ss_sigma': -0.5},
+                     PARAMS_B_B={'ss_sigma': -0.5},
+                     PARAMS_A_B={'ss_sigma': -0.5},
+                     PARAMS_B_C={'ss_sigma': -0.5},
+                     PARAMS_A_C={'ss_sigma': -0.5})
+
+    xyz_file = """1
+    H cell
+    A1       0.0000000000    0.0000000000    0.0000000000                                                                                                      
+    """
+
+    h = tb.Hamiltonian(xyz=xyz_file, nn_distance=2.1)
+    h.initialize()
+    h.set_periodic_bc([[0, 0, 1.0]])
+    h_l, h_0, h_r = h.get_coupling_hamiltonians()
+
+    energy = np.linspace(-3.0, 1.5, 700)
+
+    sgf_l = []
+    sgf_r = []
+
+    for E in energy:
+        L, R, _, _, _ = tb.surface_greens_function(E, h_l, h_0, h_r)
+        # L, R = surface_greens_function_poles_Shur(E, h_l, h_0, h_r)
+        sgf_l.append(L)
+        sgf_r.append(R)
+
+    sgf_l = np.array(sgf_l)
+    sgf_r = np.array(sgf_r)
+
+    num_sites = h_0.shape[0]
+    gf = np.linalg.pinv(np.multiply.outer(energy, np.identity(num_sites)) - h_0 - sgf_l - sgf_r)
+
+    dos = -np.trace(np.imag(gf), axis1=1, axis2=2)
+
+    tr = np.zeros((energy.shape[0]), dtype=np.complex)
+
+    for j, E in enumerate(energy):
+        gf0 = np.matrix(gf[j, :, :])
+        gamma_l = 1j * (np.matrix(sgf_l[j, :, :]) - np.matrix(sgf_l[j, :, :]).H)
+        gamma_r = 1j * (np.matrix(sgf_r[j, :, :]) - np.matrix(sgf_r[j, :, :]).H)
+        tr[j] = np.real(np.trace(gamma_l * gf0 * gamma_r * gf0.H))
+        dos[j] = np.real(np.trace(1j * (gf0 - gf0.H)))
+    print sgf_l.shape
+
 
 
 if __name__ == "__main__":

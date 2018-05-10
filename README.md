@@ -16,8 +16,8 @@ and periodic systems translated in one, two or three dimensions.
 The source distribution archive has to be unpacked first:
 
 ```bash
-tar -xvzf tb-0.1.tar.gz
-cd tb-0.1
+git clone git@github.com:freude/NanoNet.git
+cd NanoNet
 ```
 
 All dependencies may be installed at once by invoking the following command
