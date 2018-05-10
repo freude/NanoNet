@@ -1,6 +1,6 @@
 setuptools
 matplotlib
-numpy
+numpy==1.14.1
 scipy
 PyYAML
 nose
