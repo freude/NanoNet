@@ -2,7 +2,7 @@
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Build Status](https://travis-ci.org/freude/QuantumGraph.svg)](https://travis-ci.org/freude)
-[![Coverage Status](https://coveralls.io/repos/github/freude/QuantumGraph/badge.svg?branch=develop)](https://coveralls.io/github/freude/QuantumGraph?branch=develop)
+[![Coverage Status](https://coveralls.io/repos/github/freude/NanoNet/badge.svg?branch=develop)](https://coveralls.io/github/freude/NanoNet?branch=develop)
 
 The project represents an extendable Python framework for 
 the electronic structure computations based on 
@@ -34,6 +34,14 @@ the following line in the bash from within the source directory:
 
 ```
 pip install .
+```
+
+### Running the tests
+
+All tests may be run by invoking the command:
+
+```
+nosetests --with-doctest
 ```
 
 ### Python interface
@@ -161,13 +169,6 @@ a xyz-file containing atomic coordinates. The atomic coordinates are stored
 
 ### Add distance dependence for hopping parameters
 
-## Running the tests
-
-All tests may be run by invoking the command:
-
-```
-nosetests --with-doctest
-```
 ## Deployment
 
 ## Contributing
