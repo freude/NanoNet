@@ -36,6 +36,14 @@ the following line in the bash from within the source directory:
 pip install .
 ```
 
+### Running the tests
+
+All tests may be run by invoking the command:
+
+```
+nosetests --with-doctest
+```
+
 ### Python interface
 
 Below is a short example demonstrating usage of the `tb` package.
@@ -161,13 +169,6 @@ a xyz-file containing atomic coordinates. The atomic coordinates are stored
 
 ### Add distance dependence for hopping parameters
 
-## Running the tests
-
-All tests may be run by invoking the command:
-
-```
-nosetests --with-doctest
-```
 ## Deployment
 
 ## Contributing

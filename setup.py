@@ -9,5 +9,6 @@ setup(name='tb',
       license='MIT',
       packages=['tb'],
       scripts=['tb/tb'],
-      zip_safe=False
+      zip_safe=False,
+      python_requires='=2.7.*'
       )
