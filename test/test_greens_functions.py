@@ -665,7 +665,6 @@ def main3():
     print sgf_l.shape
 
 
-
 if __name__ == "__main__":
     test_gf_single_atom_chain()
     test_gf_complex_chain()

@@ -146,8 +146,7 @@ def surface_greens_function(E, h_l, h_0, h_r):
         else:
 
             gv = group_velocity(vects[:, j], vals[j], h_r)
-            print("Group velocity is ", gv, np.angle(vals[j]))
-
+            # print("Group velocity is ", gv, np.angle(vals[j]))
             if gv > 0:
 
                 lambda_left[j, j] = vals[j]
