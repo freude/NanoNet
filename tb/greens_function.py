@@ -1,4 +1,3 @@
-import matplotlib.pyplot as plt
 import numpy as np
 import scipy.linalg as linalg
 
@@ -64,7 +63,7 @@ def surface_greens_function_poles(E, h_l, h_0, h_r):
 
 def group_velocity(eigenvector, eigenvalue, h_r):
     """
-    Computes the group velocity of wave packets from their wave vectors
+    Computes the group velocity of wave packets
 
     :param eigenvector:       eigenvector
     :type eigenvector:        numpy.matrix(dtype=numpy.complex)
@@ -99,15 +98,11 @@ def iterate_gf(E, h_0, h_l, h_r, gf, num_iter):
 
 def surface_greens_function(E, h_l, h_0, h_r):
     """
-    The function surface self-energies. To do that, it provides classification and
-    sorting of the eigenvalues and eigenvectors after the eigenvalue decomposition.
-    The sorting procedure is described in [M. Wimmer, Quantum transport in nanostructures:
-    From computational concepts to spintronics in graphene and magnetic tunnel junctions,
-    2009, ISBN-9783868450255]. The algorithm puts left-propagating solutions into upper-left
-    block and right-propagating solutions - into the lower-right block.
-    The sort is performed by absolute value of the eigenvalues. For those whose
-    absolute value equals one, classification is performed computing their group velocity
-    using eigenvectors.
+    The function computes surface self-energies using the eigenvalue decomposition.
+    The procedure is described in
+    [M. Wimmer, Quantum transport in nanostructures: From computational concepts to spintronics
+    in graphene and magnetic tunnel junctions,
+    2009, ISBN-9783868450255].
 
     :param E:
     :param h_l:
