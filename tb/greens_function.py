@@ -16,6 +16,80 @@ def surface_greens_function_poles(E, h_l, h_0, h_r):
     :rtype:       numpy.matrix, numpy.matrix
     """
 
+    h_list = [h_l, h_0 - E * np.identity(h_0.shape[0]), h_r]
+
+    # linearize polynomial eigenvalue problem
+    pr_order = len(h_list) - 1
+    sm_size = h_list[0].shape[0]
+    mat_size = pr_order * sm_size
+    identity = np.identity(sm_size)
+
+    main_matrix = np.zeros((mat_size, mat_size), dtype=np.complex)
+    overlap_matrix = np.zeros((mat_size, mat_size), dtype=np.complex)
+
+    for j in xrange(pr_order):
+
+        main_matrix[(pr_order - 1) * sm_size:pr_order * sm_size, j * sm_size:(j + 1) * sm_size] = -h_list[j]
+
+        if j == pr_order - 1:
+            overlap_matrix[j * sm_size:(j + 1) * sm_size, j * sm_size:(j + 1) * sm_size] = h_list[pr_order]
+        else:
+            overlap_matrix[j * sm_size:(j + 1) * sm_size, j * sm_size:(j + 1) * sm_size] = identity
+            main_matrix[j * sm_size:(j + 1) * sm_size, (j + 1) * sm_size:(j + 2) * sm_size] = identity
+
+    alpha, betha, _, eigenvects, _, _ = linalg.lapack.cggev(main_matrix, overlap_matrix)
+
+    eigenvals = np.zeros(alpha.shape, dtype=np.complex128)
+
+    for j, item in enumerate(zip(alpha, betha)):
+
+        if np.abs(item[1]) != 0.0:
+            eigenvals[j] = item[0] / item[1]
+        else:
+            eigenvals[j] = 1e10
+
+    # sort absolute values
+    ind = np.argsort(np.abs(eigenvals))
+    eigenvals = eigenvals[ind]
+    eigenvects = eigenvects[:, ind]
+
+    vals = np.copy(eigenvals)
+    mask1 = np.abs(vals) < 0.999
+    mask2 = np.abs(vals) > 1.001
+    vals = np.angle(vals)
+
+    vals[mask1] = -5
+    vals[mask2] = 5
+    ind = np.argsort(vals, kind='mergesort')
+
+    eigenvals = eigenvals[ind]
+    eigenvects = eigenvects[:, ind]
+
+    eigenvects = eigenvects[h_0.shape[0]:, :]
+    eigenvals = np.matrix(np.diag(eigenvals))
+    eigenvects = np.matrix(eigenvects)
+
+    norms = linalg.norm(eigenvects, axis=0)
+    norms = np.array([1e30 if np.abs(norm) < 0.000001 else norm for norm in norms])
+    eigenvects = eigenvects / norms[np.newaxis, :]
+
+    return eigenvals, eigenvects
+
+
+def surface_greens_function_poles1(E, h_l, h_0, h_r):
+    """
+    Computes eigenvalues and eigenvectors for the complex band structure problem.
+    Here, the energy E is a parameter, and the eigenvalues correspond to wave vectors as `exp(ik)`.
+
+    :param E:     energy
+    :type E:      float
+    :param h_l:   left block of three-block-diagonal Hamiltonian
+    :param h_0:   central block of three-block-diagonal Hamiltonian
+    :param h_r:   right block of three-block-diagonal Hamiltonian
+    :return:      eigenvalues, k, and eigenvectors, U,
+    :rtype:       numpy.matrix, numpy.matrix
+    """
+
     main_matrix = np.block([[np.zeros(h_0.shape), np.identity(h_0.shape[0])],
                             [-h_l, E * np.identity(h_0.shape[0]) - h_0]])
 
@@ -100,16 +174,15 @@ def surface_greens_function(E, h_l, h_0, h_r):
     """
     The function computes surface self-energies using the eigenvalue decomposition.
     The procedure is described in
-    [M. Wimmer, Quantum transport in nanostructures: From computational concepts to spintronics
-    in graphene and magnetic tunnel junctions,
-    2009, ISBN-9783868450255].
+    [M. Wimmer, Quantum transport in nanostructures: From computational concepts
+    to spintronics in graphene and magnetic tunnel junctions, 2009, ISBN-9783868450255].
 
-    :param E:
-    :param h_l:
-    :param h_0:
-    :param h_r:
+    :param E:         energy array
+    :param h_l:       left-side coupling Hamiltonian
+    :param h_0:       channel Hamiltonian
+    :param h_r:       right-side coupling Hamiltonian
 
-    :return:
+    :return:          left- and right-side self-energies
     """
 
     vals, vects = surface_greens_function_poles(E, h_l, h_0, h_r)
@@ -160,5 +233,4 @@ def surface_greens_function(E, h_l, h_0, h_r):
     sgf_l = h_r * u_right * lambda_right * np.linalg.pinv(u_right)
     sgf_r = h_l * u_left * lambda_right * np.linalg.pinv(u_left)
 
-    return iterate_gf(E, h_0, h_l, h_r, sgf_l, 0), iterate_gf(E, h_0, h_r, h_l, sgf_r, 0), \
-           lambda_right, lambda_left, vals
+    return iterate_gf(E, h_0, h_l, h_r, sgf_l, 0), iterate_gf(E, h_0, h_r, h_l, sgf_r, 0)
