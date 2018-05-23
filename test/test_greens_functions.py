@@ -45,7 +45,7 @@ def test_gf_single_atom_chain():
     sgf_r = []
 
     for E in energy:
-        L, R, _, _, _ = tb.surface_greens_function(E, h_l, h_0, h_r)
+        L, R = tb.surface_greens_function(E, h_l, h_0, h_r)
         sgf_l.append(L)
         sgf_r.append(R)
 
@@ -97,7 +97,7 @@ def test_gf_complex_chain():
     sgf_r = []
 
     for E in energy:
-        L, R, _, _, _ = tb.surface_greens_function(E, h_l, h_0, h_r)
+        L, R = tb.surface_greens_function(E, h_l, h_0, h_r)
         sgf_l.append(L)
         sgf_r.append(R)
 

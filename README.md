@@ -4,10 +4,14 @@
 [![Build Status](https://travis-ci.org/freude/NanoNet.svg)](https://travis-ci.org/freude)
 [![Coverage Status](https://coveralls.io/repos/github/freude/NanoNet/badge.svg?branch=develop)](https://coveralls.io/github/freude/NanoNet?branch=develop)
 
+## Introduction
+
 The project represents an extendable Python framework for 
 the electronic structure computations based on 
 the tight-binding method. The code can deal with both finite
 and periodic systems translated in one, two or three dimensions.
+
+All computations can be governed by means of the python application programming interface (API) or the command line interface (CLI).
 
 ## Getting Started
 
@@ -56,7 +60,7 @@ If the package is properly installed, the work starts with the import of all nec
 import tb
 ```
 
-Below we demostarate band structure computation for bulk silicon using empirical tight-binding method.
+Below we demonstrate band structure computation for bulk silicon using empirical tight-binding method.
 
 1. First, one needs to specify atomic species and corresponding basis sets. It is possible to use custom basis set as
  is shown in examples in the ipython notebooks. Here we use predefined basis sets.
