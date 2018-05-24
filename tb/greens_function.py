@@ -2,40 +2,36 @@ import numpy as np
 import scipy.linalg as linalg
 
 
-def surface_greens_function_poles(E, h_l, h_0, h_r):
+def surface_greens_function_poles(h_list):
     """
     Computes eigenvalues and eigenvectors for the complex band structure problem.
-    Here, the energy E is a parameter, and the eigenvalues correspond to wave vectors as `exp(ik)`.
+    The eigenvalues correspond to wave vectors as `exp(ik)`.
 
-    :param E:     energy
-    :type E:      float
-    :param h_l:   left block of three-block-diagonal Hamiltonian
-    :param h_0:   central block of three-block-diagonal Hamiltonian
-    :param h_r:   right block of three-block-diagonal Hamiltonian
-    :return:      eigenvalues, k, and eigenvectors, U,
-    :rtype:       numpy.matrix, numpy.matrix
+    :param h_list:   list of the Hamiltonian blocks - blocks describes coupling
+                     with left-side neighbours, Hamiltonian of the side and
+                     coupling with right-side neighbours
+    :return:         eigenvalues, k, and eigenvectors, U,
+    :rtype:          numpy.matrix, numpy.matrix
     """
-
-    h_list = [h_l, h_0 - E * np.identity(h_0.shape[0]), h_r]
 
     # linearize polynomial eigenvalue problem
     pr_order = len(h_list) - 1
-    sm_size = h_list[0].shape[0]
-    mat_size = pr_order * sm_size
-    identity = np.identity(sm_size)
+    matix_size = h_list[0].shape[0]
+    full_matrix_size = pr_order * matix_size
+    identity = np.identity(matix_size)
 
-    main_matrix = np.zeros((mat_size, mat_size), dtype=np.complex)
-    overlap_matrix = np.zeros((mat_size, mat_size), dtype=np.complex)
+    main_matrix = np.zeros((full_matrix_size, full_matrix_size), dtype=np.complex)
+    overlap_matrix = np.zeros((full_matrix_size, full_matrix_size), dtype=np.complex)
 
     for j in xrange(pr_order):
 
-        main_matrix[(pr_order - 1) * sm_size:pr_order * sm_size, j * sm_size:(j + 1) * sm_size] = -h_list[j]
+        main_matrix[(pr_order - 1) * matix_size:pr_order * matix_size, j * matix_size:(j + 1) * matix_size] = -h_list[j]
 
         if j == pr_order - 1:
-            overlap_matrix[j * sm_size:(j + 1) * sm_size, j * sm_size:(j + 1) * sm_size] = h_list[pr_order]
+            overlap_matrix[j * matix_size:(j + 1) * matix_size, j * matix_size:(j + 1) * matix_size] = h_list[pr_order]
         else:
-            overlap_matrix[j * sm_size:(j + 1) * sm_size, j * sm_size:(j + 1) * sm_size] = identity
-            main_matrix[j * sm_size:(j + 1) * sm_size, (j + 1) * sm_size:(j + 2) * sm_size] = identity
+            overlap_matrix[j * matix_size:(j + 1) * matix_size, j * matix_size:(j + 1) * matix_size] = identity
+            main_matrix[j * matix_size:(j + 1) * matix_size, (j + 1) * matix_size:(j + 2) * matix_size] = identity
 
     alpha, betha, _, eigenvects, _, _ = linalg.lapack.cggev(main_matrix, overlap_matrix)
 
@@ -65,66 +61,7 @@ def surface_greens_function_poles(E, h_l, h_0, h_r):
     eigenvals = eigenvals[ind]
     eigenvects = eigenvects[:, ind]
 
-    eigenvects = eigenvects[h_0.shape[0]:, :]
-    eigenvals = np.matrix(np.diag(eigenvals))
-    eigenvects = np.matrix(eigenvects)
-
-    norms = linalg.norm(eigenvects, axis=0)
-    norms = np.array([1e30 if np.abs(norm) < 0.000001 else norm for norm in norms])
-    eigenvects = eigenvects / norms[np.newaxis, :]
-
-    return eigenvals, eigenvects
-
-
-def surface_greens_function_poles1(E, h_l, h_0, h_r):
-    """
-    Computes eigenvalues and eigenvectors for the complex band structure problem.
-    Here, the energy E is a parameter, and the eigenvalues correspond to wave vectors as `exp(ik)`.
-
-    :param E:     energy
-    :type E:      float
-    :param h_l:   left block of three-block-diagonal Hamiltonian
-    :param h_0:   central block of three-block-diagonal Hamiltonian
-    :param h_r:   right block of three-block-diagonal Hamiltonian
-    :return:      eigenvalues, k, and eigenvectors, U,
-    :rtype:       numpy.matrix, numpy.matrix
-    """
-
-    main_matrix = np.block([[np.zeros(h_0.shape), np.identity(h_0.shape[0])],
-                            [-h_l, E * np.identity(h_0.shape[0]) - h_0]])
-
-    overlap_matrix = np.block([[np.identity(h_0.shape[0]), np.zeros(h_0.shape)],
-                               [np.zeros(h_0.shape), h_r]])
-
-    alpha, betha, _, eigenvects, _, _ = linalg.lapack.cggev(main_matrix, overlap_matrix)
-
-    eigenvals = np.zeros(alpha.shape, dtype=np.complex128)
-
-    for j, item in enumerate(zip(alpha, betha)):
-
-        if np.abs(item[1]) != 0.0:
-            eigenvals[j] = item[0] / item[1]
-        else:
-            eigenvals[j] = 1e10
-
-    # sort absolute values
-    ind = np.argsort(np.abs(eigenvals))
-    eigenvals = eigenvals[ind]
-    eigenvects = eigenvects[:, ind]
-
-    vals = np.copy(eigenvals)
-    mask1 = np.abs(vals) < 0.999
-    mask2 = np.abs(vals) > 1.001
-    vals = np.angle(vals)
-
-    vals[mask1] = -5
-    vals[mask2] = 5
-    ind = np.argsort(vals, kind='mergesort')
-
-    eigenvals = eigenvals[ind]
-    eigenvects = eigenvects[:, ind]
-
-    eigenvects = eigenvects[h_0.shape[0]:, :]
+    eigenvects = eigenvects[matix_size :, :]
     eigenvals = np.matrix(np.diag(eigenvals))
     eigenvects = np.matrix(eigenvects)
 
@@ -185,7 +122,8 @@ def surface_greens_function(E, h_l, h_0, h_r):
     :return:          left- and right-side self-energies
     """
 
-    vals, vects = surface_greens_function_poles(E, h_l, h_0, h_r)
+    h_list = [h_l, h_0 - E * np.identity(h_0.shape[0]), h_r]
+    vals, vects = surface_greens_function_poles(h_list)
     vals = np.diag(vals)
 
     u_right = np.matrix(np.zeros(h_0.shape, dtype=np.complex))

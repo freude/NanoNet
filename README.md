@@ -11,13 +11,13 @@ the electronic structure computations based on
 the tight-binding method. The code can deal with both finite
 and periodic systems translated in one, two or three dimensions.
 
-All computations can be governed by means of the python application programming interface (API) or the command line interface (CLI).
+All computations can be governed by means of the python application programming interface (pyAPI) or the command line interface (CLI).
 
 ## Getting Started
 
 ### Prerequisites
 
-The source distribution archive has to be unpacked first:
+The source distribution can be obtained from GitHub:
 
 ```bash
 git clone git@github.com:freude/NanoNet.git

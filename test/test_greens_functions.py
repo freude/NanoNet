@@ -534,7 +534,8 @@ def inverse_bs_problem():
 
         print E
 
-        vals, vects = tb.surface_greens_function_poles(E, h_l, h_0, h_r)
+        h_list = [h_l, h_0 - E * np.identity(h_0.shape[0]), h_r]
+        vals, vects = tb.surface_greens_function_poles(h_list)
 
         vals = np.diag(vals)
         vals.setflags(write=1)
