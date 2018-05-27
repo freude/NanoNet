@@ -1,3 +1,7 @@
+"""
+The module contains functions that computes Green's functions and their poles
+"""
+from __future__ import print_function, division
 import numpy as np
 import scipy.linalg as linalg
 
@@ -25,13 +29,17 @@ def surface_greens_function_poles(h_list):
 
     for j in xrange(pr_order):
 
-        main_matrix[(pr_order - 1) * matix_size:pr_order * matix_size, j * matix_size:(j + 1) * matix_size] = -h_list[j]
+        main_matrix[(pr_order - 1) * matix_size:pr_order * matix_size,
+                    j * matix_size:(j + 1) * matix_size] = -h_list[j]
 
         if j == pr_order - 1:
-            overlap_matrix[j * matix_size:(j + 1) * matix_size, j * matix_size:(j + 1) * matix_size] = h_list[pr_order]
+            overlap_matrix[j * matix_size:(j + 1) * matix_size,
+                           j * matix_size:(j + 1) * matix_size] = h_list[pr_order]
         else:
-            overlap_matrix[j * matix_size:(j + 1) * matix_size, j * matix_size:(j + 1) * matix_size] = identity
-            main_matrix[j * matix_size:(j + 1) * matix_size, (j + 1) * matix_size:(j + 2) * matix_size] = identity
+            overlap_matrix[j * matix_size:(j + 1) * matix_size,
+                           j * matix_size:(j + 1) * matix_size] = identity
+            main_matrix[j * matix_size:(j + 1) * matix_size,
+                        (j + 1) * matix_size:(j + 2) * matix_size] = identity
 
     alpha, betha, _, eigenvects, _, _ = linalg.lapack.cggev(main_matrix, overlap_matrix)
 
@@ -82,7 +90,8 @@ def group_velocity(eigenvector, eigenvalue, h_r):
     :type eigenvector:        numpy.complex
     :param h_r:               coupling Hamiltonian
     :type h_r:                numpy.matrix
-    :return:                  group velocity for a pair consisting of an eigenvector and an eigenvalue
+    :return:                  group velocity for a pair consisting of
+                              an eigenvector and an eigenvalue
     """
 
     return np.imag(eigenvector.H * h_r * eigenvalue * eigenvector)
@@ -101,7 +110,7 @@ def iterate_gf(E, h_0, h_l, h_r, gf, num_iter):
     :return:
     """
 
-    for j in xrange(num_iter):
+    for _ in xrange(num_iter):
         gf = h_r * np.linalg.pinv(E * np.identity(h_0.shape[0]) - h_0 - gf) * h_l
 
     return gf
