@@ -61,9 +61,5 @@ parser.add_argument('--show', '-S', type=bool, default=True,
 parser.add_argument('--save', '-s', type=bool, default=True,
                     help='Save results of computations on disk, True/False')
 
-group1 = parser.add_mutually_exclusive_group()
-group1.add_argument('--save', action='store_true')
-group1.add_argument('--bar', action='store_false')
-
 args = parser.parse_args()
 main(args.param_file, args.k_points_file, args.show, args.save)

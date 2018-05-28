@@ -16,26 +16,22 @@ class AbstractStructureDesigner(object):
 
     @abstractmethod
     def get_neighbours(self, query):
-
-        return []
+        pass
 
     @property
     @abstractmethod
     def atom_list(self):
-
-        return []
+        pass
 
     @property
     @abstractmethod
     def num_of_nodes(self):
-
-        return []
+        pass
 
     @property
     @abstractmethod
     def num_of_species(self):
-
-        return []
+        pass
 
 
 class AbstractBasis(object):
@@ -59,9 +55,7 @@ class AbstractBasis(object):
         :return ind:   index
         :rtype:        int
         """
-
-        ind = 0
-        return ind
+        pass
 
     @abstractmethod
     def ind2qn(self, ind):
@@ -74,12 +68,9 @@ class AbstractBasis(object):
         :return qn:
         :rtype:
         """
-
-        qn = 0
-        return qn
+        pass
 
     @property
     @abstractmethod
     def orbitals_dict(self):
-
-        return dict()
+        pass
