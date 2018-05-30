@@ -28,7 +28,6 @@ def main(param_file, k_points_file, show, save):
         wave_vector = np.loadtxt(k_points_file)
 
     hamiltonian = tb.initializer(**params)
-    hamiltonian.set_periodic_bc(primitive_cell=params['primitive_cell'])
 
     band_structure = []
 

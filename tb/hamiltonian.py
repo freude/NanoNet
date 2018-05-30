@@ -356,6 +356,11 @@ def initializer(**kwargs):
     h = Hamiltonian(xyz=dict2xyz(xyz), nn_distance=nn_distance)
     h.initialize()
 
+    primitive_cell = kwargs.get('primitive_cell', [0, 0, 0])
+
+    if np.sum(np.abs(np.array(primitive_cell))) > 0:
+        h.set_periodic_bc(primitive_cell=primitive_cell)
+
     return h
 
 
