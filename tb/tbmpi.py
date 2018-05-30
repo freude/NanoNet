@@ -4,7 +4,13 @@ import argparse
 import pickle
 import matplotlib.pyplot as plt
 import numpy as np
+from mpi4py import MPI
 import tb
+
+
+comm = MPI.COMM_WORLD
+rank = comm.Get_rank()
+size = comm.Get_size()
 
 
 def main(param_file, k_points_file, show, save):
@@ -24,27 +30,38 @@ def main(param_file, k_points_file, show, save):
     hamiltonian = tb.initializer(**params)
     hamiltonian.set_periodic_bc(primitive_cell=params['primitive_cell'])
 
-    band_structure = [{} for _ in xrange(len(wave_vector))]
+    band_structure = []
 
     for j, jj in enumerate(wave_vector):
+        if j % size != rank:
+            continue
+
         vals, vects = hamiltonian.diagonalize_periodic_bc(jj)
-        band_structure[j] = {'wave_vector': jj, 'eigenvalues': vals, 'eigenvectors': vects}
+        band_structure.append({'id': j, 'wave_vector': jj, 'eigenvalues': vals, 'eigenvectors': vects})
         print('#{} '.format(j), " ".join(['{:.3f} '.format(element) for element in vals]))
 
-    band_structure = np.array([band_structure[item]['eigenvalues']
-                               for item in xrange(len(band_structure))])
+    band_structure = comm.reduce(band_structure, root=0)
 
-    if show:
-        axes = plt.axes()
-        axes.set_title('Band structure')
-        axes.set_xlabel('Wave vectors')
-        axes.set_ylabel('Energy (eV)')
-        axes.plot(band_structure)
-        plt.show()
+    if rank == 0:
+        ids = [band_structure[item]['id'] for item in xrange(len(band_structure))]
+        print(ids)
 
-    if save:
-        with open('./band_structure.pkl', 'wb') as f:
-            pickle.dump(band_structure, f, pickle.HIGHEST_PROTOCOL)
+        band_structure = [x['eigenvalues'] for _, x in sorted(zip(ids, band_structure))]
+        band_structure = np.array(band_structure)
+
+        print(show)
+
+        if show:
+            axes = plt.axes()
+            axes.set_title('Band structure')
+            axes.set_xlabel('Wave vectors')
+            axes.set_ylabel('Energy (eV)')
+            axes.plot(band_structure)
+            plt.show()
+
+        if save:
+            with open('./band_structure.pkl', 'wb') as f:
+                pickle.dump(band_structure, f, pickle.HIGHEST_PROTOCOL)
 
 
 parser = argparse.ArgumentParser()
@@ -63,4 +80,3 @@ parser.add_argument('--save', '-s', type=int, default=1,
 
 args = parser.parse_args()
 main(args.param_file, args.k_points_file, args.show, args.save)
-print(args.show)
