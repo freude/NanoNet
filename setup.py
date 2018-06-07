@@ -8,6 +8,6 @@ setup(name='tb',
       author_email='mike.klymenko@rmit.edu.au',
       license='MIT',
       packages=['tb'],
-      scripts=['tb/tb'],
+      scripts=['tb/tb', 'tb/tbmpi'],
       zip_safe=False
       )

@@ -55,7 +55,7 @@ def test_gf_single_atom_chain():
     num_sites = h_0.shape[0]
     gf = np.linalg.pinv(np.multiply.outer(energy, np.identity(num_sites)) - h_0 - sgf_l - sgf_r)
 
-    np.testing.assert_allclose(sgf_l, sgf_r, atol=1e-9)
+    np.testing.assert_allclose(sgf_l, sgf_r, atol=1e-5)
     expected = h_l * simple_chain_greens_function(energy, h_0, h_r) * h_r
     np.testing.assert_allclose(np.squeeze(sgf_r), np.squeeze(expected), atol=1e-5)
 
