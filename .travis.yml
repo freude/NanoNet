@@ -3,13 +3,14 @@ python:
     - "2.7.12"
 # command to install dependencies
 install:
+    - sudo apt-get install mpich
     - pip install python-coveralls
     - pip install coverage
     - pip install -r requirements.txt
     - pip install .
 # command to run tests
 script:
-    - nosetests --with-doctest --with-coverage
+    - nosetests --with-coverage
 branches:
     only:
         - develop

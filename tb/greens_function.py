@@ -99,7 +99,7 @@ def group_velocity(eigenvector, eigenvalue, h_r):
 
 def iterate_gf(E, h_0, h_l, h_r, gf, num_iter):
     """
-    Iterate a self-energy to achieve self-consistency
+    Iterates a self-energy to achieve self-consistency
 
     :param E:
     :param h_0:
@@ -118,7 +118,7 @@ def iterate_gf(E, h_0, h_l, h_r, gf, num_iter):
 
 def surface_greens_function(E, h_l, h_0, h_r):
     """
-    The function computes surface self-energies using the eigenvalue decomposition.
+    Computes surface self-energies using the eigenvalue decomposition.
     The procedure is described in
     [M. Wimmer, Quantum transport in nanostructures: From computational concepts
     to spintronics in graphene and magnetic tunnel junctions, 2009, ISBN-9783868450255].

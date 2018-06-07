@@ -4,4 +4,5 @@ numpy==1.14.1
 scipy
 PyYAML
 nose
+mpi4py
 
