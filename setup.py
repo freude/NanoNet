@@ -9,7 +9,7 @@ setup(name='tb',
       license='MIT',
       packages=['tb'],
       entry_points={
-        'console_scripts': ['tb = tb.tb:main', 'tbmpi = tb.tbmpi:main', 'tbmpi = tb.gf:main'],
+        'console_scripts': ['tb = tb.tb_script:main', 'tbmpi = tb.tbmpi_script:main', 'gf = tb.gf_script:main'],
       },
       zip_safe=False
       )
