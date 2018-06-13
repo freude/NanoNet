@@ -8,6 +8,8 @@ setup(name='tb',
       author_email='mike.klymenko@rmit.edu.au',
       license='MIT',
       packages=['tb'],
-      scripts=['tb/tb', 'tb/tbmpi'],
+      entry_points={
+        'console_scripts': ['tb = tb.tb_script:main', 'tbmpi = tb.tbmpi_script:main', 'gf = tb.gf_script:main'],
+      },
       zip_safe=False
       )
