@@ -8,7 +8,8 @@ import tb
 
 
 def main():
-    def main(param_file, k_points_file, show, save):
+
+    def main1(param_file, k_points_file, show, save):
 
         params = tb.yaml_parser(param_file)
 
@@ -46,7 +47,6 @@ def main():
             with open('./band_structure.pkl', 'wb') as f:
                 pickle.dump(band_structure, f, pickle.HIGHEST_PROTOCOL)
 
-
     parser = argparse.ArgumentParser()
 
     parser.add_argument('param_file', type=str,
@@ -62,8 +62,9 @@ def main():
                         help='Save results of computations on disk, 0/1')
 
     args = parser.parse_args()
-    main(args.param_file, args.k_points_file, args.show, args.save)
+    main1(args.param_file, args.k_points_file, args.show, args.save)
 
 
 if __name__ == '__main__':
+
     main()

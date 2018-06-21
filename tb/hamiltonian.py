@@ -396,6 +396,25 @@ def main():
     ax.plot(kk, np.sort(np.real(band_sructure)))
     plt.show()
 
+    split = 100
+    fig, ax = plt.subplots(1, 2)
+    ax[0].set_ylim(-1.0, -0.3)
+    ax[0].plot(kk, np.sort(np.real(band_sructure))[:, :split])
+    ax[0].set_xlabel(r'Wave vector ($\frac{\pi}{a}$)')
+    ax[0].set_ylabel(r'Energy (eV)')
+    ax[0].set_title('Valence band')
+
+    ax[1].set_ylim(2.0, 2.7)
+    ax[1].plot(kk, np.sort(np.real(band_sructure))[:, split:])
+    ax[1].set_xlabel(r'Wave vector ($\frac{\pi}{a}$)')
+    ax[1].set_ylabel(r'Energy (eV)')
+    ax[1].set_title('Conduction band')
+    fig.tight_layout()
+    plt.savefig('test.pdf', format='pdf')
+    plt.show()
+
+
+
 
 if __name__ == '__main__':
 
