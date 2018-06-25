@@ -222,4 +222,3 @@ if __name__ == '__main__':
 
     sd = StructDesignerXYZ()
     print "Done!"
-

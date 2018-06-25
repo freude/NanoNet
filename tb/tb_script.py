@@ -45,12 +45,18 @@ def main():
                                    for item in xrange(len(band_structure))])
 
         if show:
+
             axes = plt.axes()
+            axes.set_ylim(-1.0, 2.7)
             axes.set_title('Band structure')
             axes.set_xlabel('Wave vectors')
             axes.set_ylabel('Energy (eV)')
             axes.plot(band_structure)
-            plt.show()
+
+            if show != 2:
+                plt.show()
+            else:
+                plt.savefig('band_structure.png')
 
         if save:
             with open('./band_structure.pkl', 'wb') as f:
