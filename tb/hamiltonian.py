@@ -89,7 +89,11 @@ class Hamiltonian(BasisTB):
         xyz = kwargs.get('xyz', "")
         nn_distance = kwargs.get('nn_distance', 2.39)
 
-        super(Hamiltonian, self).__init__(xyz=xyz, nn_distance=nn_distance)
+        if isinstance(xyz, str):
+            super(Hamiltonian, self).__init__(xyz=xyz, nn_distance=nn_distance)
+        else:
+            super(Hamiltonian, self).__init__(xyz=dict2xyz(xyz), nn_distance=nn_distance)
+
         self.h_matrix = None                            # Hamiltonian for an isolated system
         self.h_matrix_bc_factor = None                  # exponential Bloch factors for pbc
         self.h_matrix_bc_add = None                     # additive Bloch exponentials for pbc
@@ -353,7 +357,8 @@ def initializer(**kwargs):
     xyz = kwargs.get('xyz', {})
     nn_distance = kwargs.get('nn_distance', 2.7)
 
-    h = Hamiltonian(xyz=dict2xyz(xyz), nn_distance=nn_distance)
+    h = Hamiltonian(xyz=xyz, nn_distance=nn_distance)
+
     h.initialize()
 
     primitive_cell = kwargs.get('primitive_cell', [0, 0, 0])
@@ -376,7 +381,7 @@ def main():
     PRIMITIVE_CELL = [[0, 0, a_si]]
     Atom.orbital_sets = {'Si': 'SiliconSP3D5S', 'H': 'HydrogenS'}
 
-    h = Hamiltonian(xyz='/home/mk/TB_project/input_samples/SiNW.xyz')
+    h = Hamiltonian(xyz='/home/mk/TB_project/input_samples/SiNW_large.xyz')
     h.initialize()
     h.set_periodic_bc(PRIMITIVE_CELL)
 
@@ -414,9 +419,6 @@ def main():
     plt.show()
 
 
-
-
 if __name__ == '__main__':
 
     main()
-

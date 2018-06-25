@@ -1,7 +1,6 @@
 """
 The module contains a set of auxiliary functions facilitating the tight-binding computations
 """
-from itertools import islice
 import numpy as np
 import yaml
 from constants import SPECIAL_K_POINTS
@@ -21,10 +20,20 @@ def xyz2np(xyz):
     ans = np.zeros((num_of_atoms, 3))
     j = 0
     atoms = []
+    unique_labels = dict()
 
     for line in xyz[2:]:
         if len(line.strip()) > 0:
             temp = line.split()
+            label = ''.join([i for i in temp[0] if not i.isdigit()])
+
+            try:
+                unique_labels[label] += 1
+                temp[0] = label + str(unique_labels[label])
+            except KeyError:
+                temp[0] = label + '1'
+                unique_labels[label] = 1
+
             atoms.append(temp[0])
             ans[j, 0] = float(temp[1])
             ans[j, 1] = float(temp[2])
