@@ -47,7 +47,7 @@ def main():
         if show:
 
             axes = plt.axes()
-            axes.set_ylim(-1.0, 2.7)
+            axes.set_ylim(-1.0, 2.71)
             axes.set_title('Band structure')
             axes.set_xlabel('Wave vectors')
             axes.set_ylabel('Energy (eV)')
