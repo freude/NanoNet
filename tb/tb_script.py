@@ -9,21 +9,30 @@ import tb
 
 def main():
 
-    def main1(param_file, k_points_file, show, save):
+    def main1(param_file, k_points_file, xyz, show, save):
 
-        params = tb.yaml_parser(param_file)
+        params = tb.yaml_parser(param_file)    # parse parameter file
 
-        if k_points_file is None:
+        if k_points_file is None:   # default k-points
             if len(params['primitive_cell']) == 3:
                 sym_points = ['L', 'GAMMA', 'X', 'W', 'K', 'L', 'W', 'X', 'K', 'GAMMA']
                 num_points = [15, 20, 15, 10, 15, 15, 15, 15, 20]
                 wave_vector = tb.get_k_coords(sym_points, num_points)
             else:
                 wave_vector = [[0.0, 0.0, 0.0]]
-        else:
+        else:   # read k-points file if its path is provided from the command line arguments
             wave_vector = np.loadtxt(k_points_file)
 
+        # read xyz file if its path is provided from the command line arguments
+        if isinstance(xyz, str):
+            with open(xyz, 'r') as myfile:
+                params['xyz'] = myfile.read()
+
+        # initialize Hamiltonian
         hamiltonian = tb.initializer(**params)
+
+        # compute band structure
+        band_structure = []
 
         band_structure = [{} for _ in xrange(len(wave_vector))]
 
@@ -55,6 +64,9 @@ def main():
     parser.add_argument('--k_points_file', type=str, default=None,
                         help='Path to the file containing k points coordinates')
 
+    parser.add_argument('--xyz', type=str, default=None,
+                        help='Path to the file containing atomic coordinates')
+
     parser.add_argument('--show', '-S', type=int, default=1,
                         help='Show figures, 0/1')
 
@@ -62,7 +74,7 @@ def main():
                         help='Save results of computations on disk, 0/1')
 
     args = parser.parse_args()
-    main1(args.param_file, args.k_points_file, args.show, args.save)
+    main1(args.param_file, args.k_points_file, args.xyz, args.show, args.save)
 
 
 if __name__ == '__main__':
