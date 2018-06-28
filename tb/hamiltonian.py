@@ -2,7 +2,6 @@
 The module contains all necessary classes needed to compute the Hamiltonian matrix
 """
 from __future__ import print_function, division
-import sys
 from collections import OrderedDict
 from operator import mul
 import matplotlib.pyplot as plt
@@ -10,9 +9,9 @@ import numpy as np
 from abstract_interfaces import AbstractBasis
 from structure_designer import StructDesignerXYZ, CyclicTopology
 import constants
-import diatomic_matrix_element as dme
+from diatomic_matrix_element import me
 from atoms import Atom
-from aux_functions import dict2xyz, yaml_parser, get_k_coords
+from aux_functions import dict2xyz
 
 
 VERBOSITY = 1
@@ -239,7 +238,7 @@ class Hamiltonian(BasisTB):
                 print(self.atom_list.keys()[atom2])
                 print(atom_kind1.title, atom_kind2.title)
 
-            return dme.me(atom_kind1, l1, atom_kind2, l2, coords)
+            return me(atom_kind1, l1, atom_kind2, l2, coords)
 
     def _reset_periodic_bc(self):
         """
@@ -348,40 +347,13 @@ def format_func(value, tick_number):
         return r"${0}\pi$".format(N // 2)
 
 
-def initializer(**kwargs):
-
-    set_tb_params(**kwargs)
-    Atom.orbital_sets = kwargs.get('orbital_sets', {'Si': 'SiliconSP3D5S', 'H': 'HydrogenS'})
-    sys.modules[__name__].VERBOSITY = kwargs.get('VERBOSITY', 1)
-
-    xyz = kwargs.get('xyz', {})
-    nn_distance = kwargs.get('nn_distance', 2.7)
-
-    h = Hamiltonian(xyz=xyz, nn_distance=nn_distance)
-
-    h.initialize()
-
-    primitive_cell = kwargs.get('primitive_cell', [0, 0, 0])
-
-    if np.sum(np.abs(np.array(primitive_cell))) > 0:
-        h.set_periodic_bc(primitive_cell=primitive_cell)
-
-    return h
-
-
-def set_tb_params(**kwargs):
-    for item in kwargs:
-        if item.startswith('PARAMS_'):
-            setattr(dme, item, kwargs[item])
-
-
 def main():
 
     a_si = 5.50
     PRIMITIVE_CELL = [[0, 0, a_si]]
     Atom.orbital_sets = {'Si': 'SiliconSP3D5S', 'H': 'HydrogenS'}
 
-    h = Hamiltonian(xyz='/home/mk/TB_project/input_samples/SiNW_large.xyz')
+    h = Hamiltonian(xyz='/home/mk/TB_project/input_samples/SiNW.xyz')
     h.initialize()
     h.set_periodic_bc(PRIMITIVE_CELL)
 
