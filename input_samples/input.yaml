@@ -1,6 +1,10 @@
 # Parameter file for the TB_project for Si
 
 VERBOSITY:                   1
+sparse:                    true
+
+sigma:                      1.1    # if sparse is true
+num_eigs:                    10    # if sparse is true
 
 # --------------------------------------------------------
 
@@ -23,9 +27,9 @@ orbital_sets:
 # ---------------------------------------------------------
 
 primitive_cell:
-    - [0, 0.5, 0.5]               # first vector
-    - [0.5, 0, 0.5]               # second vector
-    - [0.5, 0.5, 0]               # third vector
+    - [0, 0.5, 0.5]                # first vector
+    - [0.5, 0, 0.5]                # second vector
+    - [0.5, 0.5, 0]                # third vector
 
 # Tight-binding empirical parameters taken from
 # Jancu et al., Phys. Rev. B, 57, 6493 (1998) and

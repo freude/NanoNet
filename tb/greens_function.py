@@ -9,7 +9,7 @@ import scipy.linalg as linalg
 def surface_greens_function_poles(h_list):
     """
     Computes eigenvalues and eigenvectors for the complex band structure problem.
-    The eigenvalues correspond to wave vectors as `exp(ik)`.
+    The eigenvalues correspond to the wave vectors as `exp(ik)`.
 
     :param h_list:   list of the Hamiltonian blocks - blocks describes coupling
                      with left-side neighbours, Hamiltonian of the side and
