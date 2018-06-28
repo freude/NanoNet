@@ -5,7 +5,10 @@ __author__ = "Mike Klymenko"
 __email__ = "mike.klymenko@rmit.edu.au"
 
 from atoms import Atom
-from hamiltonian import Hamiltonian, set_tb_params, initializer
+from hamiltonian import Hamiltonian
+from hamiltonian_sparse import HamiltonianSp
 from aux_functions import get_k_coords, yaml_parser
+from hamiltonian_initializer import set_tb_params, initializer
+
 from greens_function import surface_greens_function
 
