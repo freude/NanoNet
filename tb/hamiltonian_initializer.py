@@ -21,9 +21,11 @@ def initializer(**kwargs):
     xyz = kwargs.get('xyz', {})
     nn_distance = kwargs.get('nn_distance', 2.7)
     sparse = kwargs.get('sparse', 0)
+    sigma = kwargs.get('sigma', 1.1)
+    num_eigs = kwargs.get('num_eigs', 14)
 
     if sparse:
-        h = HamiltonianSp(xyz=xyz, nn_distance=nn_distance)
+        h = HamiltonianSp(xyz=xyz, nn_distance=nn_distance, sigma=sigma, num_eigs=num_eigs)
     else:
         h = Hamiltonian(xyz=xyz, nn_distance=nn_distance)
 

@@ -21,6 +21,12 @@ class HamiltonianSp(Hamiltonian):
 
         super(HamiltonianSp, self).__init__(**kwargs)
 
+        sigma = kwargs.get('sigma', 1.1)
+        num_eigs = kwargs.get('num_eigs', 14)
+
+        self.sigma = sigma
+        self.num_eigs = num_eigs
+
     def initialize(self):
         """
         The function computes matrix elements of the Hamiltonian.
@@ -61,7 +67,7 @@ class HamiltonianSp(Hamiltonian):
         :return:
         """
 
-        vals, vects = splin.eigs(self.h_matrix)
+        vals, vects = splin.eigsh(self.h_matrix, k=self.num_eigs, sigma=self.sigma)
         vals = np.real(vals)
         ind = np.argsort(vals)
         return vals[ind], vects[:, ind]
@@ -85,8 +91,8 @@ class HamiltonianSp(Hamiltonian):
             self._compute_h_matrix_bc_factor()
             self._compute_h_matrix_bc_add()
 
-        vals, vects = splin.eigs(self.h_matrix_bc_factor.multiply(self.h_matrix) + self.h_matrix_bc_add,
-                                 k=10, sigma=2.1)
+        vals, vects = splin.eigsh(self.h_matrix_bc_factor.multiply(self.h_matrix) + self.h_matrix_bc_add,
+                                  k=self.num_eigs, sigma=self.sigma)
         vals = np.real(vals)
         ind = np.argsort(vals)
 
@@ -194,22 +200,23 @@ def main():
 
     band_sructure = np.array(band_sructure)
 
-    ax = plt.axes()
-    ax.set_ylim(-1.0, 2.7)
-    # ax.xaxis.set_major_formatter(plt.FuncFormatter(format_func))
-    ax.plot(kk, np.sort(np.real(band_sructure)))
-    plt.show()
+    vb = np.sort(np.real(band_sructure))
+    cb = vb.copy()
+    vb[vb > 0] = np.NaN
+    cb[cb < 0] = np.NaN
 
-    split = 100
+    vb = -np.sort(-vb)
+    cb = np.sort(cb)
+
     fig, ax = plt.subplots(1, 2)
     ax[0].set_ylim(-1.0, -0.3)
-    ax[0].plot(kk, np.sort(np.real(band_sructure))[:, :split])
+    ax[0].plot(kk, vb)
     ax[0].set_xlabel(r'Wave vector ($\frac{\pi}{a}$)')
     ax[0].set_ylabel(r'Energy (eV)')
     ax[0].set_title('Valence band')
 
     ax[1].set_ylim(2.0, 2.7)
-    ax[1].plot(kk, np.sort(np.real(band_sructure))[:, split:])
+    ax[1].plot(kk, cb)
     ax[1].set_xlabel(r'Wave vector ($\frac{\pi}{a}$)')
     ax[1].set_ylabel(r'Energy (eV)')
     ax[1].set_title('Conduction band')
