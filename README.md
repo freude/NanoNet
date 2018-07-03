@@ -127,25 +127,44 @@ the class Hamiltonian with proper arguments.
 
 The package is equipped with the command line tool `tb` the usage of which reads:
  
-```tb [-h] [--k_points_file K_POINTS_FILE] param_file```
- 
-    Mandatory argument:
+```
+tb [-h] [--k_points_file K_POINTS_FILE] [--xyz XYZ] 
+   [--show SHOW] [--save SAVE] 
+   [--code_name CODE_NAME] param_file
     
-    param_file
-        is an file in the yaml-format containing all parameters
-        needed to run computations.
+    positional arguments:
+      param_file            Path to the file in the yaml-format containing all
+                            parameters needed to run computations.
     
-    Optional arguments and parameters:
+    optional arguments:
+      -h, --help            show this help message and exit
+      --k_points_file K_POINTS_FILE
+                            Path to the txt file containing coordinates of wave
+                            vectors for the band structure computations. If not
+                            specified, default values will be used.
+      --xyz XYZ             Path to the file containing atomic coordinates. If
+                            specified, it overrides the coordinates specified in
+                            the param_files.
+      --show SHOW, -S SHOW  Show figures, 0/1/2. 0 shows nothing, 1 outputs
+                            figures on screen, 2 saves figures on disk without
+                            showing.
+      --save SAVE, -s SAVE  Save results of computations on disk, 0/1.
+      --code_name CODE_NAME
+                            Code name is added to the names of all saved data
+                            files.
+```
 
-    --k_points_file K_POINTS_FILE
-        path to the txt file containing coordinates of
-        wave vectors for the band structure computations. 
-        If not specified, default values will be used. 
-    -h
-        with this parameter the information about 
-        command usage will be output.
 
 The results of computations will be stored in `band_structure.pkl` file in the current directory.
+This file name can be modified by specifying the parameter `--code_name`.
+
+On the computers with `mpi` functions installed, instead of `tb` one has to use its mpi-version `tbmpi`. 
+The script `tbmpi` parallelises the loop running over the wave vectors.
+This script can be used together with the command `mpirun` (below is an example generating 8 parallel processes):
+
+```
+mpirun -n 8 tbmpi --show=2 --save=1 --xyz=si.xyz --k_points=k_points.txt input.yaml 
+```    
 
 ## Examples of usage
 
