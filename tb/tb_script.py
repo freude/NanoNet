@@ -7,8 +7,7 @@ import numpy as np
 import tb
 
 
-def main1(param_file, k_points_file, xyz, show, save):
-
+def preprocess_data(param_file, k_points_file, xyz, code_name):
     params = tb.yaml_parser(param_file)    # parse parameter file
 
     if k_points_file is None:   # default k-points
@@ -26,39 +25,87 @@ def main1(param_file, k_points_file, xyz, show, save):
         with open(xyz, 'r') as myfile:
             params['xyz'] = myfile.read()
 
+    if not isinstance(code_name, str):
+        code_name = 'band_structure'
+
+    return params, wave_vector, code_name
+
+
+def postprocess_data(kk, band_structure, show, save, code_name):
+
+    if not isinstance(band_structure, np.ndarray):
+        ids = [band_structure[item]['id'] for item in xrange(len(band_structure))]
+        band_structure = [x['eigenvalues'] for _, x in sorted(zip(ids, band_structure))]
+        band_structure = np.array(band_structure)
+
+    if len(kk.shape) > 1:
+        kk = kk[:, 2]
+
+    if show:
+
+        vb = np.sort(np.real(band_structure))
+        cb = vb.copy()
+        vb[vb > 0] = np.NaN
+        cb[cb < 0] = np.NaN
+
+        vb = -np.sort(-vb)
+        cb = np.sort(cb)
+
+        try:
+            ax_lim1 = np.nanmax(vb) - 0.5
+            ax_lim2 = np.nanmax(vb) + 0.1
+            fig, ax = plt.subplots(1, 1, figsize=(4, 7))
+            ax.set_ylim(ax_lim1, ax_lim2)
+            ax.plot(kk, vb, marker="o", markersize=5)
+            ax.set_xlabel(r'Wave vector ($\frac{\pi}{a}$)')
+            ax.set_ylabel(r'Energy (eV)')
+            ax.set_title('Valence band')
+            fig.tight_layout()
+            if show != 2:
+                plt.show()
+            else:
+                plt.savefig(code_name + '_vb.pdf')
+        except ValueError:
+            pass
+
+        try:
+            ax_lim1 = np.nanmin(cb) - 0.1
+            ax_lim2 = np.nanmin(cb) + 0.7
+            fig, ax = plt.subplots(1, 1, figsize=(4, 7))
+            ax.set_ylim(ax_lim1, ax_lim2)
+            ax.plot(kk, cb, marker="o", markersize=5)
+            ax.set_xlabel(r'Wave vector ($\frac{\pi}{a}$)')
+            ax.set_ylabel(r'Energy (eV)')
+            ax.set_title('Conduction band')
+            fig.tight_layout()
+            if show != 2:
+                plt.show()
+            else:
+                plt.savefig(code_name + '_cb.pdf')
+        except ValueError:
+            pass
+
+    if save:
+        with open(code_name+'.pkl', 'wb') as f:
+            pickle.dump(band_structure, f, pickle.HIGHEST_PROTOCOL)
+
+
+def main1(param_file, k_points_file, xyz, show, save, code_name):
+
+    params, wave_vector, code_name = preprocess_data(param_file, k_points_file, xyz, code_name)
+
     # initialize Hamiltonian
     hamiltonian = tb.initializer(**params)
 
     # compute band structure
-    band_structure = []
-
     band_structure = [{} for _ in xrange(len(wave_vector))]
 
     for j, jj in enumerate(wave_vector):
         vals, vects = hamiltonian.diagonalize_periodic_bc(jj)
-        band_structure[j] = {'wave_vector': jj, 'eigenvalues': vals, 'eigenvectors': vects}
+        band_structure[j] = {'id': j, 'wave_vector': jj, 'eigenvalues': vals, 'eigenvectors': vects}
         print('#{} '.format(j), " ".join(['{:.3f} '.format(element) for element in vals]))
 
-    band_structure = np.array([band_structure[item]['eigenvalues']
-                               for item in xrange(len(band_structure))])
-
-    if show:
-
-        axes = plt.axes()
-        axes.set_ylim(-1.0, 2.71)
-        axes.set_title('Band structure')
-        axes.set_xlabel('Wave vectors')
-        axes.set_ylabel('Energy (eV)')
-        axes.plot(band_structure)
-
-        if show != 2:
-            plt.show()
-        else:
-            plt.savefig('band_structure.png')
-
-    if save:
-        with open('./band_structure.pkl', 'wb') as f:
-            pickle.dump(band_structure, f, pickle.HIGHEST_PROTOCOL)
+    postprocess_data(wave_vector, band_structure, show, save, code_name)
 
     return 0
 
@@ -76,11 +123,14 @@ def create_parser():
     parser.add_argument('--xyz', type=str, default=None,
                         help='Path to the file containing atomic coordinates')
 
-    parser.add_argument('--show', '-S', type=int, default=0,
-                        help='Show figures, 0/1')
+    parser.add_argument('--show', '-S', type=int, default=1,
+                        help='Show figures, 0/1/2')
 
     parser.add_argument('--save', '-s', type=int, default=0,
                         help='Save results of computations on disk, 0/1')
+
+    parser.add_argument('--code_name', type=str, default=None,
+                        help='Code name is added to the names of all saved data')
 
     return parser
 
@@ -89,7 +139,7 @@ def main():
 
     parser = create_parser()
     args = parser.parse_args()
-    main1(args.param_file, args.k_points_file, args.xyz, args.show, args.save)
+    main1(args.param_file, args.k_points_file, args.xyz, args.show, args.save, args.code_name)
 
     return 0
 
