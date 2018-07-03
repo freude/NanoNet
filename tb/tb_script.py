@@ -133,22 +133,30 @@ def create_parser():
     parser = argparse.ArgumentParser()
 
     parser.add_argument('param_file', type=str,
-                        help='Path to the yaml file containing parameters')
+                        help='Path to the file in the yaml-format\
+                             containing all parameters needed to run computations.')
 
     parser.add_argument('--k_points_file', type=str, default=None,
-                        help='Path to the file containing k points coordinates')
+                        help='Path to the txt file containing coordinates of \
+                             wave vectors for the band structure computations.\
+                             If not specified, default values will be used.')
 
     parser.add_argument('--xyz', type=str, default=None,
-                        help='Path to the file containing atomic coordinates')
+                        help='Path to the file containing atomic coordinates. \
+                             If specified, it overrides the coordinates \
+                             specified in the param_files.')
 
     parser.add_argument('--show', '-S', type=int, default=1,
-                        help='Show figures, 0/1/2')
+                        help='Show figures, 0/1/2. \
+                             0 shows nothing,  \
+                             1 outputs figures on screen, \
+                             2 saves figures on disk without showing.')
 
     parser.add_argument('--save', '-s', type=int, default=0,
-                        help='Save results of computations on disk, 0/1')
+                        help='Save results of computations on disk, 0/1.')
 
     parser.add_argument('--code_name', type=str, default=None,
-                        help='Code name is added to the names of all saved data')
+                        help='Code name is added to the names of all saved data files.')
 
     return parser
 
