@@ -12,6 +12,7 @@ import constants
 from diatomic_matrix_element import me
 from atoms import Atom
 from aux_functions import dict2xyz
+from tb_script import postprocess_data
 
 
 VERBOSITY = 1
@@ -150,7 +151,7 @@ class Hamiltonian(BasisTB):
         :return:
         """
 
-        vals, vects = np.linalg.eig(self.h_matrix)
+        vals, vects = np.linalg.eigh(self.h_matrix)
         vals = np.real(vals)
         ind = np.argsort(vals)
         return vals[ind], vects[:, ind]
@@ -174,7 +175,7 @@ class Hamiltonian(BasisTB):
             self._compute_h_matrix_bc_factor()
             self._compute_h_matrix_bc_add()
 
-        vals, vects = np.linalg.eig(self.h_matrix_bc_factor * self.h_matrix + self.h_matrix_bc_add)
+        vals, vects = np.linalg.eigh(self.h_matrix_bc_factor * self.h_matrix + self.h_matrix_bc_add)
         vals = np.real(vals)
         ind = np.argsort(vals)
 
@@ -359,36 +360,15 @@ def main():
 
     num_points = 20
     kk = np.linspace(0, constants.PI / a_si, num_points, endpoint=True)
-    band_sructure = []
+    band_structure = []
 
     for jj in xrange(num_points):
         vals, _ = h.diagonalize_periodic_bc([0.0, 0.0, kk[jj]])
-        band_sructure.append(vals)
+        band_structure.append(vals)
 
-    band_sructure = np.array(band_sructure)
+    band_structure = np.array(band_structure)
 
-    ax = plt.axes()
-    ax.set_ylim(-1.0, 2.7)
-    # ax.xaxis.set_major_formatter(plt.FuncFormatter(format_func))
-    ax.plot(kk, np.sort(np.real(band_sructure)))
-    plt.show()
-
-    split = 100
-    fig, ax = plt.subplots(1, 2)
-    ax[0].set_ylim(-1.0, -0.3)
-    ax[0].plot(kk, np.sort(np.real(band_sructure))[:, :split])
-    ax[0].set_xlabel(r'Wave vector ($\frac{\pi}{a}$)')
-    ax[0].set_ylabel(r'Energy (eV)')
-    ax[0].set_title('Valence band')
-
-    ax[1].set_ylim(2.0, 2.7)
-    ax[1].plot(kk, np.sort(np.real(band_sructure))[:, split:])
-    ax[1].set_xlabel(r'Wave vector ($\frac{\pi}{a}$)')
-    ax[1].set_ylabel(r'Energy (eV)')
-    ax[1].set_title('Conduction band')
-    fig.tight_layout()
-    plt.savefig('test.pdf', format='pdf')
-    plt.show()
+    postprocess_data(kk, band_structure, show=1, save=0, code_name=None)
 
 
 if __name__ == '__main__':
