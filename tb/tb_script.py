@@ -1,5 +1,10 @@
 #!/usr/bin/env python
 from __future__ import print_function
+import os
+import matplotlib as mpl
+if os.environ.get('DISPLAY','') == '':
+    print('no display found. Using non-interactive Agg backend')
+    mpl.use('Agg')
 import argparse
 import pickle
 import matplotlib.pyplot as plt
@@ -33,13 +38,20 @@ def preprocess_data(param_file, k_points_file, xyz, code_name):
 
 def postprocess_data(kk, band_structure, show, save, code_name):
 
+    flag = True  # 1D system
+
     if not isinstance(band_structure, np.ndarray):
         ids = [band_structure[item]['id'] for item in xrange(len(band_structure))]
         band_structure = [x['eigenvalues'] for _, x in sorted(zip(ids, band_structure))]
         band_structure = np.array(band_structure)
 
     if len(kk.shape) > 1:
-        kk = kk[:, 2]
+        kkk = np.sum(kk, axis=0)
+        if np.count_nonzero(kkk) == 1:
+            kk = kk[:, np.where(kkk != 0.0)[0][0]]
+        else:
+            kk = range(kk.shape[0])
+            flag = False
 
     if show:
 
@@ -52,10 +64,13 @@ def postprocess_data(kk, band_structure, show, save, code_name):
         cb = np.sort(cb)
 
         try:
-            ax_lim1 = np.nanmax(vb) - 0.5
-            ax_lim2 = np.nanmax(vb) + 0.1
-            fig, ax = plt.subplots(1, 1, figsize=(4, 7))
-            ax.set_ylim(ax_lim1, ax_lim2)
+            fig, ax = plt.subplots(1, 1, figsize=(10, 5))
+            if flag:
+                fig.set_figheight(7)
+                fig.set_figwidth(4)
+                ax_lim1 = np.nanmax(vb) - 0.5
+                ax_lim2 = np.nanmax(vb) + 0.1
+                ax.set_ylim(ax_lim1, ax_lim2)
             ax.plot(kk, vb, marker="o", markersize=5)
             ax.set_xlabel(r'Wave vector ($\frac{\pi}{a}$)')
             ax.set_ylabel(r'Energy (eV)')
@@ -69,10 +84,13 @@ def postprocess_data(kk, band_structure, show, save, code_name):
             pass
 
         try:
-            ax_lim1 = np.nanmin(cb) - 0.1
-            ax_lim2 = np.nanmin(cb) + 0.7
-            fig, ax = plt.subplots(1, 1, figsize=(4, 7))
-            ax.set_ylim(ax_lim1, ax_lim2)
+            fig, ax = plt.subplots(1, 1, figsize=(10, 5))
+            if flag:
+                fig.set_figheight(7)
+                fig.set_figwidth(4)
+                ax_lim1 = np.nanmin(cb) - 0.1
+                ax_lim2 = np.nanmin(cb) + 0.7
+                ax.set_ylim(ax_lim1, ax_lim2)
             ax.plot(kk, cb, marker="o", markersize=5)
             ax.set_xlabel(r'Wave vector ($\frac{\pi}{a}$)')
             ax.set_ylabel(r'Energy (eV)')
