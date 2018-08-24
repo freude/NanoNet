@@ -11,38 +11,68 @@ import matplotlib.pyplot as plt
 
 import os
 
-path = 'c:\users\sammy\desktop\NanoNet\input_samples'
+flag = True
 
-tb.Atom.orbital_sets = {'Si': 'SiliconSP3D5S', 'H': 'HydrogenS'}
+def bs(path, flag= True):
 
-for xyz_file in os.listdir(path):
-    if xyz_file.endswith('xyz'):
-        hamiltonian = tb.Hamiltonian(xyz=os.path.join(path, xyz_file), nn_distance=2.4)
-        hamiltonian.initialize()
+    return()
 
-        plt.imshow(np.log(np.abs(hamiltonian.h_matrix)))
-        plt.savefig('hamitonian.pdf')
+if __name__ == "__main__":
 
-        a_si = 5.50
-        PRIMITIVE_CELL = [[0, 0, a_si]]
-        hamiltonian.set_periodic_bc(PRIMITIVE_CELL)
+    path = 'c:\users\sammy\desktop\NanoNet\input_samples'
 
-        num_points = 200
-        kk = np.linspace(0, 3.14 / 2, num_points, endpoint=True)
+    tb.Atom.orbital_sets = {'Si': 'SiliconSP3D5S', 'H': 'HydrogenS'}
 
- # Band structure computation for each K-point
+    for xyz_file in os.listdir(path):
+                if xyz_file.endswith('xyz'):
+                    hamiltonian = tb.Hamiltonian(xyz=os.path.join(path, xyz_file), nn_distance=2.4)
+                    hamiltonian.initialize()
 
-        band_structure = []
+                if flag:
+                    plt.imshow(np.log(np.abs(hamiltonian.h_matrix)))
+                    plt.savefig('hamitonian.pdf')
+                    plt.show()
 
-        for jj in xrange(num_points):
-            vals, _ = hamiltonian.diagonalize_periodic_bc([0, 0, kk[jj]])
-            band_structure.append(vals)
+                    a_si = 5.50
+                    PRIMITIVE_CELL = [[0, 0, a_si]]
+                    hamiltonian.set_periodic_bc(PRIMITIVE_CELL)
 
-        band_structure = np.array(band_structure)
+                    num_points = 50
+                    kk = np.linspace(0, 0.57, num_points, endpoint=True)
 
-        ax = plt.axes()
-        ax.set_title('Band structure of Silicon Nanowire')
-        ax.set_xlabel(r'Wave vector (k)')
-        ax.set_ylabel(r'Energy (eV)')
-        ax.plot(kk, np.sort(np.real(band_structure)))
-        plt.show()
+# Band structure computation for each K-point
+
+                    band_structure = []
+
+                    for jj in xrange(num_points):
+                        vals, _ = hamiltonian.diagonalize_periodic_bc([0, 0, kk[jj]])
+                        band_structure.append(vals)
+
+                    band_structure = np.array(band_structure)
+
+                    cba = band_structure.copy()
+                    vba = band_structure.copy()
+
+                    cba[cba<0] = 1000
+                    vba[vba>0] = -1000
+
+                    band_gap = np.min(cba)-np.max(vba);
+
+                    print band_gap
+
+                    ax = plt.axes()
+                    ax.set_title('Band structure of Silicon Nanowire')
+                    ax.set_xlabel(r'Wave vector (k)')
+                    ax.set_ylabel(r'Energy (eV)')
+                    ax.plot(kk, np.sort(np.real(band_structure)))
+                if flag:
+                    plt.show()
+
+    a=bs(path)
+    print a
+
+
+
+
+
+
