@@ -1,9 +1,11 @@
+import os
 import matplotlib
 matplotlib.use('TkAgg')
 import numpy as np
 import tb
 import matplotlib.pyplot as plt
-import os
+
+
 
 def bs(path='c:\users\sammy\desktop\NanoNet\input_samples', flag=True):
     """
@@ -18,24 +20,31 @@ def bs(path='c:\users\sammy\desktop\NanoNet\input_samples', flag=True):
     band_structures = []
     for xyz_file in os.listdir(path):
         if xyz_file.endswith('xyz'):
+
+            widths = [s for s in xyz_file if s.isdigit()]
+            width = int(''.join(widths))
+            print(width)
+
             hamiltonian = tb.Hamiltonian(xyz=os.path.join(path, xyz_file), nn_distance=2.4)
             hamiltonian.initialize()
 
-        if flag:
-            plt.imshow(np.log(np.abs(hamiltonian.h_matrix)))
-            plt.savefig('hamitonian.pdf')
-            plt.show()
+            if flag:
+                plt.axis('off')
+                plt.imshow(np.log(np.abs(hamiltonian.h_matrix)))
+                plt.savefig('hamiltonian.pdf')
+                plt.show()
 
             a_si = 5.50
             PRIMITIVE_CELL = [[0, 0, a_si]]
             hamiltonian.set_periodic_bc(PRIMITIVE_CELL)
 
-            num_points = 50
+            num_points = 20
             kk = np.linspace(0, 0.57, num_points, endpoint=True)
-#k points
+
             band_structure = []
 
             for jj in xrange(num_points):
+                print(jj)
                 vals, _ = hamiltonian.diagonalize_periodic_bc([0, 0, kk[jj]])
                 band_structure.append(vals)
 
@@ -51,12 +60,21 @@ def bs(path='c:\users\sammy\desktop\NanoNet\input_samples', flag=True):
             band_gap = np.min(cba) - np.max(vba)
             band_gaps.append(band_gap)
 
-            ax = plt.axes()
-            ax.set_title('Band structure of Silicon Nanowire')
-            ax.set_xlabel(r'Wave vector (k)')
-            ax.set_ylabel(r'Energy (eV)')
-            ax.plot(kk, np.sort(np.real(band_structure)))
-        if flag:
-            plt.show()
+            if flag:
+                fig, ax = plt.subplots(1, 2)
+                ax[0].set_ylim(-1.0, -0.3)
+                ax[0].plot(kk, np.sort(np.real(vba)))
+                ax[0].set_xlabel(r'Wave vector ($\frac{\pi}{a}$)')
+                ax[0].set_ylabel(r'Energy (eV)')
+                ax[0].set_title('Valence band, NW width={} u.c.'.format(width))
+                plt.savefig('bs_vb.pdf')
+
+                ax[1].set_ylim(2.0, 2.7)
+                ax[1].plot(kk, np.sort(np.real(cba)))
+                ax[1].set_xlabel(r'Wave vector ($\frac{\pi}{a}$)')
+                ax[1].set_ylabel(r'Energy (eV)')
+                ax[1].set_title('Conduction band, NW width={} u.c.'.format(width))
+                fig.tight_layout()
+                plt.savefig('bs_cb.pdf')
 
     return band_gaps, band_structures
