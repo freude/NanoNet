@@ -410,21 +410,23 @@ def main1():
     Bi2       0.0    0.0    5.52321494   
     """
 
-    h = Hamiltonian(xyz=xyz_file, nn_distance=4.1)
+    h = Hamiltonian(xyz=xyz_file, nn_distance=5.7)
 
     def radial_dep(coords):
         distance = np.linalg.norm(coords)
         print(distance)
         if distance < 3.3:
             return 1
-        elif distance > 3.3:
+        elif 3.7 > distance > 3.3:
             return 2
+        elif distance > 3.7:
+            return 3
 
     h.initialize(radial_dep=radial_dep)
     h.set_periodic_bc(PRIMITIVE_CELL.tolist())
 
     from aux_functions import get_k_coords
-    sym_points = ['X', 'GAMMA', 'L', 'U', 'T']
+    sym_points = ['GAMMA', 'GAMMA', 'L', 'U', 'T']
     num_points = [20, 20, 20, 20]
     k = get_k_coords(sym_points, num_points, 'Bi')
     band_structure = []
@@ -437,6 +439,7 @@ def main1():
 
     postprocess_data(k, band_structure, show=1, save=0, code_name=None)
 
+
 if __name__ == '__main__':
 
-    main()
+    main1()
