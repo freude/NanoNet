@@ -20,7 +20,7 @@ All computations can be governed by means of the python application programming 
 The source distribution can be obtained from GitHub:
 
 ```bash
-git clone git@github.com:freude/NanoNet.git
+git clone https://github.com/freude/NanoNet.git
 cd NanoNet
 ```
 
