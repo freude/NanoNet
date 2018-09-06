@@ -38,7 +38,25 @@ PARAMS_H_SI = {'ss_sigma': -3.9997,
 PARAMS_H_H = {'ss_sigma': 1}
 
 
-def me_diatomic(bond, n, l_min, l_max, m):
+#  NN - Bi-Bi
+PARAMS_BI_BI1 = {'ss_sigma': -0.608,
+                 'sp_sigma': 1.320,
+                 'pp_sigma': 1.854,
+                 'pp_pi': -0.600}
+
+# 2d NN - Bi-Bi
+PARAMS_BI_BI2 = {'ss_sigma': -0.384,
+                 'sp_sigma': 0.433,
+                 'pp_sigma': 1.396,
+                 'pp_pi': -0.344}
+
+# 3d NN - Bi-Bi
+PARAMS_BI_BI3 = {'ss_sigma': 0,
+                 'sp_sigma': 0,
+                 'pp_sigma': 0.156,
+                 'pp_pi': 0}
+
+def me_diatomic(bond, n, l_min, l_max, m, which_neighbour):
     """
     The function looks up into the table of parameters making a query parametrized by:
 
@@ -62,7 +80,10 @@ def me_diatomic(bond, n, l_min, l_max, m):
         raise ValueError('Wrong value of the value variable')
 
     try:
-        return getattr(sys.modules[__name__], 'PARAMS_' + bond)[label]
+        if which_neighbour == 0:
+            return getattr(sys.modules[__name__], 'PARAMS_' + bond)[label]
+        else:
+            return getattr(sys.modules[__name__], 'PARAMS_' + bond + str(which_neighbour))[label]
     except KeyError:
         warnings.warn('There is no parameter PARAMS_' +
                       bond + '[' + label + ']' + ' in the dictionary', UserWarning)
@@ -133,7 +154,7 @@ def t_me(N, l, m1, m2, gamma):
                (((-1) ** abs(m2)) * d_me(N, l, abs(m1), abs(m2)) - d_me(N, l, abs(m1), -abs(m2)))
 
 
-def me(atom1, ll1, atom2, ll2, coords):
+def me(atom1, ll1, atom2, ll2, coords, which_neighbour=0):
 
     # determine type of bonds
     atoms = sorted([item.upper() for item in [atom1.title, atom2.title]])
@@ -163,12 +184,12 @@ def me(atom1, ll1, atom2, ll2, coords):
     prefactor = (-1) ** ((l1 - l2 + abs(l1 - l2)) * 0.5)
     ans = 2 * a_coef(m1, gamma) * a_coef(m2, gamma) * \
         d_me(N, l1, abs(m1), 0) * d_me(N, l2, abs(m2), 0) * \
-        me_diatomic(atoms, code, l_min, l_max, 0)
+        me_diatomic(atoms, code, l_min, l_max, 0, which_neighbour)
 
     for m in xrange(1, l_min+1):
         ans += (s_me(N, l1, m1, m, gamma) * s_me(N, l2, m2, m, gamma) +
                 t_me(N, l1, m1, m, gamma) * t_me(N, l2, m2, m, gamma)) * \
-               me_diatomic(atoms, code, l_min, l_max, m)
+               me_diatomic(atoms, code, l_min, l_max, m, which_neighbour)
 
     return prefactor * ans
 

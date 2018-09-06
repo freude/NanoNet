@@ -104,11 +104,14 @@ class Hamiltonian(BasisTB):
         self.h_matrix_right_lead = None
         self.k_vector = 0                               # default value of the wave vector
         self.ct = None
+        self.radial_dependence = None
 
-    def initialize(self):
+    def initialize(self, radial_dep=None):
         """
         The function computes matrix elements of the Hamiltonian.
         """
+
+        self.radial_dependence = radial_dep
 
         # initialize Hamiltonian matrices
         self.h_matrix = np.zeros((self.basis_size, self.basis_size), dtype=np.complex)
@@ -126,7 +129,7 @@ class Hamiltonian(BasisTB):
                 if j1 == j2:
                     for l1 in xrange(self.orbitals_dict[self.atom_list.keys()[j1]].num_of_orbitals):
                         ind1 = self.qn2ind([('atoms', j1), ('l', l1)], )
-                        self.h_matrix[ind1, ind1] = self._get_me(j1, j2, l1, l1)
+                        self.h_matrix[ind1, ind1] = self._get_me(j1, j2, l1, l1, radial_dep=self.radial_dependence)
 
                 # nearest neighbours interaction
                 else:
@@ -136,7 +139,7 @@ class Hamiltonian(BasisTB):
                             ind1 = self.qn2ind([('atoms', j1), ('l', l1)], )
                             ind2 = self.qn2ind([('atoms', j2), ('l', l2)], )
 
-                            self.h_matrix[ind1, ind2] = self._get_me(j1, j2, l1, l2)
+                            self.h_matrix[ind1, ind2] = self._get_me(j1, j2, l1, l2, radial_dep=self.radial_dependence)
 
     def set_periodic_bc(self, primitive_cell):
 
@@ -199,7 +202,7 @@ class Hamiltonian(BasisTB):
         else:
             return True
 
-    def _get_me(self, atom1, atom2, l1, l2, coords=None):
+    def _get_me(self, atom1, atom2, l1, l2, coords=None, radial_dep=None):
         """
         Compute the matrix element <atom1, l1|H|l2, atom2>
 
@@ -225,21 +228,30 @@ class Hamiltonian(BasisTB):
 
             # compute radius vector pointing from one atom to another
             if coords is None:
-                coords = np.array(self.atom_list.values()[atom1], dtype=float) - \
+                coords1 = np.array(self.atom_list.values()[atom1], dtype=float) - \
                          np.array(self.atom_list.values()[atom2], dtype=float)
+            else:
+                coords1 = coords.copy()
+
+            if radial_dep is None:
+                which_neighbour = ""
+            else:
+                which_neighbour = radial_dep(coords1)
+
+            print(which_neighbour)
 
             # compute directional cosines
-            coords /= np.linalg.norm(coords)
+            coords1 /= np.linalg.norm(coords1)
 
             if VERBOSITY > 1:
-                print("coords = ", coords)
+                print("coords = ", coords1)
                 print(self.atom_list.values()[atom1])
                 print(self.atom_list.keys()[atom1])
                 print(self.atom_list.values()[atom2])
                 print(self.atom_list.keys()[atom2])
                 print(atom_kind1.title, atom_kind2.title)
 
-            return me(atom_kind1, l1, atom_kind2, l2, coords)
+            return me(atom_kind1, l1, atom_kind2, l2, coords1, which_neighbour)
 
     def _reset_periodic_bc(self):
         """
@@ -311,15 +323,15 @@ class Hamiltonian(BasisTB):
                         if split_the_leads:
                             if flag == 'R':
                                 self.h_matrix_left_lead[ind1, ind2] += phase * \
-                                    self._get_me(j1, ind, l1, l2, coords)
+                                    self._get_me(j1, ind, l1, l2, coords, radial_dep=self.radial_dependence)
                             elif flag == 'L':
                                 self.h_matrix_right_lead[ind1, ind2] += phase * \
-                                    self._get_me(j1, ind, l1, l2, coords)
+                                    self._get_me(j1, ind, l1, l2, coords, radial_dep=self.radial_dependence)
                             else:
                                 raise ValueError("Wrong flag value")
                         else:
                             self.h_matrix_bc_add[ind1, ind2] += phase * \
-                                self._get_me(j1, ind, l1, l2, coords)
+                                self._get_me(j1, ind, l1, l2, coords, radial_dep=self.radial_dependence)
 
     def get_coupling_hamiltonians(self):
 
@@ -370,6 +382,60 @@ def main():
 
     postprocess_data(kk, band_structure, show=1, save=0, code_name=None)
 
+
+def main1():
+
+    l_a = 4.5332
+    l_c = 11.7967
+
+    # PRIMITIVE_CELL = np.array([[1.0, 0.0, 0.0],
+    #                   [0.55412, 0.8408, 0.0],
+    #                   [0.55412, 0.2953, 0.7873]])
+
+    PRIMITIVE_CELL = np.array([[-1.0/2*l_a, -np.sqrt(3)/6*l_a, 1.0/3.0*l_c],
+                               [1.0/2*l_a, -np.sqrt(3)/6*l_a, 1.0/3.0*l_c],
+                               [0.0, np.sqrt(3)/3*l_a, 1.0/3.0*l_c]])
+
+    Atom.orbital_sets = {'Bi': 'Bismuth'}
+
+    # xyz_file = """2
+    # Bi2 cell
+    # Bi1       0.0000000000    0.0000000000    0.0000000000
+    # Bi2       2.2666             2.2666            2.2666
+    # """
+
+    xyz_file = """2
+    Bi2 cell
+    Bi1       0.0    0.0    0.0
+    Bi2       0.0    0.0    5.52321494   
+    """
+
+    h = Hamiltonian(xyz=xyz_file, nn_distance=4.1)
+
+    def radial_dep(coords):
+        distance = np.linalg.norm(coords)
+        print(distance)
+        if distance < 3.3:
+            return 1
+        elif distance > 3.3:
+            return 2
+
+    h.initialize(radial_dep=radial_dep)
+    h.set_periodic_bc(PRIMITIVE_CELL.tolist())
+
+    from aux_functions import get_k_coords
+    sym_points = ['X', 'GAMMA', 'L', 'U', 'T']
+    num_points = [20, 20, 20, 20]
+    k = get_k_coords(sym_points, num_points, 'Bi')
+    band_structure = []
+
+    for jj in k:
+        vals, _ = h.diagonalize_periodic_bc(jj)
+        band_structure.append(vals)
+
+    band_structure = np.array(band_structure)
+
+    postprocess_data(k, band_structure, show=1, save=0, code_name=None)
 
 if __name__ == '__main__':
 

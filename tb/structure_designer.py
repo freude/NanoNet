@@ -163,6 +163,15 @@ class CyclicTopology(object):
                                                                labels[j]: atom_coords})
                     count += 1
 
+                    for vec in self.pcv:
+
+                        atom_coords = item + self.pcv[surf] + vec
+                        self.virtual_and_interfacial_atoms.update({"*_" + str(count) +
+                                                                   "_" + str(j) + "_" +
+                                                                   labels[j]: atom_coords})
+                        count += 1
+
+
             if any(distances2[j]):
                 self.virtual_and_interfacial_atoms.update({str(j) + "_" + labels[j]: item})
                 self.interfacial_atoms_ind.append(j)
@@ -172,6 +181,14 @@ class CyclicTopology(object):
                                                                "_" + str(j) + "_" +
                                                                labels[j]: atom_coords})
                     count += 1
+
+                    for vec in self.pcv:
+
+                        atom_coords = item - self.pcv[surf] - vec
+                        self.virtual_and_interfacial_atoms.update({"*_" + str(count) +
+                                                                   "_" + str(j) + "_" +
+                                                                   labels[j]: atom_coords})
+                        count += 1
 
         # remove non-unique elements
         self.interfacial_atoms_ind = list(set(self.interfacial_atoms_ind))

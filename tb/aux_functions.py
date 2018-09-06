@@ -3,7 +3,7 @@ The module contains a set of auxiliary functions facilitating the tight-binding 
 """
 import numpy as np
 import yaml
-from constants import SPECIAL_K_POINTS
+from constants import SPECIAL_K_POINTS_BI, SPECIAL_K_POINTS_SI
 
 
 def xyz2np(xyz):
@@ -65,7 +65,7 @@ def count_species(list_of_labels):
     return counter
 
 
-def get_k_coords(special_points, num_of_points):
+def get_k_coords(special_points, num_of_points, label):
     """
     Generates a array of the coordinates in the k-space from the set of
     high-symmetry points and number of nodes between them
@@ -75,6 +75,11 @@ def get_k_coords(special_points, num_of_points):
     :return:                 array of coordinates in k-space
     :rtype:                  numpy.ndarray
     """
+
+    if label == 'Bi':
+        SPECIAL_K_POINTS = SPECIAL_K_POINTS_BI
+    if label == 'Si':
+        SPECIAL_K_POINTS = SPECIAL_K_POINTS_SI
 
     k_vectors = np.zeros((sum(num_of_points), 3))
     offset = 0

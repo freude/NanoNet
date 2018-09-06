@@ -63,10 +63,13 @@ class Atom(object):
                 if not isinstance(atom, Atom):
                     raise KeyError
             except KeyError:
+                # TODO: simplify these statements below
                 if label.lower().startswith('si'):
                     atom = getattr(sys.modules[__name__], Atom.orbital_sets['Si'])()
                 elif label.lower().startswith('h'):
                     atom = getattr(sys.modules[__name__], Atom.orbital_sets['H'])()
+                elif label.lower().startswith('b'):
+                    atom = getattr(sys.modules[__name__], Atom.orbital_sets['Bi'])()
                 else:
                     raise ValueError("There is no library entry for the atom " + label)
 
@@ -109,6 +112,23 @@ class HydrogenS(Atom):
         self.add_orbital("s", energy=0.9998)
 
 
+class Bismuth(Atom):
+    """
+    Class defines the `sp3` basis set for the bismuth atom
+    """
 
+    def __init__(self):
 
+        super(Bismuth, self).__init__("Bi")
 
+        self.add_orbital("s", energy=-10.906, principal=0)
+
+        # self.add_orbital("s1", energy=-10.906, principal=0, spin=1)
+
+        self.add_orbital("px", energy=-0.486, orbital=1, magnetic=-1)
+        self.add_orbital("py", energy=-0.486, orbital=1, magnetic=1)
+        self.add_orbital("pz", energy=-0.486, orbital=1, magnetic=0)
+
+        # self.add_orbital("px1", energy=-0.486, orbital=1, magnetic=-1, spin=1)
+        # self.add_orbital("py1", energy=-0.486, orbital=1, magnetic=1, spin=1)
+        # self.add_orbital("pz1", energy=-0.486, orbital=1, magnetic=0, spin=1)
