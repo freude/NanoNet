@@ -1,10 +1,6 @@
 #!/usr/bin/env python
 from __future__ import print_function
 import os
-import matplotlib
-if os.environ.get('DISPLAY','') == '':
-    print('no display found. Using non-interactive Agg backend')
-    matplotlib.use('Agg')
 import argparse
 import pickle
 import matplotlib.pyplot as plt
