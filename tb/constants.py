@@ -45,14 +45,14 @@ SPECIAL_K_POINTS_BI = {
     'U': (recip_lat_basis * np.matrix([0.5*gamma_bi+0.25, 1.0-gamma_bi, 0.5*gamma_bi+0.25]).T).tolist()
 }
 
-aaa = 3.289
-
-SPECIAL_K_POINTS_BI = {
-    'GAMMA': [0, 0, 0],
-    'X': [0.5 * PI/aaa, 0.5 * PI/aaa, 0.5 * PI/aaa],
-    'T': (recip_lat_basis * np.matrix([0.5, 0.5, 0.5]).T).tolist(),
-    'L': (recip_lat_basis * np.matrix([0.0, 0.5, 0.0]).T).tolist(),
-    'W': (recip_lat_basis * np.matrix([gamma_bi, 1.0-gamma_bi, 0.5]).T).tolist(),
-    'K': (recip_lat_basis * np.matrix([1.0/4+0.5*gamma_bi, 3.0/4-0.5*gamma_bi, 0.0]).T).tolist(),
-    'U': (recip_lat_basis * np.matrix([0.5*gamma_bi+0.25, 1.0-gamma_bi, 0.5*gamma_bi+0.25]).T).tolist()
-}
+# aaa = 3.289
+#
+# SPECIAL_K_POINTS_BI = {
+#     'GAMMA': [0, 0, 0],
+#     'X': [0.5 * PI/aaa, 0.5 * PI/aaa, 0.5 * PI/aaa],
+#     'T': (recip_lat_basis * np.matrix([0.5, 0.5, 0.5]).T).tolist(),
+#     'L': (recip_lat_basis * np.matrix([0.0, 0.5, 0.0]).T).tolist(),
+#     'W': (recip_lat_basis * np.matrix([gamma_bi, 1.0-gamma_bi, 0.5]).T).tolist(),
+#     'K': (recip_lat_basis * np.matrix([1.0/4+0.5*gamma_bi, 3.0/4-0.5*gamma_bi, 0.0]).T).tolist(),
+#     'U': (recip_lat_basis * np.matrix([0.5*gamma_bi+0.25, 1.0-gamma_bi, 0.5*gamma_bi+0.25]).T).tolist()
+# }

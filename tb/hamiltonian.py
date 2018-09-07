@@ -426,7 +426,7 @@ def main1():
     h.set_periodic_bc(PRIMITIVE_CELL.tolist())
 
     from aux_functions import get_k_coords
-    sym_points = ['GAMMA', 'GAMMA', 'L', 'U', 'T']
+    sym_points = ['X', 'GAMMA', 'L', 'U', 'T']
     num_points = [20, 20, 20, 20]
     k = get_k_coords(sym_points, num_points, 'Bi')
     band_structure = []

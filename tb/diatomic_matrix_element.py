@@ -114,7 +114,7 @@ def d_me(N, l, m1, m2):
                    (math.factorial(l + m2 - t) * math.factorial(l - m1 - t) *
                     math.factorial(t) * math.factorial(t + m1 - m2))
 
-    return ans * prefactor
+    return np.nan_to_num(ans * prefactor)
 
 
 def tau(m):
