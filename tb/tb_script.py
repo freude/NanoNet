@@ -19,7 +19,7 @@ def preprocess_data(param_file, k_points_file, xyz, code_name):
         if len(params['primitive_cell']) == 3:
             sym_points = ['L', 'GAMMA', 'X', 'W', 'K', 'L', 'W', 'X', 'K', 'GAMMA']
             num_points = [15, 20, 15, 10, 15, 15, 15, 15, 20]
-            wave_vector = tb.get_k_coords(sym_points, num_points)
+            wave_vector = tb.get_k_coords(sym_points, num_points, 'Si')
         else:
             wave_vector = [[0.0, 0.0, 0.0]]
     else:   # read k-points file if its path is provided from the command line arguments
