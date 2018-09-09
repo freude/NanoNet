@@ -8,7 +8,6 @@ low and high are the bounds of integration, f is f(x),
 N is the number of rectangles. Test function has been commented out,
 while the density of states function is below it.   
 """
-
 # def rectangular_rule(low, high, f, N):
 #     E = np.linspace(low, high, N)
 #     area = 0
@@ -22,7 +21,6 @@ while the density of states function is below it.
 # rectangular_rule(0, 100, polynomial, 10000)
 #
 # print rectangular_rule(0, 100, polynomial, 10000)
-
 "below is the density of states function and delta function"
 
 
