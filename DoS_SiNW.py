@@ -34,12 +34,11 @@ def delta(e, eps, h):
 
 
 def dos(eps, kk):
-    e = np.linspace(eps, kk)
-    dos = np.linspace(e.shape)
     h = 0.001
-    eps = 1000000
-
-    for j, e in enumerate(e):
+    e = np.linspace(eps, kk, h)
+    dos = np.zeros(e.shape)
+    for j, en in enumerate(e):
         for j1, kk in enumerate(kk):
-            dos[j] += delta(e, eps[j], h)
+            dos[j] += delta(en, eps[j], h)
     return dos
+
