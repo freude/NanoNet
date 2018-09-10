@@ -106,7 +106,7 @@ def test_bulk_silicon():
 
     sym_points = ['L', 'GAMMA', 'X']
     num_points = [10, 25]
-    k = tb.get_k_coords(sym_points, num_points)
+    k = tb.get_k_coords(sym_points, num_points, 'Si')
     band_sructure = []
 
     vals = np.zeros((sum(num_points), h.h_matrix.shape[0]), dtype=np.complex)

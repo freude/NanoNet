@@ -21,7 +21,7 @@ All computations can be governed by means of the python application programming 
 The source distribution can be obtained from GitHub:
 
 ```bash
-git clone git@github.com:freude/NanoNet.git
+git clone https://github.com/freude/NanoNet.git
 cd NanoNet
 ```
 
@@ -70,7 +70,7 @@ Below we demonstrate band structure computation for bulk silicon using empirical
     tb.Atom.orbital_sets = {'Si': 'SiliconSP3D5S'}
     ```
 
-2. Specify geometry of the system - determine position if atoms
+2. Specify geometry of the system - determine position of atoms
 and specify periodic boundary conditions if any. This is done by creating an object of 
 the class Hamiltonian with proper arguments.
  
