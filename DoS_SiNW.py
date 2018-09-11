@@ -24,19 +24,33 @@ while the density of states function is below it.
 "below is the density of states function and delta function"
 
 
-def delta(e, eps, h):
-    if e - (1 / (2 * h)) < eps < e + (1 / (2 * h)):
+def delta(E, eps, h):
+    if E - h < eps < E + h:
         return 1
     else:
         return 0
 
 
-def dos(eps, kk):
-    h = 0.001
-    e = np.linspace(eps, kk, h)
-    dos = np.zeros(e.shape)
-    for j, en in enumerate(e):
-        for j1, kk in enumerate(kk):
-            dos[j] += delta(en, eps[j], h)
+def dos(E, bs, kk, h):
+
+    dos = np.zeros(E.shape)
+    for j, en in enumerate(E):
+        for j1 in range(len(kk)):
+            dos[j] += delta(en, bs[j1], h)
     return dos
 
+
+if __name__ == '__main__':
+
+    num_points = 100
+    kk = np.linspace(0, 0.57, num_points, endpoint=True)
+    Eg, bstruct = bs(path='c:\users\sammy\desktop\NanoNet\input_samples', kk=kk, flag=True)
+
+    E = np.linspace(-2, 0, 200)
+    h = 0.01
+
+    dos1 = np.zeros(E.shape)
+
+    for j in range(bstruct[0].shape[1]):
+        dos1 += dos(E, bstruct[0][:, j], kk, h)
+    print(dos1)
