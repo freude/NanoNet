@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from .abstract_interfaces import AbstractBasis
 from .structure_designer import StructDesignerXYZ, CyclicTopology
-from . import constants
+from . import p
 from .diatomic_matrix_element import me
 from .atoms import Atom
 from .aux_functions import dict2xyz
@@ -378,6 +378,7 @@ def main1():
     from tb import get_k_coords
 
     path_to_xyz_file = '../input_samples/bulk_silicon.xyz'
+    # path_to_pdf_file = '../../band_structure_of_bulk_silicon.pdf'
     label = 'Si'
     basis_set = 'SiliconSP3D5S'
     sym_points = [ 'L', 'GAMMA', 'X' ]
@@ -398,17 +399,20 @@ def main1():
     k_points = get_k_coords( sym_points, num_points, label )
 
     band_structure = []
-    for jj, item in enumerate( k ):
+    for jj, item in enumerate( k_points ):
         [ eigenvalues, _ ] = h.diagonalize_periodic_bc( k_points[ jj ] )
         band_structure.append( eigenvalues )
 
     band_structure = np.array( band_structure )
 
     ax = plt.axes()
-    ax.set_ylabel( 'Energy (eV)' )
     ax.plot( band_structure[ :, indices_of_bands ] )
+    ax.set_xlabel( "" )
+    ax.set_ylabel( "Energy (eV)" )
+    ax.set_title( "" )
+    plt.tight_layout()
     plt.show()
-
+    # plt.savefig( path_to_pdf_file )
 
 def main2():
 
