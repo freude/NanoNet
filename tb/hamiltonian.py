@@ -373,30 +373,39 @@ def format_func(value, tick_number):
         return r"${0}\pi$".format(N // 2)
 
 
-def main():
+def main1():
+
+    from tb import get_k_coords
 
     a_si = 5.50
-    PRIMITIVE_CELL = [[0, 0, a_si]]
-    Atom.orbital_sets = {'Si': 'SiliconSP3D5S', 'H': 'HydrogenS'}
+    PRIMITIVE_CELL = [[0, 0.5 * a_si, 0.5 * a_si],
+                      [0.5 * a_si, 0, 0.5 * a_si],
+                      [0.5 * a_si, 0.5 * a_si, 0]]
+    Atom.orbital_sets = {'Si': 'SiliconSP3D5S'}
 
-    h = Hamiltonian(xyz='/home/mk/TB_project/input_samples/SiNW2.xyz')
+    h = Hamiltonian(xyz='../input_samples/bulk_silicon.xyz')
     h.initialize()
     h.set_periodic_bc(PRIMITIVE_CELL)
 
-    num_points = 20
-    kk = np.linspace(0, constants.PI / a_si, num_points, endpoint=True)
-    band_structure = []
+    sym_points = ['L', 'GAMMA', 'X']
+    num_points = [20, 20]
+    label = 'Si'
+    k = get_k_coords(sym_points, num_points, label)
 
-    for jj in range(num_points):
-        vals, _ = h.diagonalize_periodic_bc([0.0, 0.0, kk[jj]])
+    band_structure = []
+    for jj, item in enumerate(k):
+        vals, _ = h.diagonalize_periodic_bc(k[jj])
         band_structure.append(vals)
 
     band_structure = np.array(band_structure)
 
-    postprocess_data(kk, band_structure, show=1, save=0, code_name=None)
+    ax = plt.axes()
+    ax.set_ylabel('Energy [eV]')
+    ax.plot(np.sort(np.real(band_structure))[:, :8])
+    plt.show()
 
 
-def main1():
+def main2():
 
     l_a = 4.5332
     l_c = 11.7967
@@ -450,7 +459,10 @@ def main1():
 
     band_structure = np.array(band_structure)
 
-    postprocess_data(k, band_structure, show=1, save=0, code_name=None)
+    ax = plt.axes()
+    ax.set_ylabel('Energy [eV]')
+    ax.plot(np.sort(np.real(band_structure))[:, :8])
+    plt.show()
 
 
 if __name__ == '__main__':
