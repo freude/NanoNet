@@ -377,10 +377,9 @@ def main1():
 
     from tb import get_k_coords
 
-    a_si = 5.50
-    PRIMITIVE_CELL = [[0, 0.5 * a_si, 0.5 * a_si],
-                      [0.5 * a_si, 0, 0.5 * a_si],
-                      [0.5 * a_si, 0.5 * a_si, 0]]
+    PRIMITIVE_CELL = p.a_si * np.array([[0.0, 0.5, 0.5],
+                                      [0.5, 0.0, 0.5],
+                                      [0.5, 0.5, 0.0]])
     Atom.orbital_sets = {'Si': 'SiliconSP3D5S'}
 
     h = Hamiltonian(xyz='../input_samples/bulk_silicon.xyz')
@@ -401,7 +400,7 @@ def main1():
 
     ax = plt.axes()
     ax.set_ylabel('Energy [eV]')
-    ax.plot(np.sort(np.real(band_structure))[:, :8])
+    ax.plot(np.sort(np.real(band_structure))[:, 0:8])
     plt.show()
 
 

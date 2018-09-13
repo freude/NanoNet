@@ -7,7 +7,7 @@ from builtins import str
 from builtins import range
 import numpy as np
 import yaml
-from .constants import SPECIAL_K_POINTS_BI, SPECIAL_K_POINTS_SI
+from .p import SPECIAL_K_POINTS_BI, SPECIAL_K_POINTS_SI
 
 
 def xyz2np(xyz):

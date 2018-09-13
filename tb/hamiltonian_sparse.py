@@ -8,9 +8,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 import scipy.sparse.linalg as splin
 import scipy.sparse as sp
-from . import constants
-from .atoms import Atom
-from .hamiltonian import Hamiltonian
+import p
+from atoms import Atom
+from hamiltonian import Hamiltonian
 
 
 class HamiltonianSp(Hamiltonian):
@@ -193,7 +193,7 @@ def main():
     h.set_periodic_bc(PRIMITIVE_CELL)
 
     num_points = 30
-    kk = np.linspace(0, constants.PI / a_si, num_points, endpoint=True)
+    kk = np.linspace(0, p.PI / a_si, num_points, endpoint=True)
     band_sructure = []
 
     for jj in range(num_points):

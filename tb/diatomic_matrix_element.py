@@ -14,7 +14,7 @@ from past.utils import old_div
 import sys
 import math
 import numpy as np
-from .constants import *
+from .p import *
 import warnings
 
 
