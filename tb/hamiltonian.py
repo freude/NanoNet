@@ -242,8 +242,6 @@ class Hamiltonian(BasisTB):
             else:
                 which_neighbour = radial_dep(coords1)
 
-            print(which_neighbour)
-
             # compute directional cosines
             coords1 /= np.linalg.norm(coords1)
 
@@ -373,13 +371,23 @@ def format_func(value, tick_number):
         return r"${0}\pi$".format(N // 2)
 
 
+def radial_dep( coords ):
+    norm_of_coords = np.linalg.norm( coords )
+    if norm_of_coords < 3.3:
+        return 1
+    elif 3.7 > norm_of_coords > 3.3:
+        return 2
+    elif norm_of_coords > 3.7:
+        return 3
+
+
 def main1():
 
     from tb import get_k_coords
 
     path_to_xyz_file = '../input_samples/bulk_silicon.xyz'
     # path_to_pdf_file = '../../band_structure_of_bulk_silicon.pdf'
-    label = 'Si'
+    species = 'Si'
     basis_set = 'SiliconSP3D5S'
     sym_points = [ 'L', 'GAMMA', 'X' ]
 
@@ -390,13 +398,13 @@ def main1():
                                           [0.5, 0.0, 0.5],
                                           [0.5, 0.5, 0.0] ] )
 
-    Atom.orbital_sets = { label: basis_set }
+    Atom.orbital_sets = { species: basis_set }
 
     h = Hamiltonian( xyz = path_to_xyz_file )
     h.initialize()
     h.set_periodic_bc( primitive_cell )
 
-    k_points = get_k_coords( sym_points, num_points, label )
+    k_points = get_k_coords( sym_points, num_points, species )
 
     band_structure = []
     for jj, item in enumerate( k_points ):
@@ -414,66 +422,53 @@ def main1():
     plt.show()
     # plt.savefig( path_to_pdf_file )
 
+
 def main2():
 
-    l_a = 4.5332
-    l_c = 11.7967
-
-    # PRIMITIVE_CELL = np.array([[1.0, 0.0, 0.0],
-    #                   [0.55412, 0.8408, 0.0],
-    #                   [0.55412, 0.2953, 0.7873]])
-
-    PRIMITIVE_CELL = np.array([[-1.0/2*l_a, -np.sqrt(3)/6*l_a, 1.0/3.0*l_c],
-                               [1.0/2*l_a, -np.sqrt(3)/6*l_a, 1.0/3.0*l_c],
-                               [0.0, np.sqrt(3)/3*l_a, 1.0/3.0*l_c]])
-
-    Atom.orbital_sets = {'Bi': 'Bismuth'}
-
-    # xyz_file = """2
-    # Bi2 cell
-    # Bi1       0.0000000000    0.0000000000    0.0000000000
-    # Bi2       2.2666             2.2666            2.2666
-    # """
-
-    xyz_file = """2
-    Bi2 cell
-    Bi1       0.0    0.0    0.0
-    Bi2       0.0    0.0    5.52321494   
-    """
-
-    h = Hamiltonian(xyz=xyz_file, nn_distance=5.7)
-
-    def radial_dep(coords):
-        distance = np.linalg.norm(coords)
-        print(distance)
-        if distance < 3.3:
-            return 1
-        elif 3.7 > distance > 3.3:
-            return 2
-        elif distance > 3.7:
-            return 3
-
-    h.initialize(radial_dep=radial_dep)
-    h.set_periodic_bc(PRIMITIVE_CELL.tolist())
-
     from .aux_functions import get_k_coords
-    sym_points = ['X', 'GAMMA', 'L', 'U', 'T']
-    num_points = [20, 20, 20, 20]
-    k = get_k_coords(sym_points, num_points, 'Bi')
+
+    path_to_xyz_file = '../input_samples/bulk_bismuth.xyz'
+    # path_to_pdf_file = '../../band_structure_of_bulk_bismuth.pdf'
+    species = 'Bi'
+    basis_set = 'Bismuth'
+    sym_points = ['X', 'GAMMA', 'L']
+
+    num_points = [ 20, 20 ]
+    indices_of_bands = range( 0, 8 )
+
+    cell_a = p.a_bi * np.array( [ [ ( -1.0 / 2.0 ), ( -np.sqrt(3.0) / 6.0 ), 0.0 ],
+                                  [ (  1.0 / 2.0 ), ( -np.sqrt(3.0) / 6.0 ), 0.0 ],
+                                  [ 0.0,            (  np.sqrt(3.0) / 3.0 ), 0.0 ] ] )
+    cell_c = p.c_bi * np.array( [ [ 0.0, 0.0, ( 1.0 / 3.0 ) ],
+                                  [ 0.0, 0.0, ( 1.0 / 3.0 ) ],
+                                  [ 0.0, 0.0, ( 1.0 / 3.0 ) ] ] )
+    primitive_cell = cell_a + cell_c
+
+    Atom.orbital_sets = { species: basis_set }
+
+    h = Hamiltonian( xyz = path_to_xyz_file, nn_distance = 5.7 )
+    h.initialize( radial_dep )
+    h.set_periodic_bc(primitive_cell.tolist())
+
+    k_points = get_k_coords( sym_points, num_points, species )
+
     band_structure = []
+    for jj, item in enumerate( k_points ):
+        [ eigenvalues, _ ] = h.diagonalize_periodic_bc( k_points[ jj ] )
+        band_structure.append( eigenvalues )
 
-    for jj in k:
-        vals, _ = h.diagonalize_periodic_bc(jj)
-        band_structure.append(vals)
-
-    band_structure = np.array(band_structure)
+    band_structure = np.array( band_structure )
 
     ax = plt.axes()
-    ax.set_ylabel('Energy [eV]')
-    ax.plot(np.sort(np.real(band_structure))[:, :8])
+    ax.plot( band_structure[ :, indices_of_bands ] )
+    ax.set_xlabel( "" )
+    ax.set_ylabel( "Energy (eV)" )
+    ax.set_title( "" )
+    plt.tight_layout()
     plt.show()
+    # plt.savefig( path_to_pdf_file )
 
 
 if __name__ == '__main__':
 
-    main1()
+    main2()
