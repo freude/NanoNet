@@ -448,7 +448,7 @@ def main2():
 
     h = Hamiltonian( xyz = path_to_xyz_file, nn_distance = 5.7 )
     h.initialize( radial_dep )
-    h.set_periodic_bc(primitive_cell.tolist())
+    h.set_periodic_bc( primitive_cell.tolist() )
 
     k_points = get_k_coords( sym_points, num_points, species )
 

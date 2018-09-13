@@ -17,15 +17,13 @@ c_bi = 11.7967
 b_bi = a_bi / c_bi
 gamma_bi = 0.2303
 
-# The codes for labeling the orbitals
 
+# Labels for orbitals and bonds
 ORBITAL_QN = {0: 's', 1: 'p', 2: 'd'}
-
 M_QN = {0: 'sigma', 1: 'pi', 2: 'delta'}
 
 
-# Coordinates of high-symmetry points in the Brillouin zone
-# of the diamond-type crystal lattice
+# Coordinates of points with high symmetry in the first Brillouin zone
 
 SPECIAL_K_POINTS_SI = {
     'GAMMA': [0, 0, 0],
