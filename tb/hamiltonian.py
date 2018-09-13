@@ -377,30 +377,36 @@ def main1():
 
     from tb import get_k_coords
 
-    PRIMITIVE_CELL = p.a_si * np.array([[0.0, 0.5, 0.5],
-                                      [0.5, 0.0, 0.5],
-                                      [0.5, 0.5, 0.0]])
-    Atom.orbital_sets = {'Si': 'SiliconSP3D5S'}
-
-    h = Hamiltonian(xyz='../input_samples/bulk_silicon.xyz')
-    h.initialize()
-    h.set_periodic_bc(PRIMITIVE_CELL)
-
-    sym_points = ['L', 'GAMMA', 'X']
-    num_points = [20, 20]
+    path_to_xyz_file = '../input_samples/bulk_silicon.xyz'
     label = 'Si'
-    k = get_k_coords(sym_points, num_points, label)
+    basis_set = 'SiliconSP3D5S'
+    sym_points = [ 'L', 'GAMMA', 'X' ]
+
+    num_points = [ 20, 20 ]
+    indices_of_bands = range( 0, 8 )
+
+    primitive_cell = p.a_si * np.array( [ [0.0, 0.5, 0.5],
+                                          [0.5, 0.0, 0.5],
+                                          [0.5, 0.5, 0.0] ] )
+
+    Atom.orbital_sets = { label: basis_set }
+
+    h = Hamiltonian( xyz = path_to_xyz_file )
+    h.initialize()
+    h.set_periodic_bc( primitive_cell )
+
+    k_points = get_k_coords( sym_points, num_points, label )
 
     band_structure = []
-    for jj, item in enumerate(k):
-        vals, _ = h.diagonalize_periodic_bc(k[jj])
-        band_structure.append(vals)
+    for jj, item in enumerate( k ):
+        [ eigenvalues, _ ] = h.diagonalize_periodic_bc( k_points[ jj ] )
+        band_structure.append( eigenvalues )
 
-    band_structure = np.array(band_structure)
+    band_structure = np.array( band_structure )
 
     ax = plt.axes()
-    ax.set_ylabel('Energy [eV]')
-    ax.plot(np.sort(np.real(band_structure))[:, 0:8])
+    ax.set_ylabel( 'Energy (eV)' )
+    ax.plot( band_structure[ :, indices_of_bands ] )
     plt.show()
 
 
