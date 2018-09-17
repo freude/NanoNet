@@ -432,6 +432,7 @@ def main2():
     species = 'Bi'
     basis_set = 'Bismuth'
     sym_points = ['K', 'GAMMA', 'T', 'W', 'L', 'LAMBDA']
+    # sym_points = ['K', 'X', 'GAMMA', 'L', 'U', 'T']
     # sym_points = ['GAMMA', 'GAMMA']
 
     num_points = [20, 20, 20, 20, 20]

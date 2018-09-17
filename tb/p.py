@@ -7,14 +7,15 @@ import numpy as np
 
 
 # Mathematical constants
-PI = 3.141592653589793238462643383279502884197169399375105820974
+PI = np.pi
 
 
 # Lattice constants
 a_si = 5.50
 a_bi = 4.5332
 c_bi = 11.7967
-gamma_bi = 0.2303
+g_bi = 1.3861
+gamma_bi = 0.240385652727133
 
 
 # Labels for orbitals and bonds
@@ -34,13 +35,13 @@ SPECIAL_K_POINTS_SI = {
 }
 
 
-reciprocal_lattice_vectors_bi = (2 * PI / a_bi) * np.matrix([[-1, (-np.sqrt(3.0) / 3.0), (a_bi / c_bi)],
-                                                             [1, (-np.sqrt(3.0) / 3.0), (a_bi / c_bi)],
-                                                             [0, (2 * np.sqrt(3.0) / 3.0), (a_bi / c_bi)]])
+reciprocal_lattice_vectors_bi = g_bi * np.matrix([[-1.0, (-np.sqrt(3.0) / 3.0), (a_bi / c_bi)],
+                                                             [1.0, (-np.sqrt(3.0) / 3.0), (a_bi / c_bi)],
+                                                             [0.0, (2.0 * np.sqrt(3.0) / 3.0), (a_bi / c_bi)]])
 
 def get_high_symmetry_point_in_cartesian_space(reciprocal_lattice_vectors, coordinate_of_high_symmetry_point):
-    cartesian_coordinate_in_reciprocal_space = np.squeeze(np.asarray(coordinate_of_high_symmetry_point *
-                                                                     reciprocal_lattice_vectors)).tolist()
+    cartesian_coordinate_in_reciprocal_space = np.squeeze(np.asarray(np.matrix(coordinate_of_high_symmetry_point) *
+                                                                    reciprocal_lattice_vectors)).tolist()
     return cartesian_coordinate_in_reciprocal_space
 
 
