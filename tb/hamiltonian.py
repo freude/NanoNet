@@ -432,8 +432,9 @@ def main2():
     species = 'Bi'
     basis_set = 'Bismuth'
     sym_points = ['K', 'GAMMA', 'T', 'W', 'L', 'LAMBDA']
+    # sym_points = ['GAMMA', 'GAMMA']
 
-    num_points = [ 20, 20, 20, 20, 20 ]
+    num_points = [20, 20, 20, 20, 20]
     indices_of_bands = range( 0, 8 )
 
     cell_a = p.a_bi * np.array( [ [ ( -1.0 / 2.0 ), ( -np.sqrt(3.0) / 6.0 ), 0.0 ],
