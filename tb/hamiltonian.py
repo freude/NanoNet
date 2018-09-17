@@ -431,9 +431,9 @@ def main2():
     # path_to_pdf_file = '../../band_structure_of_bulk_bismuth.pdf'
     species = 'Bi'
     basis_set = 'Bismuth'
-    sym_points = ['X', 'GAMMA', 'L']
+    sym_points = ['K', 'GAMMA', 'T', 'W', 'L', 'LAMBDA']
 
-    num_points = [ 20, 20 ]
+    num_points = [ 20, 20, 20, 20, 20 ]
     indices_of_bands = range( 0, 8 )
 
     cell_a = p.a_bi * np.array( [ [ ( -1.0 / 2.0 ), ( -np.sqrt(3.0) / 6.0 ), 0.0 ],

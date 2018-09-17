@@ -14,7 +14,6 @@ PI = 3.141592653589793238462643383279502884197169399375105820974
 a_si = 5.50
 a_bi = 4.5332
 c_bi = 11.7967
-b_bi = a_bi / c_bi
 gamma_bi = 0.2303
 
 
@@ -34,16 +33,19 @@ SPECIAL_K_POINTS_SI = {
     'K': [3 * PI / (2 * a_si), 3 * PI / (2 * a_si), 0]
 }
 
-recip_lat_basis = np.matrix([[-1, -np.sqrt(3.0)/3.0, b_bi],
-                             [1, -np.sqrt(3.0)/3.0, b_bi],
-                             [0, 2*np.sqrt(3.0)/3.0, b_bi]]) * 2 * PI / a_bi
+reciprocal_lattice_vectors = (2 * PI / a_bi) * np.matrix([[-1, (-np.sqrt(3.0) / 3.0), (a_bi / c_bi)],
+                                                          [1, (-np.sqrt(3.0) / 3.0), (a_bi / c_bi)],
+                                                          [0, (2 * np.sqrt(3.0) / 3.0), (a_bi / c_bi)]])
 
 SPECIAL_K_POINTS_BI = {
-    'GAMMA': (recip_lat_basis * np.matrix([0, 0, 0]).T).tolist(),
-    'X': (recip_lat_basis * np.matrix([0.5, 0.5, 0.0]).T).tolist(),
-    'T': (recip_lat_basis * np.matrix([0.5, 0.5, 0.5]).T).tolist(),
-    'L': (recip_lat_basis * np.matrix([0.0, 0.5, 0.0]).T).tolist(),
-    'W': (recip_lat_basis * np.matrix([gamma_bi, 1.0-gamma_bi, 0.5]).T).tolist(),
-    'K': (recip_lat_basis * np.matrix([old_div(1.0,4)+0.5*gamma_bi, old_div(3.0,4)-0.5*gamma_bi, 0.0]).T).tolist(),
-    'U': (recip_lat_basis * np.matrix([0.5*gamma_bi+0.25, 1.0-gamma_bi, 0.5*gamma_bi+0.25]).T).tolist()
+    'GAMMA': np.squeeze(np.asarray([0.00, 0.00, 0.00] * reciprocal_lattice_vectors)).tolist(),
+    'T': np.squeeze(np.asarray([0.50, 0.50, 0.50] * reciprocal_lattice_vectors)).tolist(),
+    'L': np.squeeze(np.asarray([0.00, 0.50, 0.00] * reciprocal_lattice_vectors)).tolist(),
+    'X': np.squeeze(np.asarray([0.50, 0.50, 0.00] * reciprocal_lattice_vectors)).tolist(),
+    'LAMBDA': np.squeeze(np.asarray([0.25, 0.25, 0.25] * reciprocal_lattice_vectors)).tolist(),
+    'K': np.squeeze(np.asarray([((0.50 * gamma_bi) + 0.25), (0.75 - (0.50 * gamma_bi)), 0.00] *
+                               reciprocal_lattice_vectors)).tolist(),
+    'W': np.squeeze(np.asarray([0.50, (1.00 - gamma_bi), gamma_bi] * reciprocal_lattice_vectors)).tolist(),
+    'U': np.squeeze(np.asarray([((0.50 * gamma_bi) + 0.25), (1.00 - gamma_bi), (0.50 * gamma_bi + 0.25)] *
+                               reciprocal_lattice_vectors)).tolist()
 }
