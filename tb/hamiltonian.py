@@ -149,6 +149,15 @@ class Hamiltonian(BasisTB):
 
         if len(primitive_cell) > 0:
             self.ct = CyclicTopology(primitive_cell, list(self.atom_list.keys()), list(self.atom_list.values()), self._nn_distance)
+
+            # from mpl_toolkits.mplot3d import Axes3D
+            # import matplotlib.pyplot as plt
+            # fig = plt.figure()
+            # ax = fig.add_subplot(111, projection='3d')
+            # coordinates_to_plot = np.asarray(self.ct.virtual_and_interfacial_atoms.values())
+            # ax.scatter(coordinates_to_plot[:, 0], coordinates_to_plot[:, 1], coordinates_to_plot[:, 2])
+            # plt.show()
+
         else:
             self.ct = None
 
@@ -436,6 +445,7 @@ def main2():
     # sym_points = ['GAMMA', 'GAMMA']
 
     num_points = [20, 20, 20, 20, 20]
+    # num_points = [1]
     indices_of_bands = range( 0, 8 )
 
     cell_a = p.a_bi * np.array( [ [ ( -1.0 / 2.0 ), ( -np.sqrt(3.0) / 6.0 ), 0.0 ],
@@ -448,7 +458,7 @@ def main2():
 
     Atom.orbital_sets = { species: basis_set }
 
-    h = Hamiltonian( xyz = path_to_xyz_file, nn_distance = 5.7 )
+    h = Hamiltonian( xyz = path_to_xyz_file, nn_distance = 5 )
     h.initialize( radial_dep )
     h.set_periodic_bc( primitive_cell.tolist() )
 

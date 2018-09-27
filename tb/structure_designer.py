@@ -173,15 +173,15 @@ class CyclicTopology(object):
 
         if isinstance(query, list) or isinstance(query, np.ndarray):
             ans = self._kd_tree.query(query,
-                                      k=5,
+                                      k=13,
                                       distance_upper_bound=self._nn_distance)
         elif isinstance(query, int):
-            ans = self._kd_tree.query(list(self.virtual_and_interfacial_atoms.items())[query][1],
-                                      k=5,
+            ans = self._kd_tree.query(self.virtual_and_interfacial_atoms.items()[query][1],
+                                      k=13,
                                       distance_upper_bound=self._nn_distance)
         elif isinstance(query, str):
             ans = self._kd_tree.query(self.virtual_and_interfacial_atoms[query],
-                                      k=5,
+                                      k=13,
                                       distance_upper_bound=self._nn_distance)
         else:
             raise TypeError('Wrong input type for query')
