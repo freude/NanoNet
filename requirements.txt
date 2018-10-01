@@ -5,4 +5,4 @@ scipy
 PyYAML
 nose
 mpi4py
-
+future

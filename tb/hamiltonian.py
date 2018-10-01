@@ -3,7 +3,6 @@ The module contains all necessary classes needed to compute the Hamiltonian matr
 """
 from __future__ import print_function, division
 from __future__ import absolute_import
-from builtins import range
 from collections import OrderedDict
 from operator import mul
 import matplotlib.pyplot as plt

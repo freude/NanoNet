@@ -3,7 +3,6 @@ The module contains abstract interfaces of the classes.
 The interfaces are aimed to be schemas for further classes implementations.
 Following these schemas will ensure compatibility of the code with the entire project.
 """
-from builtins import object
 from abc import ABCMeta, abstractmethod
 from future.utils import with_metaclass
 
