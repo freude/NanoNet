@@ -7,13 +7,13 @@ from collections import OrderedDict
 from operator import mul
 import matplotlib.pyplot as plt
 import numpy as np
-from .abstract_interfaces import AbstractBasis
-from .structure_designer import StructDesignerXYZ, CyclicTopology
-from . import p
-from .diatomic_matrix_element import me
-from .atoms import Atom
-from .aux_functions import dict2xyz
-from .tb_script import postprocess_data
+from tb.abstract_interfaces import AbstractBasis
+from tb.structure_designer import StructDesignerXYZ, CyclicTopology
+from tb import p
+from tb.diatomic_matrix_element import me
+from tb.atoms import Atom
+from tb.aux_functions import dict2xyz
+from tb.tb_script import postprocess_data
 from functools import reduce
 
 
@@ -434,10 +434,10 @@ def main1():
 
 def main2():
 
-    from .aux_functions import get_k_coords
+    from tb.aux_functions import get_k_coords
 
-    path_to_xyz_file = '../input_samples/bulk_bismuth.xyz'
-    # path_to_pdf_file = '../../band_structure_of_bulk_bismuth.pdf'
+    path_to_xyz_file = 'input_samples/bulk_bismuth.xyz'
+    # path_to_pdf_file = '../band_structure_of_bulk_bismuth.pdf'
     species = 'Bi'
     basis_set = 'Bismuth'
     sym_points = ['K', 'GAMMA', 'T', 'W', 'L', 'LAMBDA']
