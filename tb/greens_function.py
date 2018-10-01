@@ -180,4 +180,4 @@ def surface_greens_function(E, h_l, h_0, h_r):
     sgf_l = h_r * u_right * lambda_right * np.linalg.pinv(u_right)
     sgf_r = h_l * u_left * lambda_right * np.linalg.pinv(u_left)
 
-    return iterate_gf(E, h_0, h_l, h_r, sgf_l, 0), iterate_gf(E, h_0, h_r, h_l, sgf_r, 0)
+    return iterate_gf(E, h_0, h_l, h_r, sgf_l, 2), iterate_gf(E, h_0, h_r, h_l, sgf_r, 2)

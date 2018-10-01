@@ -94,6 +94,7 @@ class Hamiltonian(BasisTB):
         else:
             super(Hamiltonian, self).__init__(xyz=dict2xyz(xyz), nn_distance=nn_distance)
 
+        self._coords = None                               # coordinates of sites
         self.h_matrix = None                            # Hamiltonian for an isolated system
         self.h_matrix_bc_factor = None                  # exponential Bloch factors for pbc
         self.h_matrix_bc_add = None                     # additive Bloch exponentials for pbc
@@ -112,7 +113,7 @@ class Hamiltonian(BasisTB):
         """
 
         self.radial_dependence = radial_dep
-
+        self._coords = [0 for _ in range(self.basis_size)]
         # initialize Hamiltonian matrices
         self.h_matrix = np.zeros((self.basis_size, self.basis_size), dtype=np.complex)
         self.h_matrix_bc_add = np.zeros((self.basis_size, self.basis_size), dtype=np.complex)
@@ -130,6 +131,7 @@ class Hamiltonian(BasisTB):
                     for l1 in xrange(self.orbitals_dict[self.atom_list.keys()[j1]].num_of_orbitals):
                         ind1 = self.qn2ind([('atoms', j1), ('l', l1)], )
                         self.h_matrix[ind1, ind1] = self._get_me(j1, j2, l1, l1, radial_dep=self.radial_dependence)
+                        self._coords[ind1] = self.atom_list.values()[j1]
 
                 # nearest neighbours interaction
                 else:
@@ -339,6 +341,15 @@ class Hamiltonian(BasisTB):
         self._compute_h_matrix_bc_add(split_the_leads=True)
         return self.h_matrix_left_lead.T, self.h_matrix, self.h_matrix_right_lead.T
 
+    def get_site_coordinates(self):
+        """
+        Returns coordinates of atoms in the order of Hamiltonian matrix indexing
+
+        :return:
+        """
+
+        return np.array(self._coords)
+
 
 def format_func(value, tick_number):
 
@@ -366,7 +377,7 @@ def main():
     PRIMITIVE_CELL = [[0, 0, a_si]]
     Atom.orbital_sets = {'Si': 'SiliconSP3D5S', 'H': 'HydrogenS'}
 
-    h = Hamiltonian(xyz='/home/mk/TB_project/input_samples/SiNW.xyz')
+    h = Hamiltonian(xyz='/home/mk/TB_project/input_samples/SiNW2.xyz')
     h.initialize()
     h.set_periodic_bc(PRIMITIVE_CELL)
 

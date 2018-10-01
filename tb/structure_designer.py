@@ -5,7 +5,6 @@ geometrical structure and boundary conditions of the problem.
 from collections import OrderedDict
 import numpy as np
 import scipy.spatial
-# from third_party.cluster_100 import supercell
 from aux_functions import xyz2np, count_species
 from abstract_interfaces import AbstractStructureDesigner
 
@@ -67,36 +66,6 @@ class StructDesignerXYZ(AbstractStructureDesigner):
                 ans1.append(item[1])
 
         return ans1
-
-
-# class StructDesigner(StructDesignerXYZ):
-#     """
-#     The class builds the atomic structure using
-#     a third party generating function supercell
-#     from the module cluster100.
-#     """
-#
-#     def __init__(self):
-#
-#         a_si = 5.50
-#
-#         si = supercell(2, 2, 2, AFinite=True, BFinite=True, CFinite=False, RemoveSilane=False)
-#         si.scale(a_si)
-#         # si.translate(-A*aSi/2,-B*aSi/2,-C*aSi/2)
-#         # si.translate(0,0,-C*aSi/2)
-#         # si.translate(0, 0, 0)
-#
-#         if si.closeatoms():
-#             print "Close contacts: ", si.closeatoms()
-#         a = si.toxyz()
-#
-#         open('si.xyz', 'w').write(a)
-#
-#         labels, coords = xyz2np(a)
-#         self._num_of_species = count_species(labels)
-#         self._num_of_nodes = sum(self.num_of_species.values())
-#         self._atom_list = OrderedDict(zip(labels, coords))
-#         self._kd_tree = scipy.spatial.cKDTree(coords, leafsize=100)
 
 
 class CyclicTopology(object):
