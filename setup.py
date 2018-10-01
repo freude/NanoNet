@@ -2,7 +2,7 @@ from setuptools import setup
 
 
 setup(name='tb', 
-      version='0.5',
+      version='0.7',
       description='Python framework for tight-binding computations',
       author='Mike Klymenko',
       author_email='mike.klymenko@rmit.edu.au',

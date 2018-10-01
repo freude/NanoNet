@@ -29,7 +29,7 @@ def test_simple_atomic_chain():
 
     band_structure = []
 
-    for jj in xrange(num_points):
+    for jj in range(num_points):
         vals, _ = h.diagonalize_periodic_bc([0.0, 0.0, kk[jj]])
         band_structure.append(vals)
 
@@ -71,7 +71,7 @@ def test_atomic_chain_two_kinds_of_atoms():
 
     band_structure = []
 
-    for jj in xrange(num_points):
+    for jj in range(num_points):
         vals, _ = h.diagonalize_periodic_bc([0.0, 0.0, kk[jj]])
         band_structure.append(vals)
 

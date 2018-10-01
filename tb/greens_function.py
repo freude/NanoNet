@@ -2,6 +2,8 @@
 The module contains functions that computes Green's functions and their poles
 """
 from __future__ import print_function, division
+from builtins import zip
+from builtins import range
 import numpy as np
 import scipy.linalg as linalg
 
@@ -27,7 +29,7 @@ def surface_greens_function_poles(h_list):
     main_matrix = np.zeros((full_matrix_size, full_matrix_size), dtype=np.complex)
     overlap_matrix = np.zeros((full_matrix_size, full_matrix_size), dtype=np.complex)
 
-    for j in xrange(pr_order):
+    for j in range(pr_order):
 
         main_matrix[(pr_order - 1) * matix_size:pr_order * matix_size,
                     j * matix_size:(j + 1) * matix_size] = -h_list[j]
@@ -110,13 +112,13 @@ def iterate_gf(E, h_0, h_l, h_r, gf, num_iter):
     :return:
     """
 
-    for _ in xrange(num_iter):
+    for _ in range(num_iter):
         gf = h_r * np.linalg.pinv(E * np.identity(h_0.shape[0]) - h_0 - gf) * h_l
 
     return gf
 
 
-def surface_greens_function(E, h_l, h_0, h_r):
+def surface_greens_function(E, h_l, h_0, h_r, iterate=False):
     """
     Computes surface self-energies using the eigenvalue decomposition.
     The procedure is described in
@@ -127,6 +129,7 @@ def surface_greens_function(E, h_l, h_0, h_r):
     :param h_l:       left-side coupling Hamiltonian
     :param h_0:       channel Hamiltonian
     :param h_r:       right-side coupling Hamiltonian
+    :param iterate:   iterate to stabilize TB matrix
 
     :return:          left- and right-side self-energies
     """
@@ -180,4 +183,7 @@ def surface_greens_function(E, h_l, h_0, h_r):
     sgf_l = h_r * u_right * lambda_right * np.linalg.pinv(u_right)
     sgf_r = h_l * u_left * lambda_right * np.linalg.pinv(u_left)
 
-    return iterate_gf(E, h_0, h_l, h_r, sgf_l, 0), iterate_gf(E, h_0, h_r, h_l, sgf_r, 0)
+    if iterate:
+        return iterate_gf(E, h_0, h_l, h_r, sgf_l, 2), iterate_gf(E, h_0, h_r, h_l, sgf_r, 2)
+    else:
+        return iterate_gf(E, h_0, h_l, h_r, sgf_l, 0), iterate_gf(E, h_0, h_r, h_l, sgf_r, 0)

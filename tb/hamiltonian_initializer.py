@@ -1,9 +1,10 @@
+from __future__ import absolute_import
 import sys
 import numpy as np
-from atoms import Atom
-import diatomic_matrix_element as dme
-from hamiltonian import Hamiltonian
-from hamiltonian_sparse import HamiltonianSp
+from .atoms import Atom
+from . import diatomic_matrix_element as dme
+from .hamiltonian import Hamiltonian
+from .hamiltonian_sparse import HamiltonianSp
 
 
 def set_tb_params(**kwargs):

@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 from __future__ import print_function
+from __future__ import absolute_import
 from mpi4py import MPI
 import tb
-from tb_script import create_parser, preprocess_data, postprocess_data
+from .tb_script import create_parser, preprocess_data, postprocess_data
 
 
 comm = MPI.COMM_WORLD

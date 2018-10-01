@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 from __future__ import print_function
+from __future__ import absolute_import
 import argparse
 import pickle
 import matplotlib.pyplot as plt
 import numpy as np
-import tb_script
+from . import tb_script
 
 
 def main():

@@ -8,17 +8,18 @@ np.warnings.filterwarnings('ignore')
 
 
 def simple_chain_greens_function(energy, h_0, h_r):
-    G = (energy - h_0) / (2 * h_r ** 2)
+
+    gf = (energy - h_0) / (2 * h_r ** 2)
 
     for j, E in enumerate(energy):
         if E - h_0 <= -2 * h_r:
-            G[0, j] = G[0, j] + 1.0 / (2 * h_r ** 2) * np.sqrt((E - h_0) ** 2 - 4 * h_r ** 2)
+            gf[0, j] = gf[0, j] + 1.0 / (2 * h_r ** 2) * np.sqrt((E - h_0) ** 2 - 4 * h_r ** 2)
         elif E - h_0 >= 2 * h_r:
-            G[0, j] = G[0, j] - 1.0 / (2 * h_r ** 2) * np.sqrt((E - h_0) ** 2 - 4 * h_r ** 2)
+            gf[0, j] = gf[0, j] - 1.0 / (2 * h_r ** 2) * np.sqrt((E - h_0) ** 2 - 4 * h_r ** 2)
         else:
-            G[0, j] = G[0, j] - 1.0j / (2 * h_r ** 2) * np.sqrt(4 * h_r ** 2 - (E - h_0) ** 2)
+            gf[0, j] = gf[0, j] - 1.0j / (2 * h_r ** 2) * np.sqrt(4 * h_r ** 2 - (E - h_0) ** 2)
 
-    return G
+    return gf
 
 
 def test_gf_single_atom_chain():
@@ -530,5 +531,3 @@ def test_main():
         gamma_r = 1j * (np.matrix(sgf_r[j, :, :]) - np.matrix(sgf_r[j, :, :]).H)
         tr[j] = np.real(np.trace(gamma_l * gf0 * gamma_r * gf0.H))
         dos[j] = np.real(np.trace(1j * (gf0 - gf0.H)))
-
-

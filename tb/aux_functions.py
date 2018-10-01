@@ -1,9 +1,13 @@
 """
 The module contains a set of auxiliary functions facilitating the tight-binding computations
 """
+from __future__ import print_function
+from __future__ import absolute_import
+from builtins import str
+from builtins import range
 import numpy as np
 import yaml
-from constants import SPECIAL_K_POINTS_BI, SPECIAL_K_POINTS_SI
+from .constants import SPECIAL_K_POINTS_BI, SPECIAL_K_POINTS_SI
 
 
 def xyz2np(xyz):
@@ -84,7 +88,7 @@ def get_k_coords(special_points, num_of_points, label):
     k_vectors = np.zeros((sum(num_of_points), 3))
     offset = 0
 
-    for j in xrange(len(num_of_points)):
+    for j in range(len(num_of_points)):
 
         sequence1 = np.linspace(SPECIAL_K_POINTS[special_points[j]][0],
                                 SPECIAL_K_POINTS[special_points[j+1]][0], num_of_points[j])
@@ -114,11 +118,11 @@ def dict2xyz(input_data):
     output = str(input_data['num_atoms']) + '\n'
     output += str(input_data['title']) + '\n'
 
-    for j in xrange(input_data['num_atoms']):
-        output += input_data['atoms'][j].keys()[0] + \
-                  "    " + str(input_data['atoms'][j].values()[0][0]) +\
-                  "    " + str(input_data['atoms'][j].values()[0][1]) + \
-                  "    " + str(input_data['atoms'][j].values()[0][2]) + "\n"
+    for j in range(input_data['num_atoms']):
+        output += list(input_data['atoms'][j].keys())[0] + \
+                  "    " + str(list(input_data['atoms'][j].values())[0][0]) +\
+                  "    " + str(list(input_data['atoms'][j].values())[0][1]) + \
+                  "    " + str(list(input_data['atoms'][j].values())[0][2]) + "\n"
 
     return output
 
@@ -155,4 +159,4 @@ if __name__ == "__main__":
     num_points = [15, 20, 15, 10, 15, 15, 15, 15, 20]
 
     k_points = get_k_coords(sym_points, num_points)
-    print k_points
+    print(k_points)
