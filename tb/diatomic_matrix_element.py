@@ -5,10 +5,16 @@ empirical diatomic couplings defined in the module params.
 Computations are based mostly on analytical equations derived in
 A.V. Podolskiy and P. Vogl, Phys. Rev. B. 69, 233101 (2004)
 """
+from __future__ import print_function
+from __future__ import absolute_import
+from __future__ import division
+from builtins import str
+from builtins import range
+from past.utils import old_div
 import sys
 import math
 import numpy as np
-from constants import *
+from .constants import *
 import warnings
 
 
@@ -102,15 +108,15 @@ def d_me(N, l, m1, m2):
     :return:     rotational matrix element
     """
 
-    prefactor = ((0.5 * (1 + N)) ** l) * (((1 - N) / (1 + N)) ** (m1 * 0.5 - m2 * 0.5)) * \
+    prefactor = ((0.5 * (1 + N)) ** l) * ((old_div((1 - N), (1 + N))) ** (m1 * 0.5 - m2 * 0.5)) * \
         math.sqrt(math.factorial(l + m2) * math.factorial(l - m2) *
                   math.factorial(l + m1) * math.factorial(l - m1))
 
     ans = 0
 
-    for t in xrange(2 * l + 2):
+    for t in range(2 * l + 2):
         if l + m2 - t >= 0 and l - m1 - t >= 0 and t + m1 - m2 >= 0:
-            ans += ((-1) ** t) * (((1 - N) / (1 + N)) ** t) / \
+            ans += ((-1) ** t) * ((old_div((1 - N), (1 + N))) ** t) / \
                    (math.factorial(l + m2 - t) * math.factorial(l - m1 - t) *
                     math.factorial(t) * math.factorial(t + m1 - m2))
 
@@ -127,7 +133,7 @@ def tau(m):
 def a_coef(m, gamma):
 
     if m == 0:
-        return 1.0 / math.sqrt(2)
+        return old_div(1.0, math.sqrt(2))
     else:
         return ((-1) ** abs(m)) * \
                (tau(m) * math.cos(abs(m) * gamma) - tau(-m) * math.sin(abs(m) * gamma))
@@ -186,7 +192,7 @@ def me(atom1, ll1, atom2, ll2, coords, which_neighbour=0):
         d_me(N, l1, abs(m1), 0) * d_me(N, l2, abs(m2), 0) * \
         me_diatomic(atoms, code, l_min, l_max, 0, which_neighbour)
 
-    for m in xrange(1, l_min+1):
+    for m in range(1, l_min+1):
         ans += (s_me(N, l1, m1, m, gamma) * s_me(N, l2, m2, m, gamma) +
                 t_me(N, l1, m1, m, gamma) * t_me(N, l2, m2, m, gamma)) * \
                me_diatomic(atoms, code, l_min, l_max, m, which_neighbour)
@@ -202,25 +208,25 @@ if __name__ == "__main__":
     coords = x0 - x1
     coords /= np.linalg.norm(coords)
 
-    print coords
+    print(coords)
 
     # print d_me(coords[2], 0, 0, 0)
     # print d_me(-coords[2], 0, 0, 0)
     # print d_me(-coords[2], 1, 0, 0)
 
-    print d_me(-coords[2], 1, 1, 0)
-    print d_me(-coords[2], 1, 0, 1)
-    print d_me(-coords[2], 2, 1, 0)
-    print d_me(-coords[2], 2, 0, 1)
-    print d_me(-coords[2], 2, 2, 1)
-    print d_me(-coords[2], 2, 1, 2)
-    print "-----------------------------"
-    print d_me(coords[2], 1, 1, 0)
-    print d_me(coords[2], 1, 0, 1)
-    print d_me(coords[2], 2, 1, 0)
-    print d_me(coords[2], 2, 0, 1)
-    print d_me(coords[2], 2, 2, 1)
-    print d_me(coords[2], 2, 1, 2)
+    print(d_me(-coords[2], 1, 1, 0))
+    print(d_me(-coords[2], 1, 0, 1))
+    print(d_me(-coords[2], 2, 1, 0))
+    print(d_me(-coords[2], 2, 0, 1))
+    print(d_me(-coords[2], 2, 2, 1))
+    print(d_me(-coords[2], 2, 1, 2))
+    print("-----------------------------")
+    print(d_me(coords[2], 1, 1, 0))
+    print(d_me(coords[2], 1, 0, 1))
+    print(d_me(coords[2], 2, 1, 0))
+    print(d_me(coords[2], 2, 0, 1))
+    print(d_me(coords[2], 2, 2, 1))
+    print(d_me(coords[2], 2, 1, 2))
     # print d_me(-coords[2], 1, -1, 0)
     # print d_me(-coords[2], 1, 0, -1)
     # print d_me(-coords[2], 1, -1, -1)

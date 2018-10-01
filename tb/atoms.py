@@ -1,6 +1,7 @@
 """
 Module contains classes describing atoms with different number of basis functions
 """
+from builtins import object
 import sys
 
 

@@ -2,13 +2,15 @@
 The module contains all necessary classes needed to compute the Hamiltonian matrix
 """
 from __future__ import print_function, division
+from __future__ import absolute_import
+from builtins import range
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy.sparse.linalg as splin
 import scipy.sparse as sp
-import constants
-from atoms import Atom
-from hamiltonian import Hamiltonian
+from . import constants
+from .atoms import Atom
+from .hamiltonian import Hamiltonian
 
 
 class HamiltonianSp(Hamiltonian):
@@ -39,7 +41,7 @@ class HamiltonianSp(Hamiltonian):
         self.h_matrix_bc_factor = sp.lil_matrix(self.h_matrix_bc_factor)
 
         # loop over all nodes
-        for j1 in xrange(self.num_of_nodes):
+        for j1 in range(self.num_of_nodes):
 
             # find neighbours for each node
             list_of_neighbours = self.get_neighbours(j1)
@@ -47,14 +49,14 @@ class HamiltonianSp(Hamiltonian):
             for j2 in list_of_neighbours:
                 # on site interactions
                 if j1 == j2:
-                    for l1 in xrange(self.orbitals_dict[self.atom_list.keys()[j1]].num_of_orbitals):
+                    for l1 in range(self.orbitals_dict[list(self.atom_list.keys())[j1]].num_of_orbitals):
                         ind1 = self.qn2ind([('atoms', j1), ('l', l1)], )
                         self.h_matrix[ind1, ind1] = self._get_me(j1, j2, l1, l1)
 
                 # nearest neighbours interaction
                 else:
-                    for l1 in xrange(self.orbitals_dict[self.atom_list.keys()[j1]].num_of_orbitals):
-                        for l2 in xrange(self.orbitals_dict[self.atom_list.keys()[j2]].num_of_orbitals):
+                    for l1 in range(self.orbitals_dict[list(self.atom_list.keys())[j1]].num_of_orbitals):
+                        for l2 in range(self.orbitals_dict[list(self.atom_list.keys())[j2]].num_of_orbitals):
 
                             ind1 = self.qn2ind([('atoms', j1), ('l', l1)], )
                             ind2 = self.qn2ind([('atoms', j2), ('l', l2)], )
@@ -114,18 +116,18 @@ class HamiltonianSp(Hamiltonian):
         Compute the exponential Bloch factors needed to specify pbc
         """
 
-        for j1 in xrange(self.num_of_nodes):
+        for j1 in range(self.num_of_nodes):
 
             list_of_neighbours = self.get_neighbours(j1)
 
             for j2 in list_of_neighbours:
                 if j1 != j2:
-                    coords = np.array(self.atom_list.values()[j1], dtype=float) - \
-                             np.array(self.atom_list.values()[j2], dtype=float)
+                    coords = np.array(list(self.atom_list.values())[j1], dtype=float) - \
+                             np.array(list(self.atom_list.values())[j2], dtype=float)
                     phase = np.exp(1j * np.dot(self.k_vector, coords))
 
-                    for l1 in xrange(self.orbitals_dict[self.atom_list.keys()[j1]].num_of_orbitals):
-                        for l2 in xrange(self.orbitals_dict[self.atom_list.keys()[j2]].num_of_orbitals):
+                    for l1 in range(self.orbitals_dict[list(self.atom_list.keys())[j1]].num_of_orbitals):
+                        for l2 in range(self.orbitals_dict[list(self.atom_list.keys())[j2]].num_of_orbitals):
 
                             ind1 = self.qn2ind([('atoms', j1), ('l', l1)], )
                             ind2 = self.qn2ind([('atoms', j2), ('l', l2)], )
@@ -146,22 +148,22 @@ class HamiltonianSp(Hamiltonian):
         # loop through all interfacial atoms
         for j1 in self.ct.interfacial_atoms_ind:
 
-            list_of_neighbours = self.ct.get_neighbours(self.atom_list.values()[j1])
+            list_of_neighbours = self.ct.get_neighbours(list(self.atom_list.values())[j1])
 
             for j2 in list_of_neighbours:
 
-                coords = np.array(self.atom_list.values()[j1]) - \
-                         np.array(self.ct.virtual_and_interfacial_atoms.values()[j2])
+                coords = np.array(list(self.atom_list.values())[j1]) - \
+                         np.array(list(self.ct.virtual_and_interfacial_atoms.values())[j2])
 
                 if split_the_leads:
-                    flag = self.ct.atom_classifier(self.ct.virtual_and_interfacial_atoms.values()[j2], self.ct.pcv[0])
+                    flag = self.ct.atom_classifier(list(self.ct.virtual_and_interfacial_atoms.values())[j2], self.ct.pcv[0])
 
                 phase = np.exp(1j*np.dot(self.k_vector, coords))
 
-                ind = int(self.ct.virtual_and_interfacial_atoms.keys()[j2].split('_')[2])
+                ind = int(list(self.ct.virtual_and_interfacial_atoms.keys())[j2].split('_')[2])
 
-                for l1 in xrange(self.orbitals_dict[self.atom_list.keys()[j1]].num_of_orbitals):
-                    for l2 in xrange(self.orbitals_dict[self.atom_list.keys()[ind]].num_of_orbitals):
+                for l1 in range(self.orbitals_dict[list(self.atom_list.keys())[j1]].num_of_orbitals):
+                    for l2 in range(self.orbitals_dict[list(self.atom_list.keys())[ind]].num_of_orbitals):
 
                         ind1 = self.qn2ind([('atoms', j1), ('l', l1)])
                         ind2 = self.qn2ind([('atoms', ind), ('l', l2)])
@@ -194,7 +196,7 @@ def main():
     kk = np.linspace(0, constants.PI / a_si, num_points, endpoint=True)
     band_sructure = []
 
-    for jj in xrange(num_points):
+    for jj in range(num_points):
         vals, _ = h.diagonalize_periodic_bc([0.0, 0.0, kk[jj]])
         band_sructure.append(vals)
 

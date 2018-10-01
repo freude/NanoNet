@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 from __future__ import print_function
+from builtins import zip
+from builtins import range
 import os
 import argparse
 import pickle
@@ -37,7 +39,7 @@ def postprocess_data(kk, band_structure, show, save, code_name):
     flag = True  # 1D system
 
     if not isinstance(band_structure, np.ndarray):
-        ids = [band_structure[item]['id'] for item in xrange(len(band_structure))]
+        ids = [band_structure[item]['id'] for item in range(len(band_structure))]
         band_structure = [x['eigenvalues'] for _, x in sorted(zip(ids, band_structure))]
         band_structure = np.array(band_structure)
 
@@ -46,7 +48,7 @@ def postprocess_data(kk, band_structure, show, save, code_name):
         if np.count_nonzero(kkk) == 1:
             kk = kk[:, np.where(kkk != 0.0)[0][0]]
         else:
-            kk = range(kk.shape[0])
+            kk = list(range(kk.shape[0]))
             flag = False
 
     if show:
@@ -112,7 +114,7 @@ def main1(param_file, k_points_file, xyz, show, save, code_name):
     hamiltonian = tb.initializer(**params)
 
     # compute band structure
-    band_structure = [{} for _ in xrange(len(wave_vector))]
+    band_structure = [{} for _ in range(len(wave_vector))]
 
     for j, jj in enumerate(wave_vector):
         vals, vects = hamiltonian.diagonalize_periodic_bc(jj)

@@ -3,16 +3,16 @@ The module contains abstract interfaces of the classes.
 The interfaces are aimed to be schemas for further classes implementations.
 Following these schemas will ensure compatibility of the code with the entire project.
 """
+from builtins import object
 from abc import ABCMeta, abstractmethod
+from future.utils import with_metaclass
 
 
-class AbstractStructureDesigner(object):
+class AbstractStructureDesigner(with_metaclass(ABCMeta, object)):
     """
     The class builds the atomic structure represented by a list of atoms
     and their neighbouring.
     """
-
-    __metaclass__ = ABCMeta
 
     @abstractmethod
     def get_neighbours(self, query):
@@ -34,15 +34,13 @@ class AbstractStructureDesigner(object):
         pass
 
 
-class AbstractBasis(object):
+class AbstractBasis(with_metaclass(ABCMeta, object)):
     """
     The class contains information about sets of quantum numbers and
     dimensionality of the Hilbert space.
     It is also equipped with the member functions translating quantum numbers
     into a raw index and vise versa.
     """
-
-    __metaclass__ = ABCMeta
 
     @abstractmethod
     def qn2ind(self, qn):
