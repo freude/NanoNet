@@ -5,10 +5,6 @@ geometrical structure and boundary conditions of the problem.
 from __future__ import print_function
 from __future__ import absolute_import
 from __future__ import division
-from builtins import zip
-from builtins import str
-from builtins import object
-from past.utils import old_div
 from collections import OrderedDict
 import numpy as np
 import scipy.spatial
@@ -69,7 +65,7 @@ class StructDesignerXYZ(AbstractStructureDesigner):
         ans1 = [ans[1][0]]
 
         for item in zip(ans[0], ans[1]):
-            if self._nn_distance * 0.25 < item[0] < self._nn_distance:
+            if self._nn_distance * 0.05 < item[0] < self._nn_distance:
                 ans1.append(item[1])
 
         return ans1
@@ -116,9 +112,9 @@ class CyclicTopology(object):
             for j2, basis_vec in enumerate(self.pcv):    # for lattice basis vector
 
                 # compute distance to the primary plane of the unit cell
-                distances1[j1, j2] = old_div(np.inner(coord, basis_vec), self.sizes[j2])
+                distances1[j1, j2] = np.inner(coord, basis_vec) / self.sizes[j2]
                 # compute distance to the adjacent plane of the  unit cell
-                distances2[j1, j2] = old_div(np.inner(coord - basis_vec, basis_vec), self.sizes[j2])
+                distances2[j1, j2] = np.inner(coord - basis_vec, basis_vec) / self.sizes[j2]
 
         # transform distance to the boolean variable defining whether atom belongs to the interface or not
         distances1 = np.abs(distances1 - np.min(distances1)) < self._nn_distance * 0.25
@@ -147,6 +143,29 @@ class CyclicTopology(object):
                                                                    labels[j]: atom_coords})
                         count += 1
 
+                    for vec in self.pcv:
+
+                        atom_coords = item + self.pcv[surf] - vec
+                        self.virtual_and_interfacial_atoms.update({"*_" + str(count) +
+                                                                   "_" + str(j) + "_" +
+                                                                   labels[j]: atom_coords})
+                        count += 1
+
+                    for vec in self.pcv:
+
+                        atom_coords = item - self.pcv[surf] + vec
+                        self.virtual_and_interfacial_atoms.update({"*_" + str(count) +
+                                                                   "_" + str(j) + "_" +
+                                                                   labels[j]: atom_coords})
+                        count += 1
+
+                    for vec in self.pcv:
+
+                        atom_coords = item - self.pcv[surf] - vec
+                        self.virtual_and_interfacial_atoms.update({"*_" + str(count) +
+                                                                   "_" + str(j) + "_" +
+                                                                   labels[j]: atom_coords})
+                        count += 1
 
             if any(distances2[j]):
                 self.virtual_and_interfacial_atoms.update({str(j) + "_" + labels[j]: item})
@@ -161,6 +180,30 @@ class CyclicTopology(object):
                     for vec in self.pcv:
 
                         atom_coords = item - self.pcv[surf] - vec
+                        self.virtual_and_interfacial_atoms.update({"*_" + str(count) +
+                                                                   "_" + str(j) + "_" +
+                                                                   labels[j]: atom_coords})
+                        count += 1
+
+                    for vec in self.pcv:
+
+                        atom_coords = item - self.pcv[surf] + vec
+                        self.virtual_and_interfacial_atoms.update({"*_" + str(count) +
+                                                                   "_" + str(j) + "_" +
+                                                                   labels[j]: atom_coords})
+                        count += 1
+
+                    for vec in self.pcv:
+
+                        atom_coords = item + self.pcv[surf] - vec
+                        self.virtual_and_interfacial_atoms.update({"*_" + str(count) +
+                                                                   "_" + str(j) + "_" +
+                                                                   labels[j]: atom_coords})
+                        count += 1
+
+                    for vec in self.pcv:
+
+                        atom_coords = item + self.pcv[surf] + vec
                         self.virtual_and_interfacial_atoms.update({"*_" + str(count) +
                                                                    "_" + str(j) + "_" +
                                                                    labels[j]: atom_coords})
@@ -198,8 +241,8 @@ class CyclicTopology(object):
     @staticmethod
     def atom_classifier(coords, leads):
 
-        distance_to_surface1 = old_div(np.inner(coords, leads), np.linalg.norm(leads))
-        distance_to_surface2 = old_div(np.inner(coords - leads, leads), np.linalg.norm(leads))
+        distance_to_surface1 = np.inner(coords, leads) / np.linalg.norm(leads)
+        distance_to_surface2 = np.inner(coords - leads, leads) / np.linalg.norm(leads)
 
         flag = None
 
