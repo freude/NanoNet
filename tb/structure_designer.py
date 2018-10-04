@@ -5,15 +5,21 @@ geometrical structure and boundary conditions of the problem.
 from __future__ import print_function
 from __future__ import absolute_import
 from __future__ import division
-from builtins import zip
-from builtins import str
-from builtins import object
-from past.utils import old_div
 from collections import OrderedDict
 import numpy as np
 import scipy.spatial
 from .aux_functions import xyz2np, count_species
 from .abstract_interfaces import AbstractStructureDesigner
+
+
+def is_in_coords(coord, coords):
+
+    ans = False
+
+    for xyz in list(coords):
+        ans += (coord == xyz).all()
+
+    return ans
 
 
 class StructDesignerXYZ(AbstractStructureDesigner):
@@ -24,17 +30,18 @@ class StructDesignerXYZ(AbstractStructureDesigner):
     def __init__(self, xyz='/home/mk/TB_project/tb/my_si.xyz', nn_distance=2.39):
 
         try:
-            with open(xyz, 'rb') as read_file:
+            with open(xyz, 'r') as read_file:
                 reader = read_file.read()
 
         except IOError:
             reader = xyz
 
         labels, coords = xyz2np(reader)
-        self._nn_distance = nn_distance
-        self._num_of_species = count_species(labels)
-        self._num_of_nodes = sum(self.num_of_species.values())
-        self._atom_list = OrderedDict(list(zip(labels, coords)))
+        self._nn_distance = nn_distance                            # maximal distance to a neighbor
+        self._num_of_species = count_species(labels)               # dictionary of elements and
+                                                                   # their number per unit cell
+        self._num_of_nodes = sum(self.num_of_species.values())     # number of sites per unit cell
+        self._atom_list = OrderedDict(list(zip(labels, coords)))   # atomic coordinates of atoms in unit cell
         self._kd_tree = scipy.spatial.cKDTree(coords, leafsize=100)
 
     @property
@@ -51,31 +58,18 @@ class StructDesignerXYZ(AbstractStructureDesigner):
 
     def get_neighbours(self, query):
 
-        if isinstance(query, list):
-            ans = self._kd_tree.query(query,
-                                      k=5,
-                                      distance_upper_bound=self._nn_distance)
-        elif isinstance(query, int):
-            ans = self._kd_tree.query(list(self.atom_list.items())[query][1],
-                                      k=5,
-                                      distance_upper_bound=self._nn_distance)
-        elif isinstance(query, str):
-            ans = self._kd_tree.query(self.atom_list[query],
-                                      k=5,
-                                      distance_upper_bound=self._nn_distance)
-        else:
-            raise TypeError('Wrong input type for query')
+        ans = self._get_neighbours(query)
 
         ans1 = [ans[1][0]]
 
         for item in zip(ans[0], ans[1]):
-            if self._nn_distance * 0.25 < item[0] < self._nn_distance:
+            if self._nn_distance * 0.05 < item[0] < self._nn_distance:
                 ans1.append(item[1])
 
         return ans1
 
 
-class CyclicTopology(object):
+class CyclicTopology(AbstractStructureDesigner):
     """
     The class provides functionality for determining
     the periodic boundary conditions for a crystal cell.
@@ -100,6 +94,10 @@ class CyclicTopology(object):
         self._kd_tree = scipy.spatial.cKDTree(list(self.virtual_and_interfacial_atoms.values()),
                                               leafsize=100)
 
+    @property
+    def atom_list(self):
+        return self.virtual_and_interfacial_atoms
+
     def _generate_atom_list(self, labels, coords):
         """
 
@@ -116,9 +114,9 @@ class CyclicTopology(object):
             for j2, basis_vec in enumerate(self.pcv):    # for lattice basis vector
 
                 # compute distance to the primary plane of the unit cell
-                distances1[j1, j2] = old_div(np.inner(coord, basis_vec), self.sizes[j2])
+                distances1[j1, j2] = np.inner(coord, basis_vec) / self.sizes[j2]
                 # compute distance to the adjacent plane of the  unit cell
-                distances2[j1, j2] = old_div(np.inner(coord - basis_vec, basis_vec), self.sizes[j2])
+                distances2[j1, j2] = np.inner(coord - basis_vec, basis_vec) / self.sizes[j2]
 
         # transform distance to the boolean variable defining whether atom belongs to the interface or not
         distances1 = np.abs(distances1 - np.min(distances1)) < self._nn_distance * 0.25
@@ -133,63 +131,80 @@ class CyclicTopology(object):
                 self.interfacial_atoms_ind.append(j)
 
                 for surf in np.where(distances1[j])[0]:
-                    atom_coords = item + self.pcv[surf]
-                    self.virtual_and_interfacial_atoms.update({"*_" + str(count) +
-                                                               "_" + str(j) + "_" +
-                                                               labels[j]: atom_coords})
-                    count += 1
 
-                    for vec in self.pcv:
+                    count = self._translate_atom_1st_order(item,
+                                                           np.array(self.pcv[surf]),
+                                                           "_" + str(j) + "_" + labels[j],
+                                                           coords,
+                                                           count)
 
-                        atom_coords = item + self.pcv[surf] + vec
-                        self.virtual_and_interfacial_atoms.update({"*_" + str(count) +
-                                                                   "_" + str(j) + "_" +
-                                                                   labels[j]: atom_coords})
-                        count += 1
-
+                    count = self._translate_atom_2d_order(item,
+                                                          np.array(self.pcv[surf]),
+                                                          "_" + str(j) + "_" + labels[j],
+                                                          coords,
+                                                          count)
 
             if any(distances2[j]):
                 self.virtual_and_interfacial_atoms.update({str(j) + "_" + labels[j]: item})
                 self.interfacial_atoms_ind.append(j)
                 for surf in np.where(distances2[j])[0]:
-                    atom_coords = item - self.pcv[surf]
-                    self.virtual_and_interfacial_atoms.update({"*_" + str(count) +
-                                                               "_" + str(j) + "_" +
-                                                               labels[j]: atom_coords})
-                    count += 1
 
-                    for vec in self.pcv:
+                    count = self._translate_atom_1st_order(item,
+                                                           -np.array(self.pcv[surf]),
+                                                           "_" + str(j) + "_" + labels[j],
+                                                           coords,
+                                                           count)
 
-                        atom_coords = item - self.pcv[surf] - vec
-                        self.virtual_and_interfacial_atoms.update({"*_" + str(count) +
-                                                                   "_" + str(j) + "_" +
-                                                                   labels[j]: atom_coords})
-                        count += 1
+                    count = self._translate_atom_2d_order(item,
+                                                          -np.array(self.pcv[surf]),
+                                                          "_" + str(j) + "_" + labels[j],
+                                                          coords,
+                                                          count)
 
         # remove non-unique elements
         self.interfacial_atoms_ind = list(set(self.interfacial_atoms_ind))
 
+    def _translate_atom_1st_order(self, atom_coords, cell_vector, label, penalty_coords, count):
+
+        try_coords = atom_coords + cell_vector
+
+        if not is_in_coords(try_coords, penalty_coords) and \
+                not is_in_coords(try_coords, np.array(list(self.virtual_and_interfacial_atoms.values()))):
+            self.virtual_and_interfacial_atoms.update({"*_" + str(count) + label: try_coords})
+            count += 1
+
+        return count
+
+    def _translate_atom_2d_order(self, atom_coords, cell_vector, label, penalty_coords, count):
+
+        for vec in self.pcv:
+
+            try_coords = atom_coords + cell_vector + vec
+
+            if not is_in_coords(try_coords, penalty_coords) and \
+                    not is_in_coords(try_coords, np.array(list(self.virtual_and_interfacial_atoms.values()))):
+
+                self.virtual_and_interfacial_atoms.update({"**_" + str(count) + label: try_coords})
+                count += 1
+
+            try_coords = atom_coords + cell_vector - vec
+
+            if not is_in_coords(try_coords, penalty_coords) and \
+                    not is_in_coords(try_coords, np.array(list(self.virtual_and_interfacial_atoms.values()))):
+
+                self.virtual_and_interfacial_atoms.update({"**_" + str(count) + label: try_coords})
+                count += 1
+
+        return count
+
     def get_neighbours(self, query):
 
-        if isinstance(query, list) or isinstance(query, np.ndarray):
-            ans = self._kd_tree.query(query,
-                                      k=5,
-                                      distance_upper_bound=self._nn_distance)
-        elif isinstance(query, int):
-            ans = self._kd_tree.query(list(self.virtual_and_interfacial_atoms.items())[query][1],
-                                      k=5,
-                                      distance_upper_bound=self._nn_distance)
-        elif isinstance(query, str):
-            ans = self._kd_tree.query(self.virtual_and_interfacial_atoms[query],
-                                      k=5,
-                                      distance_upper_bound=self._nn_distance)
-        else:
-            raise TypeError('Wrong input type for query')
+        ans = self._get_neighbours(query)
 
         ans1 = []
 
         for item in zip(ans[0], ans[1]):
-            if self._nn_distance * 0.25 < item[0] < self._nn_distance and \
+            if self._nn_distance * 0.01 < item[0] < self._nn_distance and \
                     list(self.virtual_and_interfacial_atoms.keys())[item[1]].startswith("*"):
                 ans1.append(item[1])
 
@@ -198,8 +213,8 @@ class CyclicTopology(object):
     @staticmethod
     def atom_classifier(coords, leads):
 
-        distance_to_surface1 = old_div(np.inner(coords, leads), np.linalg.norm(leads))
-        distance_to_surface2 = old_div(np.inner(coords - leads, leads), np.linalg.norm(leads))
+        distance_to_surface1 = np.inner(coords, leads) / np.linalg.norm(leads)
+        distance_to_surface2 = np.inner(coords - leads, leads) / np.linalg.norm(leads)
 
         flag = None
 

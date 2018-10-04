@@ -7,13 +7,12 @@ from collections import OrderedDict
 from operator import mul
 import matplotlib.pyplot as plt
 import numpy as np
-from .abstract_interfaces import AbstractBasis
-from .structure_designer import StructDesignerXYZ, CyclicTopology
-from . import constants
-from .diatomic_matrix_element import me
-from .atoms import Atom
-from .aux_functions import dict2xyz
-from .tb_script import postprocess_data
+from tb.abstract_interfaces import AbstractBasis
+from tb.structure_designer import StructDesignerXYZ, CyclicTopology
+from tb.diatomic_matrix_element import me
+from tb.atoms import Atom
+from tb.aux_functions import dict2xyz
+from tb.tb_script import postprocess_data
 from functools import reduce
 
 
@@ -149,6 +148,24 @@ class Hamiltonian(BasisTB):
 
         if len(primitive_cell) > 0:
             self.ct = CyclicTopology(primitive_cell, list(self.atom_list.keys()), list(self.atom_list.values()), self._nn_distance)
+
+            # from mpl_toolkits.mplot3d import Axes3D
+            # import matplotlib.pyplot as plt
+            # fig = plt.figure()
+            # ax = fig.add_subplot(111, projection='3d')
+            # coordinates_to_plot = np.asarray(list(self.atom_list.values()))
+            # ax.scatter(coordinates_to_plot[:, 0], coordinates_to_plot[:, 1], coordinates_to_plot[:, 2], c='red', s=100)
+            #
+            # map1 = [item.startswith('*_') for item in list(self.ct.virtual_and_interfacial_atoms.keys())]
+            # map2 = [item.startswith('**_') for item in list(self.ct.virtual_and_interfacial_atoms.keys())]
+            #
+            # coordinates_to_plot = np.asarray(list(self.ct.virtual_and_interfacial_atoms.values()))
+            # ax.scatter(coordinates_to_plot[map1, 0], coordinates_to_plot[map1, 1], coordinates_to_plot[map1, 2],
+            #            c='green', s=70)
+            # ax.scatter(coordinates_to_plot[map2, 0], coordinates_to_plot[map2, 1], coordinates_to_plot[map2, 2],
+            #            s=20)
+            # plt.show()
+
         else:
             self.ct = None
 
@@ -206,7 +223,7 @@ class Hamiltonian(BasisTB):
         else:
             return True
 
-    def _get_me(self, atom1, atom2, l1, l2, coords=None, radial_dep=None):
+    def _get_me(self, atom1, atom2, l1, l2, coords=None, radial_dep=None, spin_orbit=None):
         """
         Compute the matrix element <atom1, l1|H|l2, atom2>
 
@@ -241,8 +258,6 @@ class Hamiltonian(BasisTB):
                 which_neighbour = ""
             else:
                 which_neighbour = radial_dep(coords1)
-
-            print(which_neighbour)
 
             # compute directional cosines
             coords1 /= np.linalg.norm(coords1)
@@ -371,88 +386,3 @@ def format_func(value, tick_number):
         return r"${0}\pi/2$".format(N)
     else:
         return r"${0}\pi$".format(N // 2)
-
-
-def main():
-
-    a_si = 5.50
-    PRIMITIVE_CELL = [[0, 0, a_si]]
-    Atom.orbital_sets = {'Si': 'SiliconSP3D5S', 'H': 'HydrogenS'}
-
-    h = Hamiltonian(xyz='/home/mk/TB_project/input_samples/SiNW2.xyz')
-    h.initialize()
-    h.set_periodic_bc(PRIMITIVE_CELL)
-
-    num_points = 20
-    kk = np.linspace(0, constants.PI / a_si, num_points, endpoint=True)
-    band_structure = []
-
-    for jj in range(num_points):
-        vals, _ = h.diagonalize_periodic_bc([0.0, 0.0, kk[jj]])
-        band_structure.append(vals)
-
-    band_structure = np.array(band_structure)
-
-    postprocess_data(kk, band_structure, show=1, save=0, code_name=None)
-
-
-def main1():
-
-    l_a = 4.5332
-    l_c = 11.7967
-
-    # PRIMITIVE_CELL = np.array([[1.0, 0.0, 0.0],
-    #                   [0.55412, 0.8408, 0.0],
-    #                   [0.55412, 0.2953, 0.7873]])
-
-    PRIMITIVE_CELL = np.array([[-1.0/2*l_a, -np.sqrt(3)/6*l_a, 1.0/3.0*l_c],
-                               [1.0/2*l_a, -np.sqrt(3)/6*l_a, 1.0/3.0*l_c],
-                               [0.0, np.sqrt(3)/3*l_a, 1.0/3.0*l_c]])
-
-    Atom.orbital_sets = {'Bi': 'Bismuth'}
-
-    # xyz_file = """2
-    # Bi2 cell
-    # Bi1       0.0000000000    0.0000000000    0.0000000000
-    # Bi2       2.2666             2.2666            2.2666
-    # """
-
-    xyz_file = """2
-    Bi2 cell
-    Bi1       0.0    0.0    0.0
-    Bi2       0.0    0.0    5.52321494   
-    """
-
-    h = Hamiltonian(xyz=xyz_file, nn_distance=5.7)
-
-    def radial_dep(coords):
-        distance = np.linalg.norm(coords)
-        print(distance)
-        if distance < 3.3:
-            return 1
-        elif 3.7 > distance > 3.3:
-            return 2
-        elif distance > 3.7:
-            return 3
-
-    h.initialize(radial_dep=radial_dep)
-    h.set_periodic_bc(PRIMITIVE_CELL.tolist())
-
-    from .aux_functions import get_k_coords
-    sym_points = ['X', 'GAMMA', 'L', 'U', 'T']
-    num_points = [20, 20, 20, 20]
-    k = get_k_coords(sym_points, num_points, 'Bi')
-    band_structure = []
-
-    for jj in k:
-        vals, _ = h.diagonalize_periodic_bc(jj)
-        band_structure.append(vals)
-
-    band_structure = np.array(band_structure)
-
-    postprocess_data(k, band_structure, show=1, save=0, code_name=None)
-
-
-if __name__ == '__main__':
-
-    main1()

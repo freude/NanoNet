@@ -3,11 +3,9 @@ The module contains a set of auxiliary functions facilitating the tight-binding 
 """
 from __future__ import print_function
 from __future__ import absolute_import
-from builtins import str
-from builtins import range
 import numpy as np
 import yaml
-from .constants import SPECIAL_K_POINTS_BI, SPECIAL_K_POINTS_SI
+from test.p import SPECIAL_K_POINTS_BI, SPECIAL_K_POINTS_SI
 
 
 def xyz2np(xyz):
