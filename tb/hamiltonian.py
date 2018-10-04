@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from tb.abstract_interfaces import AbstractBasis
 from tb.structure_designer import StructDesignerXYZ, CyclicTopology
-from tb import p
+from test import p
 from tb.diatomic_matrix_element import me
 from tb.atoms import Atom
 from tb.aux_functions import dict2xyz

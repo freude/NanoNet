@@ -2,7 +2,6 @@
 This module contains the input parameters for performing calculations of band structure using empirical tight binding theory.
 """
 from __future__ import division
-from past.utils import old_div
 import numpy as np
 
 
@@ -28,9 +27,9 @@ M_QN = {0: 'sigma', 1: 'pi', 2: 'delta'}
 SPECIAL_K_POINTS_SI = {
     'GAMMA': [0, 0, 0],
     'X': [0, 2 * PI / a_si, 0],
-    'L': [old_div(PI, a_si),  old_div(PI, a_si),  old_div(PI, a_si)],
-    'W': [old_div(PI, a_si),  2 * PI / a_si,  0],
-    'U': [old_div(PI, (2 * a_si)), 2 * PI / a_si, old_div(PI, (2 * a_si))],
+    'L': [PI / a_si,  PI / a_si,  PI/ a_si],
+    'W': [PI / a_si,  2 * PI / a_si,  0],
+    'U': [PI / (2 * a_si), 2 * PI / a_si, PI/ (2 * a_si)],
     'K': [3 * PI / (2 * a_si), 3 * PI / (2 * a_si), 0]
 }
 

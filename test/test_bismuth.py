@@ -2,17 +2,21 @@ import numpy as np
 import matplotlib.pyplot as plt
 from tb import Hamiltonian
 from tb import Atom
-import p
+import test.p
 
 
 def radial_dep( coords ):
+
     norm_of_coords = np.linalg.norm( coords )
+
     if norm_of_coords < 3.3:
         return 1
     elif 3.7 > norm_of_coords > 3.3:
         return 2
-    elif norm_of_coords > 3.7:
+    elif 5.7 > norm_of_coords > 3.7:
         return 3
+    else:
+        return 100
 
 
 def main1():
@@ -27,13 +31,13 @@ def main1():
     num_points = [ 20, 20 ]
     indices_of_bands = range( 0, 8 )
 
-    primitive_cell = p.a_si * np.array( [ [0.0, 0.5, 0.5],
-                                          [0.5, 0.0, 0.5],
-                                          [0.5, 0.5, 0.0] ] )
+    primitive_cell = test.p.a_si * np.array([[0.0, 0.5, 0.5],
+                                             [0.5, 0.0, 0.5],
+                                             [0.5, 0.5, 0.0]])
 
     Atom.orbital_sets = { species: basis_set }
 
-    h = Hamiltonian( xyz = path_to_xyz_file )
+    h = Hamiltonian( xyz = path_to_xyz_file)
     h.initialize()
     h.set_periodic_bc( primitive_cell )
 
@@ -72,17 +76,17 @@ def main2():
     # num_points = [1]
     indices_of_bands = range( 0, 8 )
 
-    cell_a = p.a_bi * np.array( [ [ ( -1.0 / 2.0 ), ( -np.sqrt(3.0) / 6.0 ), 0.0 ],
-                                  [ (  1.0 / 2.0 ), ( -np.sqrt(3.0) / 6.0 ), 0.0 ],
-                                  [ 0.0,            (  np.sqrt(3.0) / 3.0 ), 0.0 ] ] )
-    cell_c = p.c_bi * np.array( [ [ 0.0, 0.0, ( 1.0 / 3.0 ) ],
-                                  [ 0.0, 0.0, ( 1.0 / 3.0 ) ],
-                                  [ 0.0, 0.0, ( 1.0 / 3.0 ) ] ] )
+    cell_a = test.p.a_bi * np.array([[(-1.0 / 2.0), (-np.sqrt(3.0) / 6.0), 0.0],
+                                     [ (  1.0 / 2.0 ), ( -np.sqrt(3.0) / 6.0 ), 0.0 ],
+                                     [ 0.0,            (  np.sqrt(3.0) / 3.0 ), 0.0 ]])
+    cell_c = test.p.c_bi * np.array([[0.0, 0.0, (1.0 / 3.0)],
+                                     [ 0.0, 0.0, ( 1.0 / 3.0 ) ],
+                                     [ 0.0, 0.0, ( 1.0 / 3.0 ) ]])
     primitive_cell = cell_a + cell_c
 
     Atom.orbital_sets = { species: basis_set }
 
-    h = Hamiltonian( xyz = path_to_xyz_file, nn_distance = 5.0 )
+    h = Hamiltonian( xyz = path_to_xyz_file, nn_distance = 4.6)
     h.initialize( radial_dep )
     h.set_periodic_bc( primitive_cell.tolist() )
 

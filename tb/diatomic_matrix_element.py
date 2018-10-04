@@ -8,13 +8,9 @@ A.V. Podolskiy and P. Vogl, Phys. Rev. B. 69, 233101 (2004)
 from __future__ import print_function
 from __future__ import absolute_import
 from __future__ import division
-from builtins import str
-from builtins import range
-from past.utils import old_div
 import sys
 import math
-import numpy as np
-from .p import *
+from test.p import *
 import warnings
 
 
@@ -62,6 +58,7 @@ PARAMS_BI_BI3 = {'ss_sigma': 0,
                  'pp_sigma': 0.156,
                  'pp_pi': 0}
 
+
 def me_diatomic(bond, n, l_min, l_max, m, which_neighbour):
     """
     The function looks up into the table of parameters making a query parametrized by:
@@ -86,6 +83,7 @@ def me_diatomic(bond, n, l_min, l_max, m, which_neighbour):
         raise ValueError('Wrong value of the value variable')
 
     try:
+        print(which_neighbour)
         if which_neighbour == 0:
             return getattr(sys.modules[__name__], 'PARAMS_' + bond)[label]
         else:
@@ -108,7 +106,7 @@ def d_me(N, l, m1, m2):
     :return:     rotational matrix element
     """
 
-    prefactor = ((0.5 * (1 + N)) ** l) * ((old_div((1 - N), (1 + N))) ** (m1 * 0.5 - m2 * 0.5)) * \
+    prefactor = ((0.5 * (1 + N)) ** l) * (((1 - N) / (1 + N)) ** (m1 * 0.5 - m2 * 0.5)) * \
         math.sqrt(math.factorial(l + m2) * math.factorial(l - m2) *
                   math.factorial(l + m1) * math.factorial(l - m1))
 
@@ -116,7 +114,7 @@ def d_me(N, l, m1, m2):
 
     for t in range(2 * l + 2):
         if l + m2 - t >= 0 and l - m1 - t >= 0 and t + m1 - m2 >= 0:
-            ans += ((-1) ** t) * ((old_div((1 - N), (1 + N))) ** t) / \
+            ans += ((-1) ** t) * (((1 - N) / (1 + N)) ** t) / \
                    (math.factorial(l + m2 - t) * math.factorial(l - m1 - t) *
                     math.factorial(t) * math.factorial(t + m1 - m2))
 
@@ -133,7 +131,7 @@ def tau(m):
 def a_coef(m, gamma):
 
     if m == 0:
-        return old_div(1.0, math.sqrt(2))
+        return 1.0 / math.sqrt(2)
     else:
         return ((-1) ** abs(m)) * \
                (tau(m) * math.cos(abs(m) * gamma) - tau(-m) * math.sin(abs(m) * gamma))
