@@ -154,7 +154,7 @@ class Hamiltonian(BasisTB):
             import matplotlib.pyplot as plt
             fig = plt.figure()
             ax = fig.add_subplot(111, projection='3d')
-            coordinates_to_plot = np.asarray(self.ct.virtual_and_interfacial_atoms.values())
+            coordinates_to_plot = np.asarray(list(self.ct.virtual_and_interfacial_atoms.values()))
             ax.scatter(coordinates_to_plot[:, 0], coordinates_to_plot[:, 1], coordinates_to_plot[:, 2])
             plt.show()
 

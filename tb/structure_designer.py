@@ -16,7 +16,7 @@ def is_in_coords(coord, coords):
 
     ans = False
 
-    for xyz in coords:
+    for xyz in list(coords):
         ans += (coord == xyz).all()
 
     return ans
@@ -30,7 +30,7 @@ class StructDesignerXYZ(AbstractStructureDesigner):
     def __init__(self, xyz='/home/mk/TB_project/tb/my_si.xyz', nn_distance=2.39):
 
         try:
-            with open(xyz, 'rb') as read_file:
+            with open(xyz, 'r') as read_file:
                 reader = read_file.read()
 
         except IOError:
@@ -169,7 +169,7 @@ class CyclicTopology(AbstractStructureDesigner):
         try_coords = atom_coords + cell_vector
 
         if not is_in_coords(try_coords, penalty_coords) and \
-                    not is_in_coords(try_coords, np.array(self.virtual_and_interfacial_atoms.values())):
+                not is_in_coords(try_coords, np.array(list(self.virtual_and_interfacial_atoms.values()))):
             self.virtual_and_interfacial_atoms.update({"*_" + str(count) + label: try_coords})
             count += 1
 
@@ -182,7 +182,7 @@ class CyclicTopology(AbstractStructureDesigner):
             try_coords = atom_coords + cell_vector + vec
 
             if not is_in_coords(try_coords, penalty_coords) and \
-                    not is_in_coords(try_coords, np.array(self.virtual_and_interfacial_atoms.values())):
+                    not is_in_coords(try_coords, np.array(list(self.virtual_and_interfacial_atoms.values()))):
 
                 self.virtual_and_interfacial_atoms.update({"*_" + str(count) + label: try_coords})
                 count += 1
@@ -190,7 +190,7 @@ class CyclicTopology(AbstractStructureDesigner):
             try_coords = atom_coords + cell_vector - vec
 
             if not is_in_coords(try_coords, penalty_coords) and \
-                    not is_in_coords(try_coords, np.array(self.virtual_and_interfacial_atoms.values())):
+                    not is_in_coords(try_coords, np.array(list(self.virtual_and_interfacial_atoms.values()))):
 
                 self.virtual_and_interfacial_atoms.update({"*_" + str(count) + label: try_coords})
                 count += 1
