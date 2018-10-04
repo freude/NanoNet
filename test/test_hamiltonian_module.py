@@ -115,7 +115,7 @@ def test_bulk_silicon():
         vals[jj, :], _ = h.diagonalize_periodic_bc(item)
 
     band_structure = np.real(np.array(vals))
-    np.testing.assert_allclose(band_structure, expected_bulk_silicon_band_structure(), atol=1e-5)
+    np.testing.assert_allclose(band_structure, expected_bulk_silicon_band_structure(), atol=1e-4)
 
 
 def expected_bulk_silicon_band_structure():
@@ -367,6 +367,6 @@ def expected_bulk_silicon_band_structure():
 
 
 if __name__ == '__main__':
-    test_simple_atomic_chain()
-    test_atomic_chain_two_kinds_of_atoms()
+    # test_simple_atomic_chain()
+    # test_atomic_chain_two_kinds_of_atoms()
     test_bulk_silicon()

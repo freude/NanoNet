@@ -3,14 +3,12 @@ The module contains all necessary classes needed to compute the Hamiltonian matr
 """
 from __future__ import print_function, division
 from __future__ import absolute_import
-from builtins import range
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy.sparse.linalg as splin
 import scipy.sparse as sp
-from . import constants
-from .atoms import Atom
-from .hamiltonian import Hamiltonian
+from tb.atoms import Atom
+from tb.hamiltonian import Hamiltonian
 
 
 class HamiltonianSp(Hamiltonian):
@@ -193,7 +191,7 @@ def main():
     h.set_periodic_bc(PRIMITIVE_CELL)
 
     num_points = 30
-    kk = np.linspace(0, constants.PI / a_si, num_points, endpoint=True)
+    kk = np.linspace(0, np.PI / a_si, num_points, endpoint=True)
     band_sructure = []
 
     for jj in range(num_points):
