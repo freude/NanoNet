@@ -184,7 +184,7 @@ class CyclicTopology(AbstractStructureDesigner):
             if not is_in_coords(try_coords, penalty_coords) and \
                     not is_in_coords(try_coords, np.array(list(self.virtual_and_interfacial_atoms.values()))):
 
-                self.virtual_and_interfacial_atoms.update({"*_" + str(count) + label: try_coords})
+                self.virtual_and_interfacial_atoms.update({"**_" + str(count) + label: try_coords})
                 count += 1
 
             try_coords = atom_coords + cell_vector - vec
@@ -192,7 +192,7 @@ class CyclicTopology(AbstractStructureDesigner):
             if not is_in_coords(try_coords, penalty_coords) and \
                     not is_in_coords(try_coords, np.array(list(self.virtual_and_interfacial_atoms.values()))):
 
-                self.virtual_and_interfacial_atoms.update({"*_" + str(count) + label: try_coords})
+                self.virtual_and_interfacial_atoms.update({"**_" + str(count) + label: try_coords})
                 count += 1
 
         return count

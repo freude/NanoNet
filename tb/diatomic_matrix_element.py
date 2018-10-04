@@ -83,7 +83,6 @@ def me_diatomic(bond, n, l_min, l_max, m, which_neighbour):
         raise ValueError('Wrong value of the value variable')
 
     try:
-        print(which_neighbour)
         if which_neighbour == 0:
             return getattr(sys.modules[__name__], 'PARAMS_' + bond)[label]
         else:
