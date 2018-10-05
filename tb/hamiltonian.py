@@ -367,22 +367,3 @@ class Hamiltonian(BasisTB):
 
         return np.array(self._coords)
 
-
-def format_func(value, tick_number):
-
-    # if value == PI / a_si:
-    #     return r"$\frac{\pi}{2}$"
-    # else:
-    #     return '%.2f' % value
-
-    N = int(np.round(2 * value / np.pi))
-    if N == 0:
-        return "0"
-    elif N == 1:
-        return r"$\pi/2$"
-    elif N == 2:
-        return r"$\pi$"
-    elif N % 2 > 0:
-        return r"${0}\pi/2$".format(N)
-    else:
-        return r"${0}\pi$".format(N // 2)
