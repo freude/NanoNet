@@ -3,7 +3,7 @@
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Build Status](https://travis-ci.org/freude/NanoNet.svg)](https://travis-ci.org/freude)
 [![Coverage Status](https://coveralls.io/repos/github/freude/NanoNet/badge.svg?branch=develop)](https://coveralls.io/github/freude/NanoNet?branch=develop)
-
+[![CodeFactor](https://www.codefactor.io/repository/github/freude/nanonet/badge/master)](https://www.codefactor.io/repository/github/freude/nanonet/overview/master)
 
 ## Introduction
 
