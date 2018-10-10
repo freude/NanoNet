@@ -2,8 +2,6 @@
 The module contains functions that computes Green's functions and their poles
 """
 from __future__ import print_function, division
-from builtins import zip
-from builtins import range
 import numpy as np
 import scipy.linalg as linalg
 
@@ -185,5 +183,5 @@ def surface_greens_function(E, h_l, h_0, h_r, iterate=False):
 
     if iterate:
         return iterate_gf(E, h_0, h_l, h_r, sgf_l, 2), iterate_gf(E, h_0, h_r, h_l, sgf_r, 2)
-    else:
-        return iterate_gf(E, h_0, h_l, h_r, sgf_l, 0), iterate_gf(E, h_0, h_r, h_l, sgf_r, 0)
+
+    return iterate_gf(E, h_0, h_l, h_r, sgf_l, 0), iterate_gf(E, h_0, h_r, h_l, sgf_r, 0)

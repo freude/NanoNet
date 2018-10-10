@@ -1,5 +1,4 @@
 import sys
-import matplotlib.pyplot as plt
 import numpy as np
 import tb
 
@@ -479,9 +478,8 @@ def expected_tr_of_complex_chain():
 
 
 def test_main():
-    import sys
+
     sys.path.insert(0, '/home/mk/TB_project/tb')
-    import tb
 
     a = tb.Atom('A')
     a.add_orbital('s', -0.7)
@@ -531,3 +529,39 @@ def test_main():
         gamma_r = 1j * (np.matrix(sgf_r[j, :, :]) - np.matrix(sgf_r[j, :, :]).H)
         tr[j] = np.real(np.trace(gamma_l * gf0 * gamma_r * gf0.H))
         dos[j] = np.real(np.trace(1j * (gf0 - gf0.H)))
+
+
+def mat2py(h_r1):
+
+    h_r = np.zeros(h_r1.shape, dtype=np.complex)
+
+    for j1 in range(h_r1.shape[0]):
+        for j2 in range(h_r1.shape[1]):
+
+            buf = list(h_r1[j1, j2])
+
+            for jj, item in enumerate(buf):
+                if item == 'i':
+                    buf[jj] = 'j'
+
+            h_r[j1, j2] = complex("".join(buf))
+
+    return h_r
+
+
+if __name__=='__main__':
+
+    h_0 = np.loadtxt('/home/mk/H0.txt', delimiter=',', dtype=np.complex)
+    h_r = mat2py(np.genfromtxt('/home/mk/HR.txt', dtype=str, delimiter=','))
+    ans = mat2py(np.genfromtxt('/home/mk/sig.txt', dtype=str, delimiter=','))
+
+    h_r = np.asmatrix(h_r)
+    h_l = h_r.H
+
+    energy = 0.404370259774118
+
+    from greens_function import surface_greens_function as gf
+
+    L, R = gf(energy, h_l, h_0, h_r, iterate=False)
+    sgf_l = L
+    sgf_r = R
