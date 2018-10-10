@@ -146,7 +146,7 @@ class Hamiltonian(BasisTB):
 
     def set_periodic_bc(self, primitive_cell):
 
-        if len(primitive_cell) > 0:
+        if list(primitive_cell):
             self.ct = CyclicTopology(primitive_cell, list(self.atom_list.keys()), list(self.atom_list.values()), self._nn_distance)
 
             # from mpl_toolkits.mplot3d import Axes3D
@@ -220,8 +220,8 @@ class Hamiltonian(BasisTB):
 
         if (np.abs(h_matrix - h_matrix.conj().T) > 0.001).any():
             return False
-        else:
-            return True
+
+        return True
 
     def _get_me(self, atom1, atom2, l1, l2, coords=None, radial_dep=None, spin_orbit=None):
         """
@@ -366,4 +366,3 @@ class Hamiltonian(BasisTB):
         """
 
         return np.array(self._coords)
-
