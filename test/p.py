@@ -34,27 +34,39 @@ SPECIAL_K_POINTS_SI = {
 }
 
 
-reciprocal_lattice_vectors_bi = g_bi * np.matrix([[-1.0, (-np.sqrt(3.0) / 3.0), (a_bi / c_bi)],
-                                                  [1.0, (-np.sqrt(3.0) / 3.0), (a_bi / c_bi)],
-                                                  [0.0, (2.0 * np.sqrt(3.0) / 3.0), (a_bi / c_bi)]])
-
-
 def get_high_symmetry_point_in_cartesian_space(reciprocal_lattice_vectors, coordinate_of_high_symmetry_point):
     cartesian_coordinate_in_reciprocal_space = np.squeeze(np.asarray(np.matrix(coordinate_of_high_symmetry_point) *
                                                                      reciprocal_lattice_vectors)).tolist()
     return cartesian_coordinate_in_reciprocal_space
 
+# reciprocal_lattice_vectors_bi = g_bi * np.matrix([[-1.0, (-np.sqrt(3.0) / 3.0), (a_bi / c_bi)],
+#                                                   [1.0, (-np.sqrt(3.0) / 3.0), (a_bi / c_bi)],
+#                                                   [0.0, (2.0 * np.sqrt(3.0) / 3.0), (a_bi / c_bi)]])
+#
+# SPECIAL_K_POINTS_BI = {
+#     'LAMBDA': get_high_symmetry_point_in_cartesian_space(reciprocal_lattice_vectors_bi, [0.25, 0.25, 0.25]),
+#     'GAMMA': get_high_symmetry_point_in_cartesian_space(reciprocal_lattice_vectors_bi, [0.00, 0.00, 0.00]),
+#     'T': get_high_symmetry_point_in_cartesian_space(reciprocal_lattice_vectors_bi, [0.50, 0.50, 0.50]),
+#     'L': get_high_symmetry_point_in_cartesian_space(reciprocal_lattice_vectors_bi, [0.00, 0.50, 0.00]),
+#     'X': get_high_symmetry_point_in_cartesian_space(reciprocal_lattice_vectors_bi, [0.50, 0.50, 0.00]),
+#     'K': get_high_symmetry_point_in_cartesian_space(reciprocal_lattice_vectors_bi, [((0.50 * gamma_bi) + 0.25), (0.75 -
+#                                                                                     (0.50 * gamma_bi)), 0.00]),
+#     'W': get_high_symmetry_point_in_cartesian_space(reciprocal_lattice_vectors_bi, [0.50, (1.00 - gamma_bi), gamma_bi]),
+#     'U': get_high_symmetry_point_in_cartesian_space(reciprocal_lattice_vectors_bi, [((0.50 * gamma_bi) + 0.25), (1.00 -
+#                                                                                     gamma_bi), ((0.50 * gamma_bi) +
+#                                                                                     0.25)])
+# }
+
+cell = [[4.32903, 0.000000000000000, 0.000000000000000],
+        [-0.5 * 4.32903, 0.866025403784439 * 4.32903, 0.000000000000000],
+        [0.000000000000000, 0.0, 6.929958905343691 * 4.32903]]
+
+reciprocal_lattice_vectors_bi_bilayer = np.pi * np.asmatrix(np.concatenate(([np.cross(cell[1], cell[2]) / np.dot(cell[0], np.cross(cell[1], cell[2]))],
+                                                                            [np.cross(cell[2], cell[0]) / np.dot(cell[1], np.cross(cell[2], cell[0]))],
+                                                                            [np.cross(cell[0], cell[1]) / np.dot(cell[2], np.cross(cell[0], cell[1]))]), axis=0))
 
 SPECIAL_K_POINTS_BI = {
-    'LAMBDA': get_high_symmetry_point_in_cartesian_space(reciprocal_lattice_vectors_bi, [0.25, 0.25, 0.25]),
-    'GAMMA': get_high_symmetry_point_in_cartesian_space(reciprocal_lattice_vectors_bi, [0.00, 0.00, 0.00]),
-    'T': get_high_symmetry_point_in_cartesian_space(reciprocal_lattice_vectors_bi, [0.50, 0.50, 0.50]),
-    'L': get_high_symmetry_point_in_cartesian_space(reciprocal_lattice_vectors_bi, [0.00, 0.50, 0.00]),
-    'X': get_high_symmetry_point_in_cartesian_space(reciprocal_lattice_vectors_bi, [0.50, 0.50, 0.00]),
-    'K': get_high_symmetry_point_in_cartesian_space(reciprocal_lattice_vectors_bi, [((0.50 * gamma_bi) + 0.25), (0.75 -
-                                                                                    (0.50 * gamma_bi)), 0.00]),
-    'W': get_high_symmetry_point_in_cartesian_space(reciprocal_lattice_vectors_bi, [0.50, (1.00 - gamma_bi), gamma_bi]),
-    'U': get_high_symmetry_point_in_cartesian_space(reciprocal_lattice_vectors_bi, [((0.50 * gamma_bi) + 0.25), (1.00 -
-                                                                                    gamma_bi), ((0.50 * gamma_bi) +
-                                                                                    0.25)])
+    'GAMMA': get_high_symmetry_point_in_cartesian_space(reciprocal_lattice_vectors_bi_bilayer, [0.00000, 0.00000, 0.00000]),
+    'K':     get_high_symmetry_point_in_cartesian_space(reciprocal_lattice_vectors_bi_bilayer, [0.33333, 0.33333, 0.00000]),
+    'M':     get_high_symmetry_point_in_cartesian_space(reciprocal_lattice_vectors_bi_bilayer, [0.50000, 0.00000, 0.00000])
 }

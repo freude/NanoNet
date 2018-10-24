@@ -149,22 +149,22 @@ class Hamiltonian(BasisTB):
         if list(primitive_cell):
             self.ct = CyclicTopology(primitive_cell, list(self.atom_list.keys()), list(self.atom_list.values()), self._nn_distance)
 
-            # from mpl_toolkits.mplot3d import Axes3D
-            # import matplotlib.pyplot as plt
-            # fig = plt.figure()
-            # ax = fig.add_subplot(111, projection='3d')
-            # coordinates_to_plot = np.asarray(list(self.atom_list.values()))
-            # ax.scatter(coordinates_to_plot[:, 0], coordinates_to_plot[:, 1], coordinates_to_plot[:, 2], c='red', s=100)
-            #
-            # map1 = [item.startswith('*_') for item in list(self.ct.virtual_and_interfacial_atoms.keys())]
-            # map2 = [item.startswith('**_') for item in list(self.ct.virtual_and_interfacial_atoms.keys())]
-            #
-            # coordinates_to_plot = np.asarray(list(self.ct.virtual_and_interfacial_atoms.values()))
-            # ax.scatter(coordinates_to_plot[map1, 0], coordinates_to_plot[map1, 1], coordinates_to_plot[map1, 2],
-            #            c='green', s=70)
-            # ax.scatter(coordinates_to_plot[map2, 0], coordinates_to_plot[map2, 1], coordinates_to_plot[map2, 2],
-            #            s=20)
-            # plt.show()
+            from mpl_toolkits.mplot3d import Axes3D
+            import matplotlib.pyplot as plt
+            fig = plt.figure()
+            ax = fig.add_subplot(111, projection='3d')
+            coordinates_to_plot = np.asarray(list(self.atom_list.values()))
+            ax.scatter(coordinates_to_plot[:, 0], coordinates_to_plot[:, 1], coordinates_to_plot[:, 2], c='red', s=100)
+
+            map1 = [item.startswith('*_') for item in list(self.ct.virtual_and_interfacial_atoms.keys())]
+            map2 = [item.startswith('**_') for item in list(self.ct.virtual_and_interfacial_atoms.keys())]
+
+            coordinates_to_plot = np.asarray(list(self.ct.virtual_and_interfacial_atoms.values()))
+            ax.scatter(coordinates_to_plot[map1, 0], coordinates_to_plot[map1, 1], coordinates_to_plot[map1, 2],
+                       c='green', s=70)
+            ax.scatter(coordinates_to_plot[map2, 0], coordinates_to_plot[map2, 1], coordinates_to_plot[map2, 2],
+                       s=20)
+            plt.show()
 
         else:
             self.ct = None

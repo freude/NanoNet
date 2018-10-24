@@ -40,23 +40,29 @@ PARAMS_H_SI = {'ss_sigma': -3.9997,
 PARAMS_H_H = {'ss_sigma': 1}
 
 
-#  NN - Bi-Bi
+# 1NN - Bi-Bi
 PARAMS_BI_BI1 = {'ss_sigma': -0.608,
                  'sp_sigma': 1.320,
                  'pp_sigma': 1.854,
                  'pp_pi': -0.600}
 
-# 2d NN - Bi-Bi
+# 2NN - Bi-Bi
 PARAMS_BI_BI2 = {'ss_sigma': -0.384,
                  'sp_sigma': 0.433,
                  'pp_sigma': 1.396,
                  'pp_pi': -0.344}
 
-# 3d NN - Bi-Bi
+# 3NN - Bi-Bi
 PARAMS_BI_BI3 = {'ss_sigma': 0,
                  'sp_sigma': 0,
                  'pp_sigma': 0.156,
                  'pp_pi': 0}
+
+# 100NN - Bi-Bi
+PARAMS_BI_BI100 = {'ss_sigma': 0,
+                 'sp_sigma':   0,
+                 'pp_sigma':   0,
+                 'pp_pi':      0}
 
 
 def me_diatomic(bond, n, l_min, l_max, m, which_neighbour):

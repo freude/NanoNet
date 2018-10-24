@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from tb import Hamiltonian
 from tb import Atom
 import test.p
+from test import p
 
 
 def radial_dep( coords ):
@@ -14,7 +15,7 @@ def radial_dep( coords ):
     elif 3.7 > norm_of_coords > 3.3:
         return 2
     elif 5.7 > norm_of_coords > 3.7:
-        return 3
+        return 100
     else:
         return 100
 
@@ -174,7 +175,51 @@ def main3():
         fig.tight_layout()
         plt.savefig('bs_cb.pdf')
 
+def main4():
+
+    from tb.aux_functions import get_k_coords
+
+    path_to_xyz_file = """2
+                          Bilayer Bismuth                         
+                          Bi   -0.000002    2.499368    0.868710
+                          Bi    2.164517    1.249682   29.131290
+                       """
+
+    # path_to_pdf_file = '../band_structure_of_bulk_bismuth.pdf'
+    species = 'Bi'
+    basis_set = 'Bismuth'
+    sym_points = ['M', 'GAMMA', 'K']
+
+    num_points = [20, 20]
+    indices_of_bands = range( 0, 8 )
+
+    primitive_cell = p.cell
+
+    Atom.orbital_sets = { species: basis_set }
+
+    h = Hamiltonian( xyz = path_to_xyz_file, nn_distance = 6.5)
+    h.initialize( radial_dep )
+    h.set_periodic_bc( primitive_cell)
+
+    k_points = get_k_coords( sym_points, num_points, species )
+
+    band_structure = []
+    for jj, item in enumerate( k_points ):
+        [ eigenvalues, _ ] = h.diagonalize_periodic_bc( k_points[ jj ] )
+        band_structure.append( eigenvalues )
+
+    band_structure = np.array( band_structure )
+
+    ax = plt.axes()
+    ax.plot( band_structure[ :, indices_of_bands ] )
+    ax.set_xlabel( "" )
+    ax.set_ylabel( "Energy (eV)" )
+    ax.set_title( "" )
+    plt.tight_layout()
+    plt.ylim((-1, 1))
+    plt.show()
+
 
 if __name__ == '__main__':
 
-    main3()
+    main4()
