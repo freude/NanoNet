@@ -6,16 +6,16 @@ import test.p
 from test import p
 
 
-def radial_dep( coords ):
+def radial_dep(coords):
 
-    norm_of_coords = np.linalg.norm( coords )
+    norm_of_coords = np.linalg.norm(coords)
 
-    if norm_of_coords < 3.3:
+    if 1.0 < norm_of_coords < 3.2:
         return 1
-    elif 3.7 > norm_of_coords > 3.3:
+    elif 4.4 > norm_of_coords > 3.2:
         return 2
-    elif 5.7 > norm_of_coords > 3.7:
-        return 100
+    elif 7.6 > norm_of_coords > 4.4:
+        return 3
     else:
         return 100
 
@@ -180,7 +180,7 @@ def main4():
     from tb.aux_functions import get_k_coords
 
     path_to_xyz_file = """2
-                          Bilayer Bismuth                         
+                          Bilayer Bismuth
                           Bi   -0.000002    2.499368    0.868710
                           Bi    2.164517    1.249682   29.131290
                        """
@@ -197,9 +197,9 @@ def main4():
 
     Atom.orbital_sets = { species: basis_set }
 
-    h = Hamiltonian( xyz = path_to_xyz_file, nn_distance = 6.5)
+    h = Hamiltonian( xyz = path_to_xyz_file, nn_distance = 7.6)
     h.initialize( radial_dep )
-    h.set_periodic_bc( primitive_cell)
+    h.set_periodic_bc(primitive_cell, radial_dep)
 
     k_points = get_k_coords( sym_points, num_points, species )
 

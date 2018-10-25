@@ -144,7 +144,7 @@ class Hamiltonian(BasisTB):
 
                             self.h_matrix[ind1, ind2] = self._get_me(j1, j2, l1, l2, radial_dep=self.radial_dependence)
 
-    def set_periodic_bc(self, primitive_cell):
+    def set_periodic_bc(self, primitive_cell, radial_dep):
 
         if list(primitive_cell):
             self.ct = CyclicTopology(primitive_cell, list(self.atom_list.keys()), list(self.atom_list.values()), self._nn_distance)
@@ -164,6 +164,38 @@ class Hamiltonian(BasisTB):
                        c='green', s=70)
             ax.scatter(coordinates_to_plot[map2, 0], coordinates_to_plot[map2, 1], coordinates_to_plot[map2, 2],
                        s=20)
+
+            plt.show()
+
+            from mpl_toolkits.mplot3d import Axes3D
+            import matplotlib.pyplot as plt
+            fig = plt.figure()
+            ax = fig.add_subplot(111, projection='3d')
+
+            coordinates_of_atoms_in_unit_cell = np.asarray(list(self.atom_list.values()))
+            ax.scatter(coordinates_of_atoms_in_unit_cell[:, 0], coordinates_of_atoms_in_unit_cell[:, 1], coordinates_of_atoms_in_unit_cell[:, 2], c='k', s=60)
+
+            coordinates_of_atoms_outside_of_unit_cell = np.asarray(list(self.ct.virtual_and_interfacial_atoms.values()))
+            for ii in range(len(self.atom_list)):
+                for jj in range(len(self.ct.virtual_and_interfacial_atoms)):
+                    if radial_dep(coordinates_of_atoms_outside_of_unit_cell[jj] - coordinates_of_atoms_in_unit_cell[ii]) == 1:
+                       ax.scatter(coordinates_of_atoms_outside_of_unit_cell[jj, 0],
+                                  coordinates_of_atoms_outside_of_unit_cell[jj, 1],
+                                  coordinates_of_atoms_outside_of_unit_cell[jj, 2],
+                                  c='r', s=30)
+                    elif radial_dep(coordinates_of_atoms_outside_of_unit_cell[jj] - coordinates_of_atoms_in_unit_cell[ii]) == 2:
+                        ax.scatter(coordinates_of_atoms_outside_of_unit_cell[jj, 0],
+                                   coordinates_of_atoms_outside_of_unit_cell[jj, 1],
+                                   coordinates_of_atoms_outside_of_unit_cell[jj, 2],
+                                   c='g', s=20)
+                    elif radial_dep(coordinates_of_atoms_outside_of_unit_cell[jj] - coordinates_of_atoms_in_unit_cell[ii]) == 3:
+                        ax.scatter(coordinates_of_atoms_outside_of_unit_cell[jj, 0],
+                                   coordinates_of_atoms_outside_of_unit_cell[jj, 1],
+                                   coordinates_of_atoms_outside_of_unit_cell[jj, 2],
+                                   c='b', s=10)
+
+            ax.set_xlim(-6, 6)
+            ax.set_ylim(-6, 6)
             plt.show()
 
         else:
