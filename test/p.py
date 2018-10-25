@@ -57,9 +57,10 @@ def get_high_symmetry_point_in_cartesian_space(reciprocal_lattice_vectors, coord
 #                                                                                     0.25)])
 # }
 
-cell = [[4.32903, 0.000000000000000, 0.000000000000000],
-        [-0.5 * 4.32903, 0.866025403784439 * 4.32903, 0.000000000000000],
-        [0.000000000000000, 0.0, 6.929958905343691 * 4.32903]]
+
+cell = 4.32903 * np.array([[ 1.000000000000000, 0.000000000000000, 0.000000000000000],
+                           [-0.500000000000000, 0.866025403784439, 0.000000000000000],
+                           [ 0.000000000000000, 0.000000000000000, 6.929958905343691]])
 
 reciprocal_lattice_vectors_bi_bilayer = np.pi * np.asmatrix(np.concatenate(([np.cross(cell[1], cell[2]) / np.dot(cell[0], np.cross(cell[1], cell[2]))],
                                                                             [np.cross(cell[2], cell[0]) / np.dot(cell[1], np.cross(cell[2], cell[0]))],
