@@ -180,10 +180,10 @@ def main4():
     from tb.aux_functions import get_k_coords
 
     path_to_xyz_file = """2
-                          Bilayer Bismuth
-                          Bi   0.000000    2.499368    0.868710
-                          Bi   2.164517    1.249682   -0.868710
-                       """
+                              Bilayer Bismuth
+                              Bi   0.000000    2.499364    0.868720
+                              Bi   2.164513    1.249682   -0.868720
+                           """
 
     # path_to_pdf_file = '../band_structure_of_bulk_bismuth.pdf'
     species = 'Bi'

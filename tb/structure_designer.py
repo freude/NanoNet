@@ -17,7 +17,7 @@ def is_in_coords(coord, coords):
     ans = False
 
     for xyz in list(coords):
-        ans += (coord == xyz).all()
+        ans += (np.linalg.norm(coord - xyz) < 0.01)
 
     return ans
 
