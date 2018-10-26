@@ -58,12 +58,6 @@ PARAMS_BI_BI3 = {'ss_sigma': 0,
                  'pp_sigma': 0.156,
                  'pp_pi': 0}
 
-# 100NN - Bi-Bi
-PARAMS_BI_BI100 = {'ss_sigma': 0,
-                 'sp_sigma':   0,
-                 'pp_sigma':   0,
-                 'pp_pi':      0}
-
 
 def me_diatomic(bond, n, l_min, l_max, m, which_neighbour):
     """
@@ -91,6 +85,8 @@ def me_diatomic(bond, n, l_min, l_max, m, which_neighbour):
     try:
         if which_neighbour == 0:
             return getattr(sys.modules[__name__], 'PARAMS_' + bond)[label]
+        elif which_neighbour == 100:
+            return 0
         else:
             return getattr(sys.modules[__name__], 'PARAMS_' + bond + str(which_neighbour))[label]
     except KeyError:
