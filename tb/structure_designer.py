@@ -122,6 +122,9 @@ class CyclicTopology(AbstractStructureDesigner):
         distances1 = np.abs(distances1 - np.min(distances1)) < self._nn_distance * 0.25
         distances2 = np.abs(np.abs(distances2) - np.min(np.abs(distances2))) < self._nn_distance * 0.25
 
+        distances1 = np.ones(distances1.shape)
+        distances2 = np.ones(distances1.shape)
+
         # form new lists of atoms
         count = 0
         for j, item in enumerate(coords):

@@ -10,11 +10,11 @@ def radial_dep(coords):
 
     norm_of_coords = np.linalg.norm(coords)
 
-    if 1.0 < norm_of_coords < 3.2:
+    if norm_of_coords < 3.3:
         return 1
-    elif 4.4 > norm_of_coords > 3.2:
+    elif 3.7 > norm_of_coords > 3.3:
         return 2
-    elif 7.6 > norm_of_coords > 4.4:
+    elif 5.0 > norm_of_coords > 3.7:
         return 3
     else:
         return 100
@@ -181,8 +181,8 @@ def main4():
 
     path_to_xyz_file = """2
                           Bilayer Bismuth
-                          Bi   -0.000002    2.499368    0.868710
-                          Bi    2.164517    1.249682   29.131290
+                          Bi   0.000000    2.499368    0.868710
+                          Bi   2.164517    1.249682   -0.868710
                        """
 
     # path_to_pdf_file = '../band_structure_of_bulk_bismuth.pdf'
@@ -197,7 +197,7 @@ def main4():
 
     Atom.orbital_sets = { species: basis_set }
 
-    h = Hamiltonian( xyz = path_to_xyz_file, nn_distance = 7.6)
+    h = Hamiltonian( xyz = path_to_xyz_file, nn_distance = 5.6)
     h.initialize( radial_dep )
     h.set_periodic_bc(primitive_cell, radial_dep)
 
