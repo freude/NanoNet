@@ -12,6 +12,7 @@ import sys
 import math
 from test.p import *
 import warnings
+from test import p
 
 
 #  NN - Si-Si
@@ -159,20 +160,16 @@ def t_me(N, l, m1, m2, gamma):
                (((-1) ** abs(m2)) * d_me(N, l, abs(m1), abs(m2)) - d_me(N, l, abs(m1), -abs(m2)))
 
 
-def me(atom1, ll1, atom2, ll2, coords, which_neighbour=0):
+def matrix_element_to_be_returned(atom1, ll1, atom2, ll2, coords, which_neighbour, l1, l2):
 
     # determine type of bonds
     atoms = sorted([item.upper() for item in [atom1.title, atom2.title]])
     atoms = atoms[0] + '_' + atoms[1]
 
-    # quantum numbers for the first atom
+    # quantum numbers
     n1 = atom1.orbitals[ll1]['n']
-    l1 = atom1.orbitals[ll1]['l']
     m1 = atom1.orbitals[ll1]['m']
-
-    # quantum numbers for the second atom
     n2 = atom2.orbitals[ll2]['n']
-    l2 = atom2.orbitals[ll2]['l']
     m2 = atom2.orbitals[ll2]['m']
 
     L = coords[0]
@@ -197,6 +194,68 @@ def me(atom1, ll1, atom2, ll2, coords, which_neighbour=0):
                me_diatomic(atoms, code, l_min, l_max, m, which_neighbour)
 
     return prefactor * ans
+
+
+def me(atom1, ll1, atom2, ll2, coords, which_neighbour=0):
+
+    # orbital types
+    type1 = atom1.orbitals[ll1]['title']
+    type2 = atom1.orbitals[ll2]['title']
+
+    # quantum numbers
+    l1 = atom1.orbitals[ll1]['l']
+    l2 = atom2.orbitals[ll2]['l']
+    s1 = atom1.orbitals[ll1]['s']
+    s2 = atom2.orbitals[ll2]['s']
+
+    if atom1 == atom2 and l1 == 1 and l2 == 1:
+        if type1 == 'px' and type2 == 'py' and s1 == 0 and s2 == 0:
+            return (-1j * p.LAMBDA / 3) + matrix_element_to_be_returned(atom1, ll1, atom2, ll2, coords, which_neighbour, l1, l2)
+
+        elif type1 == 'px' and type2 == 'pz' and s1 == 1 and s2 == 0:
+            return (p.LAMBDA / 3) + matrix_element_to_be_returned(atom1, ll1, atom2, ll2, coords, which_neighbour, l1, l2)
+
+        elif type1 == 'py' and type2 == 'pz' and s1 == 1 and s2 == 0:
+            return (-1j * p.LAMBDA / 3) + matrix_element_to_be_returned(atom1, ll1, atom2, ll2, coords, which_neighbour, l1, l2)
+
+        elif type1 == 'px' and type2 == 'py' and s1 == 0 and s2 == 0:
+            return (+1j * p.LAMBDA / 3) + matrix_element_to_be_returned(atom1, ll1, atom2, ll2, coords, which_neighbour, l1, l2)
+
+        elif type1 == 'px' and type2 == 'pz' and s1 == 0 and s2 == 1:
+            return (p.LAMBDA / 3) + matrix_element_to_be_returned(atom1, ll1, atom2, ll2, coords, which_neighbour, l1, l2)
+
+        elif type1 == 'py' and type2 == 'pz' and s1 == 0 and s2 == 1:
+            return (+1j * p.LAMBDA / 3) + matrix_element_to_be_returned(atom1, ll1, atom2, ll2, coords, which_neighbour, l1, l2)
+
+        # elif type1 == 'py' and type2 == 'px' and s1 == 0 and s2 == 0:
+        #     return (+1j * p.LAMBDA / 3) + matrix_element_to_be_returned(atom1, ll1, atom2, ll2, coords, which_neighbour, l1, l2)
+        #
+        # elif type1 == 'pz' and type2 == 'px' and s1 == 0 and s2 == 1:
+        #     return (p.LAMBDA / 3) + matrix_element_to_be_returned(atom1, ll1, atom2, ll2, coords, which_neighbour, l1, l2)
+        #
+        # elif type1 == 'pz' and type2 == 'py' and s1 == 0 and s2 == 1:
+        #     return (+1j * p.LAMBDA / 3) + matrix_element_to_be_returned(atom1, ll1, atom2, ll2, coords, which_neighbour, l1, l2)
+        #
+        # elif type1 == 'py' and type2 == 'px' and s1 == 0 and s2 == 0:
+        #     return (-1j * p.LAMBDA / 3) + matrix_element_to_be_returned(atom1, ll1, atom2, ll2, coords, which_neighbour, l1, l2)
+        #
+        # elif type1 == 'pz' and type2 == 'px' and s1 == 1 and s2 == 0:
+        #     return (p.LAMBDA / 3) + matrix_element_to_be_returned(atom1, ll1, atom2, ll2, coords, which_neighbour, l1, l2)
+        #
+        # elif type1 == 'pz' and type2 == 'py' and s1 == 1 and s2 == 0:
+        #     return (-1j * p.LAMBDA / 3) + matrix_element_to_be_returned(atom1, ll1, atom2, ll2, coords, which_neighbour, l1, l2)
+
+        elif s1 == s2:
+            return matrix_element_to_be_returned(atom1, ll1, atom2, ll2, coords, which_neighbour, l1, l2)
+
+        else:
+            return 0
+
+    elif s1 == s2:
+        return matrix_element_to_be_returned(atom1, ll1, atom2, ll2, coords, which_neighbour, l1, l2)
+
+    else:
+        return 0
 
 
 if __name__ == "__main__":

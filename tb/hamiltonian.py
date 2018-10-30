@@ -259,7 +259,7 @@ class Hamiltonian(BasisTB):
 
         return True
 
-    def _get_me(self, atom1, atom2, l1, l2, coords=None, radial_dep=None, spin_orbit=None):
+    def _get_me(self, atom1, atom2, l1, l2, coords=None, radial_dep=None):
         """
         Compute the matrix element <atom1, l1|H|l2, atom2>
 

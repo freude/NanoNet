@@ -72,10 +72,12 @@ def main2():
     sym_points = ['K', 'GAMMA', 'T', 'W', 'L', 'LAMBDA']
     # sym_points = ['K', 'X', 'GAMMA', 'L', 'U', 'T']
     # sym_points = ['GAMMA', 'GAMMA']
+    # sym_points = ['K', 'GAMMA', 'T']
 
     num_points = [20, 20, 20, 20, 20]
     # num_points = [1]
-    indices_of_bands = range(0, 8)
+    # num_points = [20, 20]
+    indices_of_bands = range(0, 16)
 
     cell_a = test.p.a_bi * np.array([[(-1.0 / 2.0), (-np.sqrt(3.0) / 6.0), 0.0],
                                      [ (  1.0 / 2.0 ), ( -np.sqrt(3.0) / 6.0 ), 0.0 ],
@@ -99,6 +101,9 @@ def main2():
         band_structure.append( eigenvalues )
 
     band_structure = np.array( band_structure )
+
+    # plt.imshow(np.real(h.h_matrix_bc_factor * h.h_matrix + h.h_matrix_bc_add))
+    # plt.show()
 
     ax = plt.axes()
     ax.plot( band_structure[ :, indices_of_bands ] )
