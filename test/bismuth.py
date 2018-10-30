@@ -75,7 +75,7 @@ def main2():
 
     num_points = [20, 20, 20, 20, 20]
     # num_points = [1]
-    indices_of_bands = range( 0, 8 )
+    indices_of_bands = range(0, 8)
 
     cell_a = test.p.a_bi * np.array([[(-1.0 / 2.0), (-np.sqrt(3.0) / 6.0), 0.0],
                                      [ (  1.0 / 2.0 ), ( -np.sqrt(3.0) / 6.0 ), 0.0 ],
@@ -89,7 +89,7 @@ def main2():
 
     h = Hamiltonian( xyz = path_to_xyz_file, nn_distance = 4.6)
     h.initialize( radial_dep )
-    h.set_periodic_bc( primitive_cell.tolist() )
+    h.set_periodic_bc(primitive_cell.tolist(), radial_dep)
 
     k_points = get_k_coords( sym_points, num_points, species )
 
@@ -222,4 +222,4 @@ def main4():
 
 if __name__ == '__main__':
 
-    main4()
+    main2()

@@ -122,13 +122,7 @@ class Bismuth(Atom):
         super(Bismuth, self).__init__("Bi")
 
         self.add_orbital("s", energy=-10.906, principal=0)
-
-        # self.add_orbital("s1", energy=-10.906, principal=0, spin=1)
-
         self.add_orbital("px", energy=-0.486, orbital=1, magnetic=-1)
         self.add_orbital("py", energy=-0.486, orbital=1, magnetic=1)
         self.add_orbital("pz", energy=-0.486, orbital=1, magnetic=0)
 
-        # self.add_orbital("px1", energy=-0.486, orbital=1, magnetic=-1, spin=1)
-        # self.add_orbital("py1", energy=-0.486, orbital=1, magnetic=1, spin=1)
-        # self.add_orbital("pz1", energy=-0.486, orbital=1, magnetic=0, spin=1)
