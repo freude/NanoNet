@@ -306,7 +306,7 @@ class Hamiltonian(BasisTB):
                 print(list(self.atom_list.keys())[atom2])
                 print(atom_kind1.title, atom_kind2.title)
 
-            return me(atom_kind1, l1, atom_kind2, l2, coords1, which_neighbour)
+            return me(atom_kind1, l1, atom_kind2, l2, coords1, atom1, atom2, which_neighbour)
 
     def _reset_periodic_bc(self):
         """

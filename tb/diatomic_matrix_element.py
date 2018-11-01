@@ -196,7 +196,7 @@ def matrix_element_to_be_returned(atom1, ll1, atom2, ll2, coords, which_neighbou
     return prefactor * ans
 
 
-def me(atom1, ll1, atom2, ll2, coords, which_neighbour=0):
+def me(atom1, ll1, atom2, ll2, coords, atom1_index, atom2_index, which_neighbour=0):
 
     # orbital types
     type1 = atom1.orbitals[ll1]['title']
@@ -208,46 +208,46 @@ def me(atom1, ll1, atom2, ll2, coords, which_neighbour=0):
     s1 = atom1.orbitals[ll1]['s']
     s2 = atom2.orbitals[ll2]['s']
 
-    if atom1 == atom2 and l1 == 1 and l2 == 1:
+    if atom1_index == atom2_index and l1 == 1 and l2 == 1:
+
         if type1 == 'px' and type2 == 'py' and s1 == 0 and s2 == 0:
             return (-1j * p.LAMBDA / 3) + matrix_element_to_be_returned(atom1, ll1, atom2, ll2, coords, which_neighbour, l1, l2)
 
-        elif type1 == 'px' and type2 == 'pz' and s1 == 1 and s2 == 0:
-            return (p.LAMBDA / 3) + matrix_element_to_be_returned(atom1, ll1, atom2, ll2, coords, which_neighbour, l1, l2)
-
-        elif type1 == 'py' and type2 == 'pz' and s1 == 1 and s2 == 0:
-            return (-1j * p.LAMBDA / 3) + matrix_element_to_be_returned(atom1, ll1, atom2, ll2, coords, which_neighbour, l1, l2)
-
-        elif type1 == 'px' and type2 == 'py' and s1 == 0 and s2 == 0:
-            return (+1j * p.LAMBDA / 3) + matrix_element_to_be_returned(atom1, ll1, atom2, ll2, coords, which_neighbour, l1, l2)
-
         elif type1 == 'px' and type2 == 'pz' and s1 == 0 and s2 == 1:
-            return (p.LAMBDA / 3) + matrix_element_to_be_returned(atom1, ll1, atom2, ll2, coords, which_neighbour, l1, l2)
+            return p.LAMBDA / 3
 
         elif type1 == 'py' and type2 == 'pz' and s1 == 0 and s2 == 1:
-            return (+1j * p.LAMBDA / 3) + matrix_element_to_be_returned(atom1, ll1, atom2, ll2, coords, which_neighbour, l1, l2)
+            return -1j * p.LAMBDA / 3
 
-        # elif type1 == 'py' and type2 == 'px' and s1 == 0 and s2 == 0:
-        #     return (+1j * p.LAMBDA / 3) + matrix_element_to_be_returned(atom1, ll1, atom2, ll2, coords, which_neighbour, l1, l2)
-        #
-        # elif type1 == 'pz' and type2 == 'px' and s1 == 0 and s2 == 1:
-        #     return (p.LAMBDA / 3) + matrix_element_to_be_returned(atom1, ll1, atom2, ll2, coords, which_neighbour, l1, l2)
-        #
-        # elif type1 == 'pz' and type2 == 'py' and s1 == 0 and s2 == 1:
-        #     return (+1j * p.LAMBDA / 3) + matrix_element_to_be_returned(atom1, ll1, atom2, ll2, coords, which_neighbour, l1, l2)
-        #
-        # elif type1 == 'py' and type2 == 'px' and s1 == 0 and s2 == 0:
-        #     return (-1j * p.LAMBDA / 3) + matrix_element_to_be_returned(atom1, ll1, atom2, ll2, coords, which_neighbour, l1, l2)
-        #
-        # elif type1 == 'pz' and type2 == 'px' and s1 == 1 and s2 == 0:
-        #     return (p.LAMBDA / 3) + matrix_element_to_be_returned(atom1, ll1, atom2, ll2, coords, which_neighbour, l1, l2)
-        #
-        # elif type1 == 'pz' and type2 == 'py' and s1 == 1 and s2 == 0:
-        #     return (-1j * p.LAMBDA / 3) + matrix_element_to_be_returned(atom1, ll1, atom2, ll2, coords, which_neighbour, l1, l2)
+        elif type1 == 'pz' and type2 == 'px' and s1 == 0 and s2 == 1:
+            return -p.LAMBDA / 3
+
+        elif type1 == 'pz' and type2 == 'py' and s1 == 0 and s2 == 1:
+            return 1j * p.LAMBDA / 3
+
+        elif type1 == 'px' and type2 == 'py' and s1 == 1 and s2 == 1:
+            return (1j * p.LAMBDA / 3) + matrix_element_to_be_returned(atom1, ll1, atom2, ll2, coords, which_neighbour, l1, l2)
+
+        elif type1 == 'py' and type2 == 'px' and s1 == 0 and s2 == 0:
+            return (1j * p.LAMBDA / 3) + matrix_element_to_be_returned(atom1, ll1, atom2, ll2, coords, which_neighbour, l1, l2)
+
+        elif type1 == 'pz' and type2 == 'px' and s1 == 1 and s2 == 0:
+            return (p.LAMBDA / 3)
+
+        elif type1 == 'pz' and type2 == 'py' and s1 == 1 and s2 == 0:
+            return (1j * p.LAMBDA / 3)
+
+        elif type1 == 'px' and type2 == 'pz' and s1 == 1 and s2 == 0:
+            return -p.LAMBDA / 3
+
+        elif type1 == 'py' and type2 == 'pz' and s1 == 1 and s2 == 0:
+            return -1j * p.LAMBDA / 3
+
+        elif type1 == 'py' and type2 == 'px' and s1 == 1 and s2 == 1:
+            return (-1j * p.LAMBDA / 3) + matrix_element_to_be_returned(atom1, ll1, atom2, ll2, coords, which_neighbour, l1, l2)
 
         elif s1 == s2:
             return matrix_element_to_be_returned(atom1, ll1, atom2, ll2, coords, which_neighbour, l1, l2)
-
         else:
             return 0
 

@@ -102,7 +102,9 @@ def main2():
 
     band_structure = np.array( band_structure )
 
-    # plt.imshow(np.real(h.h_matrix_bc_factor * h.h_matrix + h.h_matrix_bc_add))
+    print(h.is_hermitian())
+
+    # plt.imshow(np.abs(h.h_matrix_bc_factor * h.h_matrix + h.h_matrix_bc_add))
     # plt.show()
 
     ax = plt.axes()

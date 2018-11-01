@@ -22,7 +22,7 @@ ORBITAL_QN = {0: 's', 1: 'p', 2: 'd'}
 M_QN = {0: 'sigma', 1: 'pi', 2: 'delta'}
 
 # Spin-orbit coupling term
-LAMBDA = 0
+LAMBDA = 0.25
 
 # Coordinates of points with high symmetry in the first Brillouin zone
 
