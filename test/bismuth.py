@@ -15,7 +15,7 @@ def radial_dep(coords):
     elif 3.7 > norm_of_coords > 3.3:
         return 2
     elif 5.0 > norm_of_coords > 3.7:
-        return 3
+        return 100
     else:
         return 100
 
@@ -104,9 +104,6 @@ def main2():
 
     print(h.is_hermitian())
 
-    # plt.imshow(np.abs(h.h_matrix_bc_factor * h.h_matrix + h.h_matrix_bc_add))
-    # plt.show()
-
     ax = plt.axes()
     ax.plot( band_structure[ :, indices_of_bands ] )
     ax.set_xlabel( "" )
@@ -115,6 +112,9 @@ def main2():
     plt.tight_layout()
     plt.show()
     # plt.savefig( path_to_pdf_file )
+
+    # plt.imshow(np.abs(h.h_matrix_bc_factor * h.h_matrix + h.h_matrix_bc_add))
+    # plt.show()
 
 def main3():
     """
@@ -197,8 +197,8 @@ def main4():
     basis_set = 'Bismuth'
     sym_points = ['M', 'GAMMA', 'K']
 
-    num_points = [20, 20]
-    indices_of_bands = range( 0, 8 )
+    num_points = [40, 40]
+    indices_of_bands = range( 0, 16 )
 
     primitive_cell = p.cell
 
@@ -213,7 +213,7 @@ def main4():
     band_structure = []
     for jj, item in enumerate( k_points ):
         [ eigenvalues, _ ] = h.diagonalize_periodic_bc( k_points[ jj ] )
-        band_structure.append( eigenvalues )
+        band_structure.append(eigenvalues)
 
     band_structure = np.array( band_structure )
 
@@ -223,10 +223,10 @@ def main4():
     ax.set_ylabel( "Energy (eV)" )
     ax.set_title( "" )
     plt.tight_layout()
-    plt.ylim((-1, 1))
+    plt.ylim((-2, 1))
     plt.show()
 
 
 if __name__ == '__main__':
 
-    main2()
+    main4()
