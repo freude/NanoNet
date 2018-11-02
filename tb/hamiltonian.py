@@ -170,37 +170,37 @@ class Hamiltonian(BasisTB):
             # ax.set_zlim(-6, 6)
             # plt.show()
 
-            # from mpl_toolkits.mplot3d import Axes3D
-            # import matplotlib.pyplot as plt
-            # fig = plt.figure()
-            # ax = fig.add_subplot(111, projection='3d')
-            #
-            # coordinates_of_atoms_in_unit_cell = np.asarray(list(self.atom_list.values()))
-            # ax.scatter(coordinates_of_atoms_in_unit_cell[:, 0], coordinates_of_atoms_in_unit_cell[:, 1], coordinates_of_atoms_in_unit_cell[:, 2], c='k', s=60)
-            #
-            # coordinates_of_atoms_outside_of_unit_cell = np.asarray(list(self.ct.virtual_and_interfacial_atoms.values()))
-            # for ii in range(len(self.atom_list)):
-            #     for jj in range(len(self.ct.virtual_and_interfacial_atoms)):
-            #         if radial_dep(coordinates_of_atoms_outside_of_unit_cell[jj] - coordinates_of_atoms_in_unit_cell[ii]) == 1:
-            #            ax.scatter(coordinates_of_atoms_outside_of_unit_cell[jj, 0],
-            #                       coordinates_of_atoms_outside_of_unit_cell[jj, 1],
-            #                       coordinates_of_atoms_outside_of_unit_cell[jj, 2],
-            #                       c='r', s=30)
-            #         elif radial_dep(coordinates_of_atoms_outside_of_unit_cell[jj] - coordinates_of_atoms_in_unit_cell[ii]) == 2:
-            #             ax.scatter(coordinates_of_atoms_outside_of_unit_cell[jj, 0],
-            #                        coordinates_of_atoms_outside_of_unit_cell[jj, 1],
-            #                        coordinates_of_atoms_outside_of_unit_cell[jj, 2],
-            #                        c='g', s=20)
-            #         elif radial_dep(coordinates_of_atoms_outside_of_unit_cell[jj] - coordinates_of_atoms_in_unit_cell[ii]) == 3:
-            #             ax.scatter(coordinates_of_atoms_outside_of_unit_cell[jj, 0],
-            #                        coordinates_of_atoms_outside_of_unit_cell[jj, 1],
-            #                        coordinates_of_atoms_outside_of_unit_cell[jj, 2],
-            #                        c='b', s=10)
-            #
-            # ax.set_xlim(-6, 6)
-            # ax.set_ylim(-6, 6)
-            # ax.set_zlim(-6, 6)
-            # plt.show()
+            from mpl_toolkits.mplot3d import Axes3D
+            import matplotlib.pyplot as plt
+            fig = plt.figure()
+            ax = fig.add_subplot(111, projection='3d')
+
+            coordinates_of_atoms_in_unit_cell = np.asarray(list(self.atom_list.values()))
+            ax.scatter(coordinates_of_atoms_in_unit_cell[:, 0], coordinates_of_atoms_in_unit_cell[:, 1], coordinates_of_atoms_in_unit_cell[:, 2], c='k', s=60)
+
+            coordinates_of_atoms_outside_of_unit_cell = np.asarray(list(self.ct.virtual_and_interfacial_atoms.values()))
+            for ii in range(len(self.atom_list)):
+                for jj in range(len(self.ct.virtual_and_interfacial_atoms)):
+                    if radial_dep(coordinates_of_atoms_outside_of_unit_cell[jj] - coordinates_of_atoms_in_unit_cell[ii]) == 1:
+                       ax.scatter(coordinates_of_atoms_outside_of_unit_cell[jj, 0],
+                                  coordinates_of_atoms_outside_of_unit_cell[jj, 1],
+                                  coordinates_of_atoms_outside_of_unit_cell[jj, 2],
+                                  c='r', s=30)
+                    elif radial_dep(coordinates_of_atoms_outside_of_unit_cell[jj] - coordinates_of_atoms_in_unit_cell[ii]) == 2:
+                        ax.scatter(coordinates_of_atoms_outside_of_unit_cell[jj, 0],
+                                   coordinates_of_atoms_outside_of_unit_cell[jj, 1],
+                                   coordinates_of_atoms_outside_of_unit_cell[jj, 2],
+                                   c='g', s=20)
+                    elif radial_dep(coordinates_of_atoms_outside_of_unit_cell[jj] - coordinates_of_atoms_in_unit_cell[ii]) == 3:
+                        ax.scatter(coordinates_of_atoms_outside_of_unit_cell[jj, 0],
+                                   coordinates_of_atoms_outside_of_unit_cell[jj, 1],
+                                   coordinates_of_atoms_outside_of_unit_cell[jj, 2],
+                                   c='b', s=10)
+
+            ax.set_xlim(-6, 6)
+            ax.set_ylim(-6, 6)
+            ax.set_zlim(-6, 6)
+            plt.show()
 
         else:
             self.ct = None

@@ -15,7 +15,7 @@ def radial_dep(coords):
     elif 3.7 > norm_of_coords > 3.3:
         return 2
     elif 5.0 > norm_of_coords > 3.7:
-        return 100
+        return 3
     else:
         return 100
 
@@ -196,29 +196,39 @@ def main4():
     species = 'Bi'
     basis_set = 'Bismuth'
     sym_points = ['M', 'GAMMA', 'K']
+    # sym_points = ['GAMMA', 'GAMMA']
 
     num_points = [40, 40]
+    # num_points = [1]
     indices_of_bands = range( 0, 16 )
 
     primitive_cell = p.cell
 
     Atom.orbital_sets = { species: basis_set }
 
-    h = Hamiltonian( xyz = path_to_xyz_file, nn_distance = 5.6)
-    h.initialize( radial_dep )
+    h = Hamiltonian(xyz=path_to_xyz_file, nn_distance=5.6)
+    h.initialize(radial_dep)
     h.set_periodic_bc(primitive_cell, radial_dep)
 
     k_points = get_k_coords( sym_points, num_points, species )
 
-    band_structure = []
-    for jj, item in enumerate( k_points ):
-        [ eigenvalues, _ ] = h.diagonalize_periodic_bc( k_points[ jj ] )
-        band_structure.append(eigenvalues)
+    list_of_spin_orbit_couplings = [0]
+    # list_of_spin_orbit_couplings = np.linspace(0, 0.333333, 40)
 
-    band_structure = np.array( band_structure )
+    band_structure = []
+    for ii, item in enumerate(list_of_spin_orbit_couplings):
+        for jj, item in enumerate(k_points):
+            # h = Hamiltonian(xyz=path_to_xyz_file, nn_distance=5.6)
+            # h.initialize(radial_dep)
+            # h.set_periodic_bc(primitive_cell, radial_dep)
+            p.LAMBDA = list_of_spin_orbit_couplings[ii]
+            [eigenvalues, _] = h.diagonalize_periodic_bc(k_points[jj])
+            band_structure.append(eigenvalues)
+
+    band_structure = np.array(band_structure)
 
     ax = plt.axes()
-    ax.plot( band_structure[ :, indices_of_bands ] )
+    ax.plot(band_structure[ :, indices_of_bands ])
     ax.set_xlabel( "" )
     ax.set_ylabel( "Energy (eV)" )
     ax.set_title( "" )
