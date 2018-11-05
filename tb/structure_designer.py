@@ -6,10 +6,12 @@ from __future__ import print_function
 from __future__ import absolute_import
 from __future__ import division
 from collections import OrderedDict
+import logging
 import numpy as np
 import scipy.spatial
 from .aux_functions import xyz2np, count_species
 from .abstract_interfaces import AbstractStructureDesigner
+from .aux_functions import print_dict
 
 
 def is_in_coords(coord, coords):
@@ -37,6 +39,9 @@ class StructDesignerXYZ(AbstractStructureDesigner):
             reader = xyz
 
         labels, coords = xyz2np(reader)
+
+        logging.info("The xyz-file:\n {}".format(reader))
+
         self._nn_distance = nn_distance                            # maximal distance to a neighbor
         self._num_of_species = count_species(labels)               # dictionary of elements and
                                                                    # their number per unit cell
@@ -93,6 +98,10 @@ class CyclicTopology(AbstractStructureDesigner):
 
         self._kd_tree = scipy.spatial.cKDTree(list(self.virtual_and_interfacial_atoms.values()),
                                               leafsize=100)
+
+        logging.info("Primitive_cell_vectors: \n {} \n".format(primitive_cell_vectors))
+        logging.info("Virtual and interfacial atoms: \n "
+                     "{} ".format(print_dict(self.virtual_and_interfacial_atoms)))
 
     @property
     def atom_list(self):

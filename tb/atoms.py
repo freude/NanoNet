@@ -2,6 +2,7 @@
 Module contains classes describing atoms with different number of basis functions
 """
 import sys
+from tb.aux_functions import print_table
 
 
 class Atom(object):
@@ -40,6 +41,10 @@ class Atom(object):
 
         self.orbitals.append(orbital)
         self.num_of_orbitals += 1
+
+    def generate_info(self):
+
+        return print_table(self.orbitals)
 
     @staticmethod
     def atoms_factory(labels):

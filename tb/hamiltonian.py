@@ -4,6 +4,8 @@ The module contains all necessary classes needed to compute the Hamiltonian matr
 from __future__ import print_function, division
 from __future__ import absolute_import
 from collections import OrderedDict
+from functools import reduce
+import logging
 from operator import mul
 import matplotlib.pyplot as plt
 import numpy as np
@@ -13,10 +15,11 @@ from tb.diatomic_matrix_element import me
 from tb.atoms import Atom
 from tb.aux_functions import dict2xyz
 from tb.tb_script import postprocess_data
-from functools import reduce
 
 
 VERBOSITY = 1
+# logging.basicConfig(format='%(asctime)s[%(filename)s:%(lineno)s - %(funcName)10s() ]:%(message)s', level=logging.INFO)
+logging.basicConfig(format='%(message)s', level=logging.INFO)
 
 
 class BasisTB(AbstractBasis, StructDesignerXYZ):
@@ -55,6 +58,11 @@ class BasisTB(AbstractBasis, StructDesignerXYZ):
             self._offsets.append(self.orbitals_dict[list(self.atom_list.keys())[j]].num_of_orbitals)
         self._offsets = np.cumsum(self._offsets)
 
+        # make a log
+        logging.info("Basis set \n Num of species {} \n".format(self.num_of_species))
+        for key, label in self._orbitals_dict.items():
+            logging.info("\n {} {} ".format(key, label.generate_info()))
+
     def qn2ind(self, qn):
 
         qn = OrderedDict(qn)
@@ -89,6 +97,9 @@ class Hamiltonian(BasisTB):
 
         xyz = kwargs.get('xyz', "")
         nn_distance = kwargs.get('nn_distance', 2.39)
+
+        logging.info('The verbosity level is {}'.format(VERBOSITY))
+        logging.info('The radius of the neighbourhood is {} Ang'.format(nn_distance))
 
         if isinstance(xyz, str):
             super(Hamiltonian, self).__init__(xyz=xyz, nn_distance=nn_distance)

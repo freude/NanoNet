@@ -200,7 +200,7 @@ def me(atom1, ll1, atom2, ll2, coords, atom1_index, atom2_index, which_neighbour
 
     # orbital types
     type1 = atom1.orbitals[ll1]['title']
-    type2 = atom1.orbitals[ll2]['title']
+    type2 = atom2.orbitals[ll2]['title']
 
     # quantum numbers
     l1 = atom1.orbitals[ll1]['l']

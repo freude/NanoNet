@@ -141,7 +141,7 @@ def main3():
 
     a_si = 5.50
     PRIMITIVE_CELL = [[0, 0, a_si]]
-    hamiltonian.set_periodic_bc(PRIMITIVE_CELL)
+    hamiltonian.set_periodic_bc(PRIMITIVE_CELL, radial_dep=radial_dep)
 
     num_points = 20
     kk = np.linspace(0, 0.57, num_points, endpoint=True)
@@ -181,6 +181,7 @@ def main3():
         ax[1].set_title('Conduction band')
         fig.tight_layout()
         plt.savefig('bs_cb.pdf')
+        plt.show()
 
 def main4():
 
