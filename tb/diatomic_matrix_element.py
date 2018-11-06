@@ -10,10 +10,8 @@ from __future__ import absolute_import
 from __future__ import division
 import sys
 import math
-from test.p import *
+from .constants import *
 import warnings
-from test import p
-
 
 #  NN - Si-Si
 PARAMS_SI_SI = {'ss_sigma': -1.9413,
@@ -59,6 +57,11 @@ PARAMS_BI_BI3 = {'ss_sigma': 0,
                  'pp_sigma': 0.156,
                  'pp_pi': 0}
 
+# # 1NN - Bi-Bi
+# PARAMS_BI_BI1 = {'ss_sigma': -0.92,
+#                  'sp_sigma': 1.99,
+#                  'pp_sigma': 2.79,
+#                  'pp_pi': -0.9}
 
 def me_diatomic(bond, n, l_min, l_max, m, which_neighbour):
     """
@@ -160,100 +163,48 @@ def t_me(N, l, m1, m2, gamma):
                (((-1) ** abs(m2)) * d_me(N, l, abs(m1), abs(m2)) - d_me(N, l, abs(m1), -abs(m2)))
 
 
-def matrix_element_to_be_returned(atom1, ll1, atom2, ll2, coords, which_neighbour, l1, l2):
+def me(atom1, ll1, atom2, ll2, coords, which_neighbour=0):
 
     # determine type of bonds
     atoms = sorted([item.upper() for item in [atom1.title, atom2.title]])
     atoms = atoms[0] + '_' + atoms[1]
 
-    # quantum numbers
+    # quantum numbers for the first atom
     n1 = atom1.orbitals[ll1]['n']
-    m1 = atom1.orbitals[ll1]['m']
-    n2 = atom2.orbitals[ll2]['n']
-    m2 = atom2.orbitals[ll2]['m']
-
-    L = coords[0]
-    M = coords[1]
-    N = coords[2]
-
-    gamma = math.atan2(L, M)
-
-    code = str(min(n1, n2)) + str(max(n1, n2))
-
-    l_min = min(l1, l2)
-    l_max = max(l1, l2)
-
-    prefactor = (-1) ** ((l1 - l2 + abs(l1 - l2)) * 0.5)
-    ans = 2 * a_coef(m1, gamma) * a_coef(m2, gamma) * \
-        d_me(N, l1, abs(m1), 0) * d_me(N, l2, abs(m2), 0) * \
-        me_diatomic(atoms, code, l_min, l_max, 0, which_neighbour)
-
-    for m in range(1, l_min+1):
-        ans += (s_me(N, l1, m1, m, gamma) * s_me(N, l2, m2, m, gamma) +
-                t_me(N, l1, m1, m, gamma) * t_me(N, l2, m2, m, gamma)) * \
-               me_diatomic(atoms, code, l_min, l_max, m, which_neighbour)
-
-    return prefactor * ans
-
-
-def me(atom1, ll1, atom2, ll2, coords, atom1_index, atom2_index, which_neighbour=0):
-
-    # orbital types
-    type1 = atom1.orbitals[ll1]['title']
-    type2 = atom2.orbitals[ll2]['title']
-
-    # quantum numbers
     l1 = atom1.orbitals[ll1]['l']
-    l2 = atom2.orbitals[ll2]['l']
+    m1 = atom1.orbitals[ll1]['m']
     s1 = atom1.orbitals[ll1]['s']
+
+    # quantum numbers for the second atom
+    n2 = atom2.orbitals[ll2]['n']
+    l2 = atom2.orbitals[ll2]['l']
+    m2 = atom2.orbitals[ll2]['m']
     s2 = atom2.orbitals[ll2]['s']
 
-    if atom1_index == atom2_index and l1 == 1 and l2 == 1:
+    if s1 == s2:
 
-        if type1 == 'px' and type2 == 'py' and s1 == 0 and s2 == 0:
-            return (-1j * p.LAMBDA / 3) + matrix_element_to_be_returned(atom1, ll1, atom2, ll2, coords, which_neighbour, l1, l2)
+        L = coords[0]
+        M = coords[1]
+        N = coords[2]
 
-        elif type1 == 'px' and type2 == 'pz' and s1 == 0 and s2 == 1:
-            return p.LAMBDA / 3
+        gamma = math.atan2(L, M)
 
-        elif type1 == 'py' and type2 == 'pz' and s1 == 0 and s2 == 1:
-            return -1j * p.LAMBDA / 3
+        code = str(min(n1, n2)) + str(max(n1, n2))
 
-        elif type1 == 'pz' and type2 == 'px' and s1 == 0 and s2 == 1:
-            return -p.LAMBDA / 3
+        l_min = min(l1, l2)
+        l_max = max(l1, l2)
 
-        elif type1 == 'pz' and type2 == 'py' and s1 == 0 and s2 == 1:
-            return 1j * p.LAMBDA / 3
+        prefactor = (-1) ** ((l1 - l2 + abs(l1 - l2)) * 0.5)
+        ans = 2 * a_coef(m1, gamma) * a_coef(m2, gamma) * \
+            d_me(N, l1, abs(m1), 0) * d_me(N, l2, abs(m2), 0) * \
+            me_diatomic(atoms, code, l_min, l_max, 0, which_neighbour)
 
-        elif type1 == 'px' and type2 == 'py' and s1 == 1 and s2 == 1:
-            return (1j * p.LAMBDA / 3) + matrix_element_to_be_returned(atom1, ll1, atom2, ll2, coords, which_neighbour, l1, l2)
+        for m in range(1, l_min+1):
+            ans += (s_me(N, l1, m1, m, gamma) * s_me(N, l2, m2, m, gamma) +
+                    t_me(N, l1, m1, m, gamma) * t_me(N, l2, m2, m, gamma)) * \
+                   me_diatomic(atoms, code, l_min, l_max, m, which_neighbour)
 
-        elif type1 == 'py' and type2 == 'px' and s1 == 0 and s2 == 0:
-            return (1j * p.LAMBDA / 3) + matrix_element_to_be_returned(atom1, ll1, atom2, ll2, coords, which_neighbour, l1, l2)
-
-        elif type1 == 'pz' and type2 == 'px' and s1 == 1 and s2 == 0:
-            return (p.LAMBDA / 3)
-
-        elif type1 == 'pz' and type2 == 'py' and s1 == 1 and s2 == 0:
-            return (1j * p.LAMBDA / 3)
-
-        elif type1 == 'px' and type2 == 'pz' and s1 == 1 and s2 == 0:
-            return -p.LAMBDA / 3
-
-        elif type1 == 'py' and type2 == 'pz' and s1 == 1 and s2 == 0:
-            return -1j * p.LAMBDA / 3
-
-        elif type1 == 'py' and type2 == 'px' and s1 == 1 and s2 == 1:
-            return (-1j * p.LAMBDA / 3) + matrix_element_to_be_returned(atom1, ll1, atom2, ll2, coords, which_neighbour, l1, l2)
-
-        elif s1 == s2:
-            return matrix_element_to_be_returned(atom1, ll1, atom2, ll2, coords, which_neighbour, l1, l2)
-        else:
-            return 0
-
-    elif s1 == s2:
-        return matrix_element_to_be_returned(atom1, ll1, atom2, ll2, coords, which_neighbour, l1, l2)
-
+        return prefactor * ans
     else:
         return 0
 

@@ -5,7 +5,7 @@ from __future__ import print_function
 from __future__ import absolute_import
 import numpy as np
 import yaml
-from test.p import SPECIAL_K_POINTS_BI, SPECIAL_K_POINTS_SI
+from examples.data_bi_bulk import SPECIAL_K_POINTS_BI, SPECIAL_K_POINTS_SI
 
 
 def xyz2np(xyz):
@@ -78,10 +78,13 @@ def get_k_coords(special_points, num_of_points, label):
     :rtype:                  numpy.ndarray
     """
 
-    if label == 'Bi':
-        SPECIAL_K_POINTS = SPECIAL_K_POINTS_BI
-    if label == 'Si':
-        SPECIAL_K_POINTS = SPECIAL_K_POINTS_SI
+    if isinstance(label, str):
+        if label == 'Bi':
+            SPECIAL_K_POINTS = SPECIAL_K_POINTS_BI
+        if label == 'Si':
+            SPECIAL_K_POINTS = SPECIAL_K_POINTS_SI
+    else:
+        SPECIAL_K_POINTS = label
 
     k_vectors = np.zeros((sum(num_of_points), 3))
     offset = 0

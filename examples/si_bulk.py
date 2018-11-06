@@ -2,14 +2,15 @@ import numpy as np
 import matplotlib.pyplot as plt
 from tb import Hamiltonian
 from tb import Atom
-import test.p
-from test import p
+import examples.data_bi_bulk
+from examples import data_bi_bulk
+from tb.plotting import plot_bs_split, plot_atom_positions
 
 
 def radial_dep(coords):
 
     norm_of_coords = np.linalg.norm(coords)
-
+    print(norm_of_coords)
     if norm_of_coords < 3.3:
         return 1
     elif 3.7 > norm_of_coords > 3.3:
@@ -32,9 +33,9 @@ def main1():
     num_points = [ 20, 20 ]
     indices_of_bands = range( 0, 8 )
 
-    primitive_cell = test.p.a_si * np.array([[0.0, 0.5, 0.5],
-                                             [0.5, 0.0, 0.5],
-                                             [0.5, 0.5, 0.0]])
+    primitive_cell = examples.data_bi_bulk.a_si * np.array([[0.0, 0.5, 0.5],
+                                                            [0.5, 0.0, 0.5],
+                                                            [0.5, 0.5, 0.0]])
 
     Atom.orbital_sets = { species: basis_set }
 
@@ -79,19 +80,19 @@ def main2():
     # num_points = [20, 20]
     indices_of_bands = range(0, 16)
 
-    cell_a = test.p.a_bi * np.array([[(-1.0 / 2.0), (-np.sqrt(3.0) / 6.0), 0.0],
-                                     [ (  1.0 / 2.0 ), ( -np.sqrt(3.0) / 6.0 ), 0.0 ],
-                                     [ 0.0,            (  np.sqrt(3.0) / 3.0 ), 0.0 ]])
-    cell_c = test.p.c_bi * np.array([[0.0, 0.0, (1.0 / 3.0)],
-                                     [ 0.0, 0.0, ( 1.0 / 3.0 ) ],
-                                     [ 0.0, 0.0, ( 1.0 / 3.0 ) ]])
+    cell_a = examples.data_bi_bulk.a_bi * np.array([[(-1.0 / 2.0), (-np.sqrt(3.0) / 6.0), 0.0],
+                                                    [ (  1.0 / 2.0 ), ( -np.sqrt(3.0) / 6.0 ), 0.0 ],
+                                                    [ 0.0,            (  np.sqrt(3.0) / 3.0 ), 0.0 ]])
+    cell_c = examples.data_bi_bulk.c_bi * np.array([[0.0, 0.0, (1.0 / 3.0)],
+                                                    [ 0.0, 0.0, ( 1.0 / 3.0 ) ],
+                                                    [ 0.0, 0.0, ( 1.0 / 3.0 ) ]])
     primitive_cell = cell_a + cell_c
 
     Atom.orbital_sets = { species: basis_set }
 
-    h = Hamiltonian( xyz = path_to_xyz_file, nn_distance = 4.6)
+    h = Hamiltonian( xyz = path_to_xyz_file, nn_distance = 4.6, so_coupling=1.2)
     h.initialize( radial_dep )
-    h.set_periodic_bc(primitive_cell.tolist(), radial_dep)
+    h.set_periodic_bc(primitive_cell.tolist())
 
     k_points = get_k_coords( sym_points, num_points, species )
 
@@ -141,7 +142,7 @@ def main3():
 
     a_si = 5.50
     PRIMITIVE_CELL = [[0, 0, a_si]]
-    hamiltonian.set_periodic_bc(PRIMITIVE_CELL, radial_dep=radial_dep)
+    hamiltonian.set_periodic_bc(PRIMITIVE_CELL)
 
     num_points = 20
     kk = np.linspace(0, 0.57, num_points, endpoint=True)
@@ -166,22 +167,8 @@ def main3():
     band_gaps.append(band_gap)
 
     if True:
-        fig, ax = plt.subplots(1, 2)
-        ax[0].set_ylim(-1.0, -0.3)
-        ax[0].plot(kk, np.sort(np.real(vba)))
-        ax[0].set_xlabel(r'Wave vector ($\frac{\pi}{a}$)')
-        ax[0].set_ylabel(r'Energy (eV)')
-        ax[0].set_title('Valence band')
-        plt.savefig('bs_vb.pdf')
+        plot_bs_split(kk, vba, cba)
 
-        ax[1].set_ylim(2.0, 2.7)
-        ax[1].plot(kk, np.sort(np.real(cba)))
-        ax[1].set_xlabel(r'Wave vector ($\frac{\pi}{a}$)')
-        ax[1].set_ylabel(r'Energy (eV)')
-        ax[1].set_title('Conduction band')
-        fig.tight_layout()
-        plt.savefig('bs_cb.pdf')
-        plt.show()
 
 def main4():
 
@@ -203,17 +190,18 @@ def main4():
     # num_points = [1]
     indices_of_bands = range( 0, 16 )
 
-    primitive_cell = p.cell
+    primitive_cell = data_bi_bulk.cell
 
     Atom.orbital_sets = { species: basis_set }
 
-    h = Hamiltonian(xyz=path_to_xyz_file, nn_distance=5.6)
+    h = Hamiltonian(xyz=path_to_xyz_file, nn_distance=4.7, so_coupling=0.9)
     h.initialize(radial_dep)
-    h.set_periodic_bc(primitive_cell, radial_dep)
+    h.set_periodic_bc(primitive_cell)
+    plot_atom_positions(h.atom_list, h.ct.virtual_and_interfacial_atoms, radial_dep)
 
     k_points = get_k_coords( sym_points, num_points, species )
 
-    list_of_spin_orbit_couplings = [0]
+    list_of_spin_orbit_couplings = [0.27]
     # list_of_spin_orbit_couplings = np.linspace(0, 0.333333, 40)
 
     band_structure = []
@@ -221,8 +209,8 @@ def main4():
         for jj, item in enumerate(k_points):
             # h = Hamiltonian(xyz=path_to_xyz_file, nn_distance=5.6)
             # h.initialize(radial_dep)
-            # h.set_periodic_bc(primitive_cell, radial_dep)
-            p.LAMBDA = list_of_spin_orbit_couplings[ii]
+            # h.set_periodic_bc(primitive_cell, radial_dep)data_bi_bulk.py
+            data_bi_bulk.LAMBDA = list_of_spin_orbit_couplings[ii]
             [eigenvalues, _] = h.diagonalize_periodic_bc(k_points[jj])
             band_structure.append(eigenvalues)
 
@@ -234,10 +222,10 @@ def main4():
     ax.set_ylabel( "Energy (eV)" )
     ax.set_title( "" )
     plt.tight_layout()
-    plt.ylim((-2, 1))
+    plt.ylim((-2, 2))
     plt.show()
 
 
 if __name__ == '__main__':
 
-    main4()
+    main2()
