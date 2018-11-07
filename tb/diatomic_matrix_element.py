@@ -63,6 +63,7 @@ PARAMS_BI_BI3 = {'ss_sigma': 0,
 #                  'pp_sigma': 2.79,
 #                  'pp_pi': -0.9}
 
+
 def me_diatomic(bond, n, l_min, l_max, m, which_neighbour):
     """
     The function looks up into the table of parameters making a query parametrized by:

@@ -21,7 +21,7 @@ bi.add_orbital("pz", energy=-0.486, principal=0, orbital=1, magnetic=0, spin=1)
 def radial_dep(coords):
 
     norm_of_coords = np.linalg.norm(coords)
-    print(norm_of_coords)
+
     if norm_of_coords < 3.3:
         return 1
     elif 3.7 > norm_of_coords > 3.3:
@@ -60,25 +60,25 @@ def main():
                      PARAMS_BI_BI2=data_bi_bilayer.PARAMS_BI_BI2,
                      PARAMS_BI_BI3=data_bi_bilayer.PARAMS_BI_BI3)
 
-    h = Hamiltonian(xyz=path_to_xyz_file, nn_distance=4.7, so_coupling=1.7)
+    h = Hamiltonian(xyz=path_to_xyz_file, nn_distance=4.7, so_coupling=1.8)
     h.initialize(radial_dep)
     h.set_periodic_bc(primitive_cell)
     plot_atom_positions(h.atom_list, h.ct.virtual_and_interfacial_atoms, radial_dep)
 
     k_points = get_k_coords( sym_points, num_points, data_bi_bilayer.SPECIAL_K_POINTS_BI)
 
-    list_of_spin_orbit_couplings = [0.27]
+    # list_of_spin_orbit_couplings = [0.27]
     # list_of_spin_orbit_couplings = np.linspace(0, 0.333333, 40)
 
     band_structure = []
-    for ii, item in enumerate(list_of_spin_orbit_couplings):
-        for jj, item in enumerate(k_points):
-            # h = Hamiltonian(xyz=path_to_xyz_file, nn_distance=5.6)
-            # h.initialize(radial_dep)
-            # h.set_periodic_bc(primitive_cell, radial_dep)data_bi_bulk.py
-            data_bi_bilayer.LAMBDA = list_of_spin_orbit_couplings[ii]
-            [eigenvalues, _] = h.diagonalize_periodic_bc(k_points[jj])
-            band_structure.append(eigenvalues)
+    # for ii, item in enumerate(list_of_spin_orbit_couplings):
+    for jj, item in enumerate(k_points):
+        # h = Hamiltonian(xyz=path_to_xyz_file, nn_distance=5.6)
+        # h.initialize(radial_dep)
+        # h.set_periodic_bc(primitive_cell, radial_dep)data_bi_bulk.py
+        # data_bi_bilayer.LAMBDA = list_of_spin_orbit_couplings[ii]
+        [eigenvalues, _] = h.diagonalize_periodic_bc(k_points[jj])
+        band_structure.append(eigenvalues)
 
     band_structure = np.array(band_structure)
 

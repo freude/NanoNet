@@ -41,6 +41,7 @@ class StructDesignerXYZ(AbstractStructureDesigner):
         labels, coords = xyz2np(reader)
 
         logging.info("The xyz-file:\n {}".format(reader))
+        logging.info("---------------------------------\n")
 
         self._nn_distance = nn_distance                            # maximal distance to a neighbor
         self._num_of_species = count_species(labels)               # dictionary of elements and
@@ -102,6 +103,7 @@ class CyclicTopology(AbstractStructureDesigner):
         logging.info("Primitive_cell_vectors: \n {} \n".format(primitive_cell_vectors))
         logging.info("Virtual and interfacial atoms: \n "
                      "{} ".format(print_dict(self.virtual_and_interfacial_atoms)))
+        logging.info("---------------------------------\n")
 
     @property
     def atom_list(self):

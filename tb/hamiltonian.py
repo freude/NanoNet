@@ -6,6 +6,7 @@ from __future__ import absolute_import
 from collections import OrderedDict
 from functools import reduce
 import logging
+import inspect
 from operator import mul
 import matplotlib.pyplot as plt
 import numpy as np
@@ -17,9 +18,11 @@ from tb.aux_functions import dict2xyz
 from tb.tb_script import postprocess_data
 
 
-VERBOSITY = 1
+VERBOSITY = 2
 # logging.basicConfig(format='%(asctime)s[%(filename)s:%(lineno)s - %(funcName)10s() ]:%(message)s', level=logging.INFO)
 logging.basicConfig(format='%(message)s', level=logging.INFO)
+
+unique_distances = set()
 
 
 class BasisTB(AbstractBasis, StructDesignerXYZ):
@@ -62,6 +65,7 @@ class BasisTB(AbstractBasis, StructDesignerXYZ):
         logging.info("Basis set \n Num of species {} \n".format(self.num_of_species))
         for key, label in self._orbitals_dict.items():
             logging.info("\n {} {} ".format(key, label.generate_info()))
+        logging.info("---------------------------------\n")
 
     def qn2ind(self, qn):
 
@@ -100,6 +104,7 @@ class Hamiltonian(BasisTB):
 
         logging.info('The verbosity level is {}'.format(VERBOSITY))
         logging.info('The radius of the neighbourhood is {} Ang'.format(nn_distance))
+        logging.info("\n---------------------------------\n")
 
         if isinstance(xyz, str):
             super(Hamiltonian, self).__init__(xyz=xyz, nn_distance=nn_distance)
@@ -124,6 +129,12 @@ class Hamiltonian(BasisTB):
         """
         The function computes matrix elements of the Hamiltonian.
         """
+        if radial_dep is None:
+            logging.info('Radial dependence function: None')
+            logging.info("\n---------------------------------\n")
+        else:
+            logging.info('Radial dependence function:\n\n{}'.format(inspect.getsource(radial_dep)))
+            logging.info("\n---------------------------------\n")
 
         self.radial_dependence = radial_dep
         self._coords = [0 for _ in range(self.basis_size)]
@@ -265,21 +276,25 @@ class Hamiltonian(BasisTB):
             else:
                 coords1 = coords.copy()
 
+            norm = np.linalg.norm(coords1)
+
+            if VERBOSITY > 1:
+
+                coordinates = np.array2string(norm, precision=4) + " Ang between atoms " +\
+                              self._ind2atom(atom1).title + " and " + self._ind2atom(atom2).title
+
+                if coordinates not in unique_distances:
+                    unique_distances.add(coordinates)
+                    logging.info("Unique distances: \n    {}".format("\n    ".join(unique_distances)))
+                    logging.info("---------------------------------\n")
+
             if radial_dep is None:
                 which_neighbour = ""
             else:
-                which_neighbour = radial_dep(coords1)
+                which_neighbour = radial_dep(norm)
 
             # compute directional cosines
-            coords1 /= np.linalg.norm(coords1)
-
-            if VERBOSITY > 1:
-                print("coords = ", coords1)
-                print(list(self.atom_list.values())[atom1])
-                print(list(self.atom_list.keys())[atom1])
-                print(list(self.atom_list.values())[atom2])
-                print(list(self.atom_list.keys())[atom2])
-                print(atom_kind1.title, atom_kind2.title)
+            coords1 /= norm
 
             return me(atom_kind1, l1, atom_kind2, l2, coords1, which_neighbour)
 
