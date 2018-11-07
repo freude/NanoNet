@@ -6,10 +6,12 @@ from __future__ import print_function
 from __future__ import absolute_import
 from __future__ import division
 from collections import OrderedDict
+import logging
 import numpy as np
 import scipy.spatial
 from .aux_functions import xyz2np, count_species
 from .abstract_interfaces import AbstractStructureDesigner
+from .aux_functions import print_dict
 
 
 def is_in_coords(coord, coords):
@@ -17,7 +19,7 @@ def is_in_coords(coord, coords):
     ans = False
 
     for xyz in list(coords):
-        ans += (coord == xyz).all()
+        ans += (np.linalg.norm(coord - xyz) < 0.01)
 
     return ans
 
@@ -37,6 +39,10 @@ class StructDesignerXYZ(AbstractStructureDesigner):
             reader = xyz
 
         labels, coords = xyz2np(reader)
+
+        logging.info("The xyz-file:\n {}".format(reader))
+        logging.info("---------------------------------\n")
+
         self._nn_distance = nn_distance                            # maximal distance to a neighbor
         self._num_of_species = count_species(labels)               # dictionary of elements and
                                                                    # their number per unit cell
@@ -63,7 +69,7 @@ class StructDesignerXYZ(AbstractStructureDesigner):
         ans1 = [ans[1][0]]
 
         for item in zip(ans[0], ans[1]):
-            if self._nn_distance * 0.05 < item[0] < self._nn_distance:
+            if self._nn_distance * 0.1 < item[0] < self._nn_distance:
                 ans1.append(item[1])
 
         return ans1
@@ -94,6 +100,11 @@ class CyclicTopology(AbstractStructureDesigner):
         self._kd_tree = scipy.spatial.cKDTree(list(self.virtual_and_interfacial_atoms.values()),
                                               leafsize=100)
 
+        logging.info("Primitive_cell_vectors: \n {} \n".format(primitive_cell_vectors))
+        logging.info("Virtual and interfacial atoms: \n "
+                     "{} ".format(print_dict(self.virtual_and_interfacial_atoms)))
+        logging.info("---------------------------------\n")
+
     @property
     def atom_list(self):
         return self.virtual_and_interfacial_atoms
@@ -121,6 +132,9 @@ class CyclicTopology(AbstractStructureDesigner):
         # transform distance to the boolean variable defining whether atom belongs to the interface or not
         distances1 = np.abs(distances1 - np.min(distances1)) < self._nn_distance * 0.25
         distances2 = np.abs(np.abs(distances2) - np.min(np.abs(distances2))) < self._nn_distance * 0.25
+
+        distances1 = np.ones(distances1.shape)
+        distances2 = np.ones(distances1.shape)
 
         # form new lists of atoms
         count = 0
@@ -204,7 +218,7 @@ class CyclicTopology(AbstractStructureDesigner):
         ans1 = []
 
         for item in zip(ans[0], ans[1]):
-            if self._nn_distance * 0.01 < item[0] < self._nn_distance and \
+            if self._nn_distance * 0.1 < item[0] < self._nn_distance and \
                     list(self.virtual_and_interfacial_atoms.keys())[item[1]].startswith("*"):
                 ans1.append(item[1])
 

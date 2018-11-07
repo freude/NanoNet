@@ -10,9 +10,8 @@ from __future__ import absolute_import
 from __future__ import division
 import sys
 import math
-from test.p import *
+from .constants import *
 import warnings
-
 
 #  NN - Si-Si
 PARAMS_SI_SI = {'ss_sigma': -1.9413,
@@ -40,23 +39,29 @@ PARAMS_H_SI = {'ss_sigma': -3.9997,
 PARAMS_H_H = {'ss_sigma': 1}
 
 
-#  NN - Bi-Bi
+# 1NN - Bi-Bi
 PARAMS_BI_BI1 = {'ss_sigma': -0.608,
                  'sp_sigma': 1.320,
                  'pp_sigma': 1.854,
                  'pp_pi': -0.600}
 
-# 2d NN - Bi-Bi
+# 2NN - Bi-Bi
 PARAMS_BI_BI2 = {'ss_sigma': -0.384,
                  'sp_sigma': 0.433,
                  'pp_sigma': 1.396,
                  'pp_pi': -0.344}
 
-# 3d NN - Bi-Bi
+# 3NN - Bi-Bi
 PARAMS_BI_BI3 = {'ss_sigma': 0,
                  'sp_sigma': 0,
                  'pp_sigma': 0.156,
                  'pp_pi': 0}
+
+# # 1NN - Bi-Bi
+# PARAMS_BI_BI1 = {'ss_sigma': -0.92,
+#                  'sp_sigma': 1.99,
+#                  'pp_sigma': 2.79,
+#                  'pp_pi': -0.9}
 
 
 def me_diatomic(bond, n, l_min, l_max, m, which_neighbour):
@@ -85,6 +90,8 @@ def me_diatomic(bond, n, l_min, l_max, m, which_neighbour):
     try:
         if which_neighbour == 0:
             return getattr(sys.modules[__name__], 'PARAMS_' + bond)[label]
+        elif which_neighbour == 100:
+            return 0
         else:
             return getattr(sys.modules[__name__], 'PARAMS_' + bond + str(which_neighbour))[label]
     except KeyError:
@@ -167,34 +174,40 @@ def me(atom1, ll1, atom2, ll2, coords, which_neighbour=0):
     n1 = atom1.orbitals[ll1]['n']
     l1 = atom1.orbitals[ll1]['l']
     m1 = atom1.orbitals[ll1]['m']
+    s1 = atom1.orbitals[ll1]['s']
 
     # quantum numbers for the second atom
     n2 = atom2.orbitals[ll2]['n']
     l2 = atom2.orbitals[ll2]['l']
     m2 = atom2.orbitals[ll2]['m']
+    s2 = atom2.orbitals[ll2]['s']
 
-    L = coords[0]
-    M = coords[1]
-    N = coords[2]
+    if s1 == s2:
 
-    gamma = math.atan2(L, M)
+        L = coords[0]
+        M = coords[1]
+        N = coords[2]
 
-    code = str(min(n1, n2)) + str(max(n1, n2))
+        gamma = math.atan2(L, M)
 
-    l_min = min(l1, l2)
-    l_max = max(l1, l2)
+        code = str(min(n1, n2)) + str(max(n1, n2))
 
-    prefactor = (-1) ** ((l1 - l2 + abs(l1 - l2)) * 0.5)
-    ans = 2 * a_coef(m1, gamma) * a_coef(m2, gamma) * \
-        d_me(N, l1, abs(m1), 0) * d_me(N, l2, abs(m2), 0) * \
-        me_diatomic(atoms, code, l_min, l_max, 0, which_neighbour)
+        l_min = min(l1, l2)
+        l_max = max(l1, l2)
 
-    for m in range(1, l_min+1):
-        ans += (s_me(N, l1, m1, m, gamma) * s_me(N, l2, m2, m, gamma) +
-                t_me(N, l1, m1, m, gamma) * t_me(N, l2, m2, m, gamma)) * \
-               me_diatomic(atoms, code, l_min, l_max, m, which_neighbour)
+        prefactor = (-1) ** ((l1 - l2 + abs(l1 - l2)) * 0.5)
+        ans = 2 * a_coef(m1, gamma) * a_coef(m2, gamma) * \
+            d_me(N, l1, abs(m1), 0) * d_me(N, l2, abs(m2), 0) * \
+            me_diatomic(atoms, code, l_min, l_max, 0, which_neighbour)
 
-    return prefactor * ans
+        for m in range(1, l_min+1):
+            ans += (s_me(N, l1, m1, m, gamma) * s_me(N, l2, m2, m, gamma) +
+                    t_me(N, l1, m1, m, gamma) * t_me(N, l2, m2, m, gamma)) * \
+                   me_diatomic(atoms, code, l_min, l_max, m, which_neighbour)
+
+        return prefactor * ans
+    else:
+        return 0
 
 
 if __name__ == "__main__":

@@ -5,7 +5,7 @@ from __future__ import print_function
 from __future__ import absolute_import
 import numpy as np
 import yaml
-from test.p import SPECIAL_K_POINTS_BI, SPECIAL_K_POINTS_SI
+from examples.data_bi_bulk import SPECIAL_K_POINTS_BI, SPECIAL_K_POINTS_SI
 
 
 def xyz2np(xyz):
@@ -78,10 +78,13 @@ def get_k_coords(special_points, num_of_points, label):
     :rtype:                  numpy.ndarray
     """
 
-    if label == 'Bi':
-        SPECIAL_K_POINTS = SPECIAL_K_POINTS_BI
-    if label == 'Si':
-        SPECIAL_K_POINTS = SPECIAL_K_POINTS_SI
+    if isinstance(label, str):
+        if label == 'Bi':
+            SPECIAL_K_POINTS = SPECIAL_K_POINTS_BI
+        if label == 'Si':
+            SPECIAL_K_POINTS = SPECIAL_K_POINTS_SI
+    else:
+        SPECIAL_K_POINTS = label
 
     k_vectors = np.zeros((sum(num_of_points), 3))
     offset = 0
@@ -149,6 +152,59 @@ def yaml_parser(input_data):
     output['primitive_cell'] = np.array(output['primitive_cell']) * output['lattice_constant']
 
     return output
+
+
+def print_table(myDict, colList=None, sep='\uFFFA'):
+    """ Pretty print a list of dictionaries (myDict) as a dynamically sized table.
+    If column names (colList) aren't specified, they will show in random order.
+    sep: row separator. Ex: sep='\n' on Linux. Default: dummy to not split line.
+    Author: Thierry Husson - Use it as you want but don't blame me.
+    """
+
+    if not colList:
+        colList = list(myDict[0].keys() if myDict else [])
+
+    myList = [colList]  # 1st row = header
+
+    for item in myDict:
+        myList.append([str(item[col]) for col in colList])
+
+    colSize = [max(map(len, (sep.join(col)).split(sep))) for col in zip(*myList)]
+
+    formatStr = ' | '.join(["{{:<{}}}".format(i) for i in colSize])
+    line = formatStr.replace(' | ', '-+-').format(*['-' * i for i in colSize])
+    item = myList.pop(0)
+    lineDone = False
+
+    out = "\n"
+
+    while myList:
+        if all(not i for i in item):
+            item = myList.pop(0)
+            if line and (sep != '\uFFFA' or not lineDone):
+                out += line
+                out += "\n"
+                lineDone = True
+
+        row = [i.split(sep, 1) for i in item]
+        out += formatStr.format(*[i[0] for i in row])
+        out += "\n"
+        item = [i[1] if len(i) > 1 else '' for i in row]
+
+    out += line
+    out += "\n"
+
+    return out
+
+
+def print_dict(dictionary):
+
+    out = "{:<18} {:<15} \n".format('Label', 'Coordinates')
+    for key, value in dictionary.items():
+
+        out += "{:<18} {:<15} \n".format(key, str(value))
+
+    return out
 
 
 if __name__ == "__main__":

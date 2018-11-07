@@ -4,6 +4,9 @@ The module contains all necessary classes needed to compute the Hamiltonian matr
 from __future__ import print_function, division
 from __future__ import absolute_import
 from collections import OrderedDict
+from functools import reduce
+import logging
+import inspect
 from operator import mul
 import matplotlib.pyplot as plt
 import numpy as np
@@ -13,10 +16,13 @@ from tb.diatomic_matrix_element import me
 from tb.atoms import Atom
 from tb.aux_functions import dict2xyz
 from tb.tb_script import postprocess_data
-from functools import reduce
 
 
-VERBOSITY = 1
+VERBOSITY = 2
+# logging.basicConfig(format='%(asctime)s[%(filename)s:%(lineno)s - %(funcName)10s() ]:%(message)s', level=logging.INFO)
+logging.basicConfig(format='%(message)s', level=logging.INFO)
+logging.StreamHandler(stream=None)
+unique_distances = set()
 
 
 class BasisTB(AbstractBasis, StructDesignerXYZ):
@@ -55,6 +61,12 @@ class BasisTB(AbstractBasis, StructDesignerXYZ):
             self._offsets.append(self.orbitals_dict[list(self.atom_list.keys())[j]].num_of_orbitals)
         self._offsets = np.cumsum(self._offsets)
 
+        # make a log
+        logging.info("Basis set \n Num of species {} \n".format(self.num_of_species))
+        for key, label in self._orbitals_dict.items():
+            logging.info("\n {} {} ".format(key, label.generate_info()))
+        logging.info("---------------------------------\n")
+
     def qn2ind(self, qn):
 
         qn = OrderedDict(qn)
@@ -90,6 +102,10 @@ class Hamiltonian(BasisTB):
         xyz = kwargs.get('xyz', "")
         nn_distance = kwargs.get('nn_distance', 2.39)
 
+        logging.info('The verbosity level is {}'.format(VERBOSITY))
+        logging.info('The radius of the neighbourhood is {} Ang'.format(nn_distance))
+        logging.info("\n---------------------------------\n")
+
         if isinstance(xyz, str):
             super(Hamiltonian, self).__init__(xyz=xyz, nn_distance=nn_distance)
         else:
@@ -107,11 +123,18 @@ class Hamiltonian(BasisTB):
         self.k_vector = 0                               # default value of the wave vector
         self.ct = None
         self.radial_dependence = None
+        self.so_coupling = kwargs.get('so_coupling', 0.0)
 
     def initialize(self, radial_dep=None):
         """
         The function computes matrix elements of the Hamiltonian.
         """
+        if radial_dep is None:
+            logging.info('Radial dependence function: None')
+            logging.info("\n---------------------------------\n")
+        else:
+            logging.info('Radial dependence function:\n\n{}'.format(inspect.getsource(radial_dep)))
+            logging.info("\n---------------------------------\n")
 
         self.radial_dependence = radial_dep
         self._coords = [0 for _ in range(self.basis_size)]
@@ -134,6 +157,12 @@ class Hamiltonian(BasisTB):
                         self.h_matrix[ind1, ind1] = self._get_me(j1, j2, l1, l1, radial_dep=self.radial_dependence)
                         self._coords[ind1] = list(self.atom_list.values())[j1]
 
+                        if self.so_coupling != 0:
+                            for l2 in range(self.orbitals_dict[list(self.atom_list.keys())[j1]].num_of_orbitals):
+                                ind2 = self.qn2ind([('atoms', j1), ('l', l2)], )
+                                self.h_matrix[ind1, ind2] = self._get_me(j1, j2, l1, l2,
+                                                                         radial_dep=self.radial_dependence)
+
                 # nearest neighbours interaction
                 else:
                     for l1 in range(self.orbitals_dict[list(self.atom_list.keys())[j1]].num_of_orbitals):
@@ -147,25 +176,10 @@ class Hamiltonian(BasisTB):
     def set_periodic_bc(self, primitive_cell):
 
         if list(primitive_cell):
-            self.ct = CyclicTopology(primitive_cell, list(self.atom_list.keys()), list(self.atom_list.values()), self._nn_distance)
-
-            # from mpl_toolkits.mplot3d import Axes3D
-            # import matplotlib.pyplot as plt
-            # fig = plt.figure()
-            # ax = fig.add_subplot(111, projection='3d')
-            # coordinates_to_plot = np.asarray(list(self.atom_list.values()))
-            # ax.scatter(coordinates_to_plot[:, 0], coordinates_to_plot[:, 1], coordinates_to_plot[:, 2], c='red', s=100)
-            #
-            # map1 = [item.startswith('*_') for item in list(self.ct.virtual_and_interfacial_atoms.keys())]
-            # map2 = [item.startswith('**_') for item in list(self.ct.virtual_and_interfacial_atoms.keys())]
-            #
-            # coordinates_to_plot = np.asarray(list(self.ct.virtual_and_interfacial_atoms.values()))
-            # ax.scatter(coordinates_to_plot[map1, 0], coordinates_to_plot[map1, 1], coordinates_to_plot[map1, 2],
-            #            c='green', s=70)
-            # ax.scatter(coordinates_to_plot[map2, 0], coordinates_to_plot[map2, 1], coordinates_to_plot[map2, 2],
-            #            s=20)
-            # plt.show()
-
+            self.ct = CyclicTopology(primitive_cell,
+                                     list(self.atom_list.keys()),
+                                     list(self.atom_list.values()),
+                                     self._nn_distance)
         else:
             self.ct = None
 
@@ -223,7 +237,11 @@ class Hamiltonian(BasisTB):
 
         return True
 
-    def _get_me(self, atom1, atom2, l1, l2, coords=None, radial_dep=None, spin_orbit=None):
+    def _ind2atom(self, ind):
+
+        return self.orbitals_dict[list(self.atom_list.keys())[ind]]
+
+    def _get_me(self, atom1, atom2, l1, l2, coords=None, radial_dep=None):
         """
         Compute the matrix element <atom1, l1|H|l2, atom2>
 
@@ -238,14 +256,18 @@ class Hamiltonian(BasisTB):
         """
 
         # on site (pick right table of parameters for a certain atom)
-        if atom1 == atom2 and l1 == l2 and coords is None:
-            return self.orbitals_dict[list(self.atom_list.keys())[atom1]].orbitals[l1]['energy']
+        if atom1 == atom2 and coords is None:
+            atom_obj = self._ind2atom(atom1)
+            if l1 == l2:
+                return atom_obj.orbitals[l1]['energy']
+            else:
+                return self._comp_so(atom_obj, l1, l2)
 
         # nearest neighbours (define bound type and atomic quantum numbers)
         if atom1 != atom2 or coords is not None:
 
-            atom_kind1 = self.orbitals_dict[list(self.atom_list.keys())[atom1]]
-            atom_kind2 = self.orbitals_dict[list(self.atom_list.keys())[atom2]]
+            atom_kind1 = self._ind2atom(atom1)
+            atom_kind2 = self._ind2atom(atom2)
 
             # compute radius vector pointing from one atom to another
             if coords is None:
@@ -254,23 +276,80 @@ class Hamiltonian(BasisTB):
             else:
                 coords1 = coords.copy()
 
+            norm = np.linalg.norm(coords1)
+
+            if VERBOSITY > 1:
+
+                coordinates = np.array2string(norm, precision=4) + " Ang between atoms " +\
+                              self._ind2atom(atom1).title + " and " + self._ind2atom(atom2).title
+
+                if coordinates not in unique_distances:
+                    unique_distances.add(coordinates)
+                    logging.info("Unique distances: \n    {}".format("\n    ".join(unique_distances)))
+                    logging.info("---------------------------------\n")
+
             if radial_dep is None:
                 which_neighbour = ""
             else:
-                which_neighbour = radial_dep(coords1)
+                which_neighbour = radial_dep(norm)
 
             # compute directional cosines
-            coords1 /= np.linalg.norm(coords1)
-
-            if VERBOSITY > 1:
-                print("coords = ", coords1)
-                print(list(self.atom_list.values())[atom1])
-                print(list(self.atom_list.keys())[atom1])
-                print(list(self.atom_list.values())[atom2])
-                print(list(self.atom_list.keys())[atom2])
-                print(atom_kind1.title, atom_kind2.title)
+            coords1 /= norm
 
             return me(atom_kind1, l1, atom_kind2, l2, coords1, which_neighbour)
+
+    def _comp_so(self, atom, ind1, ind2):
+
+        type1 = atom.orbitals[ind1]['title']
+        type2 = atom.orbitals[ind2]['title']
+
+        # quantum numbers
+        l1 = atom.orbitals[ind1]['l']
+        s1 = atom.orbitals[ind1]['s']
+        l2 = atom.orbitals[ind2]['l']
+        s2 = atom.orbitals[ind2]['s']
+
+        if l1 == 1 and l2 == 1:
+
+            if type1 == 'px' and type2 == 'py' and s1 == 0 and s2 == 0:
+                return -1j * self.so_coupling / 3
+
+            elif type1 == 'px' and type2 == 'pz' and s1 == 0 and s2 == 1:
+                return self.so_coupling / 3
+
+            elif type1 == 'py' and type2 == 'pz' and s1 == 0 and s2 == 1:
+                return -1j * self.so_coupling / 3
+
+            elif type1 == 'pz' and type2 == 'px' and s1 == 0 and s2 == 1:
+                return -self.so_coupling / 3
+
+            elif type1 == 'pz' and type2 == 'py' and s1 == 0 and s2 == 1:
+                return 1j * self.so_coupling / 3
+
+            elif type1 == 'px' and type2 == 'py' and s1 == 1 and s2 == 1:
+                return 1j * self.so_coupling / 3
+
+            elif type1 == 'py' and type2 == 'px' and s1 == 0 and s2 == 0:
+                return 1j * self.so_coupling / 3
+
+            elif type1 == 'pz' and type2 == 'px' and s1 == 1 and s2 == 0:
+                return self.so_coupling / 3
+
+            elif type1 == 'pz' and type2 == 'py' and s1 == 1 and s2 == 0:
+                return 1j * self.so_coupling / 3
+
+            elif type1 == 'px' and type2 == 'pz' and s1 == 1 and s2 == 0:
+                return -self.so_coupling / 3
+
+            elif type1 == 'py' and type2 == 'pz' and s1 == 1 and s2 == 0:
+                return -1j * self.so_coupling / 3
+
+            elif type1 == 'py' and type2 == 'px' and s1 == 1 and s2 == 1:
+                return -1j * self.so_coupling / 3
+            else:
+                return 0
+        else:
+            return 0
 
     def _reset_periodic_bc(self):
         """
