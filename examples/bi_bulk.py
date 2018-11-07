@@ -3,13 +3,12 @@ import matplotlib.pyplot as plt
 from tb import Hamiltonian
 from tb import Atom
 import examples.data_bi_bulk
-from tb.plotting import plot_atom_positions
+from tb.plotting import plot_atom_positions, plot_atom_positions1
 
 
 def radial_dep(coords):
 
     norm_of_coords = np.linalg.norm(coords)
-    print(norm_of_coords)
     if norm_of_coords < 3.3:
         return 1
     elif 3.7 > norm_of_coords > 3.3:
@@ -51,6 +50,8 @@ def main():
     h = Hamiltonian( xyz = path_to_xyz_file, nn_distance = 4.6, so_coupling=1.2)
     h.initialize( radial_dep )
     h.set_periodic_bc(primitive_cell.tolist())
+    # plot_atom_positions(h.atom_list, h.ct.virtual_and_interfacial_atoms, radial_dep)
+    # plot_atom_positions1(h, h.ct.virtual_and_interfacial_atoms, radial_dep)
 
     k_points = get_k_coords( sym_points, num_points, species )
 

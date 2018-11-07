@@ -22,7 +22,7 @@ def get_high_symmetry_point_in_cartesian_space(reciprocal_lattice_vectors, coord
     return cartesian_coordinate_in_reciprocal_space
 
 
-cell = 4.32903 * np.array([[ 1.000000000000000, 0.000000000000000, 0.000000000000000],
+cell = a_bi * np.array([[ 1.000000000000000, 0.000000000000000, 0.000000000000000],
                            [-0.500000000000000, 0.866025403784439, 0.000000000000000],
                            [ 0.000000000000000, 0.000000000000000, 6.929958905343691]])
 
@@ -30,8 +30,8 @@ reciprocal_lattice_vectors_bi_bilayer = 2 * np.pi * np.asmatrix(np.concatenate((
                                                                                 [np.cross(cell[2], cell[0]) / np.dot(cell[1], np.cross(cell[2], cell[0]))],
                                                                                 [np.cross(cell[0], cell[1]) / np.dot(cell[2], np.cross(cell[0], cell[1]))]), axis=0))
 
-cell = 4.32903 * np.array([[ 1.000000000000000, 0.000000000000000, 0.000000000000000],
-                           [-0.500000000000000, 0.866025403784439, 0.000000000000000]])
+cell = a_bi * np.array([[ 1.000000000000000, 0.000000000000000, 0.000000000000000],
+                        [ -0.500000000000000, 0.866025403784439, 0.000000000000000]])
 
 SPECIAL_K_POINTS_BI = {
     'GAMMA': get_high_symmetry_point_in_cartesian_space(reciprocal_lattice_vectors_bi_bilayer, [0.00000, 0.00000, 0.00000]),

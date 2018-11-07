@@ -69,7 +69,7 @@ class StructDesignerXYZ(AbstractStructureDesigner):
         ans1 = [ans[1][0]]
 
         for item in zip(ans[0], ans[1]):
-            if self._nn_distance * 0.05 < item[0] < self._nn_distance:
+            if self._nn_distance * 0.1 < item[0] < self._nn_distance:
                 ans1.append(item[1])
 
         return ans1
@@ -218,7 +218,7 @@ class CyclicTopology(AbstractStructureDesigner):
         ans1 = []
 
         for item in zip(ans[0], ans[1]):
-            if self._nn_distance * 0.01 < item[0] < self._nn_distance and \
+            if self._nn_distance * 0.1 < item[0] < self._nn_distance and \
                     list(self.virtual_and_interfacial_atoms.keys())[item[1]].startswith("*"):
                 ans1.append(item[1])
 

@@ -21,7 +21,7 @@ from tb.tb_script import postprocess_data
 VERBOSITY = 2
 # logging.basicConfig(format='%(asctime)s[%(filename)s:%(lineno)s - %(funcName)10s() ]:%(message)s', level=logging.INFO)
 logging.basicConfig(format='%(message)s', level=logging.INFO)
-
+logging.StreamHandler(stream=None)
 unique_distances = set()
 
 
