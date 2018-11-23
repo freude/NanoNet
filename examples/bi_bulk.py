@@ -25,16 +25,18 @@ def main():
 
     path_to_xyz_file = 'input_samples/bulk_bismuth.xyz'
     # path_to_pdf_file = '../band_structure_of_bulk_bismuth.pdf'
+    path_to_data_file = '/Users/tcqp/Dropbox/research/conferences/2018/fleet/poster/data/band_structure_of_bulk_bismuth/etb/band_structure_with_spin_orbit_1.csv'
     species = 'Bi'
     basis_set = 'Bismuth'
-    sym_points = ['K', 'GAMMA', 'T', 'W', 'L', 'LAMBDA']
+    # sym_points = ['U', 'X', 'GAMMA', 'L', 'U', 'T']
+    # sym_points = ['K', 'GAMMA', 'T', 'W', 'L', 'LAMBDA']
     # sym_points = ['K', 'X', 'GAMMA', 'L', 'U', 'T']
     # sym_points = ['GAMMA', 'GAMMA']
-    # sym_points = ['K', 'GAMMA', 'T']
+    sym_points = ['K', 'GAMMA', 'T']
 
-    num_points = [20, 20, 20, 20, 20]
+    # num_points = [40, 40, 40, 40, 40]
     # num_points = [1]
-    # num_points = [20, 20]
+    num_points = [10, 10]
     indices_of_bands = range(0, 16)
 
     cell_a = examples.data_bi_bulk.a_bi * np.array([[(-1.0 / 2.0), (-np.sqrt(3.0) / 6.0), 0.0],
@@ -47,7 +49,7 @@ def main():
 
     Atom.orbital_sets = { species: basis_set }
 
-    h = Hamiltonian( xyz = path_to_xyz_file, nn_distance = 4.6, so_coupling=1.2)
+    h = Hamiltonian( xyz = path_to_xyz_file, nn_distance = 4.6, so_coupling=1.5)
     h.initialize( radial_dep )
     h.set_periodic_bc(primitive_cell.tolist())
     # plot_atom_positions(h.atom_list, h.ct.virtual_and_interfacial_atoms, radial_dep)
@@ -60,7 +62,7 @@ def main():
         [ eigenvalues, _ ] = h.diagonalize_periodic_bc( k_points[ jj ] )
         band_structure.append( eigenvalues )
 
-    band_structure = np.array( band_structure )
+    band_structure = np.array(band_structure)
 
     print(h.is_hermitian())
 
@@ -75,6 +77,12 @@ def main():
 
     # plt.imshow(np.abs(h.h_matrix_bc_factor * h.h_matrix + h.h_matrix_bc_add))
     # plt.show()
+
+    k_index = np.linspace(0, 1, np.size(k_points, axis=0))
+    # band_structure_data = np.c_[k_index[:,None],band_structure]
+    # np.savetxt(path_to_data_file, np.c_[band_structure_data])
+
+    difference_in_k_points = np.diff(k_points, n=1, axis=1)
 
 
 if __name__ == '__main__':

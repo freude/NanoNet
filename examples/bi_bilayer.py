@@ -50,23 +50,20 @@ def main():
 
     path_to_xyz_file = """2
                               Bilayer Bismuth
-                              Bi   -2.164513   -1.249682  1.73744 
-                              Bi   0.0    0.0    0.0
-                           """
-
-    path_to_xyz_file = """2
-                              Bilayer Bismuth
                               Bi   -2.2666 -1.30862212 -1.59098161
                               Bi   0.0    0.0    0.0
                            """
 
     # path_to_pdf_file = '../band_structure_of_bulk_bismuth.pdf'
+    path_to_data_file = '/Users/tcqp/Dropbox/research/conferences/2018/fleet/poster/data/band_structure_of_111_bilayer/etb/3.0/band_structure.csv'
     species = 'Bi'
     basis_set = 'Bismuth'
-    sym_points = ['M', 'GAMMA', 'K']
+    sym_points = ['M', 'GAMMA', 'K', 'M']
+    # sym_points = ['GAMMA', 'M', 'K', 'GAMMA']
+    # sym_points = ['M', 'GAMMA', 'K']
     # sym_points = ['GAMMA', 'GAMMA']
 
-    num_points = [40, 40]
+    num_points = [40, 40, 40]
     # num_points = [1]
     indices_of_bands = range( 0, 16 )
 
@@ -80,8 +77,8 @@ def main():
 
     k_points = get_k_coords( sym_points, num_points, data_bi_bilayer.SPECIAL_K_POINTS_BI)
 
-    list_of_spin_orbit_couplings = [1.8]
-    # list_of_spin_orbit_couplings = np.linspace(0, 3.0, 40)
+    list_of_spin_orbit_couplings = [3.0]
+    # list_of_spin_orbit_couplings = np.linspace(0, 3.25, 160)
 
     band_structure = []
     for ii, item in enumerate(list_of_spin_orbit_couplings):
@@ -92,10 +89,7 @@ def main():
         # plot_atom_positions1(h, h.ct.virtual_and_interfacial_atoms, radial_dep)
 
         for jj, item in enumerate(k_points):
-            # h = Hamiltonian(xyz=path_to_xyz_file, nn_distance=5.6)
-            # h.initialize(radial_dep)
-            # h.set_periodic_bc(primitive_cell, radial_dep)data_bi_bulk.py
-            # data_bi_bilayer.LAMBDA = list_of_spin_orbit_couplings[ii]
+
             [eigenvalues, _] = h.diagonalize_periodic_bc(k_points[jj])
             band_structure.append(eigenvalues)
 
@@ -107,9 +101,15 @@ def main():
     ax.set_ylabel( "Energy (eV)" )
     ax.set_title( "" )
     plt.tight_layout()
-    plt.ylim((-2, 2))
+    plt.ylim((-1, 1))
     plt.show()
 
+    k_index = np.linspace(0, 1, np.size(k_points, axis=0))
+    band_structure_data = np.c_[k_index[:,None],band_structure]
+    np.savetxt(path_to_data_file, np.c_[band_structure_data])
+
+    # band_structure_data = np.c_[list_of_spin_orbit_couplings[:,None],band_structure]
+    # np.savetxt(path_to_data_file, np.c_[band_structure_data])
 
 if __name__ == '__main__':
 
