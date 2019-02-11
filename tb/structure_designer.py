@@ -48,7 +48,7 @@ class StructDesignerXYZ(AbstractStructureDesigner):
                                                                    # their number per unit cell
         self._num_of_nodes = sum(self.num_of_species.values())     # number of sites per unit cell
         self._atom_list = OrderedDict(list(zip(labels, coords)))   # atomic coordinates of atoms in unit cell
-        self._kd_tree = scipy.spatial.cKDTree(coords, leafsize=100)
+        self._kd_tree = scipy.spatial.cKDTree(coords, leafsize=1, balanced_tree=True)
 
     @property
     def atom_list(self):
@@ -98,7 +98,7 @@ class CyclicTopology(AbstractStructureDesigner):
         self._generate_atom_list(labels, coords)
 
         self._kd_tree = scipy.spatial.cKDTree(list(self.virtual_and_interfacial_atoms.values()),
-                                              leafsize=100)
+                                              leafsize=100, balanced_tree=True)
 
         logging.info("Primitive_cell_vectors: \n {} \n".format(primitive_cell_vectors))
         logging.info("Virtual and interfacial atoms: \n "
