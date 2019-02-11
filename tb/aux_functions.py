@@ -5,7 +5,7 @@ from __future__ import print_function
 from __future__ import absolute_import
 import numpy as np
 import yaml
-from examples.data_bi_bulk import SPECIAL_K_POINTS_BI, SPECIAL_K_POINTS_SI
+from tb.special_points import SPECIAL_K_POINTS_BI, SPECIAL_K_POINTS_SI
 
 
 def xyz2np(xyz):
