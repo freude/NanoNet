@@ -26,7 +26,7 @@ def is_in_coords(coord, coords):
 
 class StructDesignerXYZ(AbstractStructureDesigner):
     """
-    The class builds the atomic structure from the xyz file or string.
+    The class builds an atomic structure from the xyz file or string.
     """
 
     def __init__(self, xyz='/home/mk/TB_project/tb/my_si.xyz', nn_distance=2.39):
