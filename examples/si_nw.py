@@ -117,6 +117,7 @@ def main2():
     # plt.imshow(np.abs(h.h_matrix_bc_factor * h.h_matrix + h.h_matrix_bc_add))
     # plt.show()
 
+
 def main3():
     """
     This function computes the band gap / band structure for Silicon Nanowire
