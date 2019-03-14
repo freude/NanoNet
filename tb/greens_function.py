@@ -244,7 +244,7 @@ def surface_greens_function(E, h_l, h_0, h_r, iterate=False):
     lambda_right = np.matrix(np.zeros(h_0.shape, dtype=np.complex))
     lambda_left = np.matrix(np.zeros(h_0.shape, dtype=np.complex))
 
-    alpha = 0.0001
+    alpha = 0.005
 
     for j in range(h_0.shape[0]):
         if np.abs(vals[j]) > 1.0 + alpha:
