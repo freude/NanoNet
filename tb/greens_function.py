@@ -244,7 +244,7 @@ def surface_greens_function(E, h_l, h_0, h_r, iterate=False):
     lambda_right = np.matrix(np.zeros(h_0.shape, dtype=np.complex))
     lambda_left = np.matrix(np.zeros(h_0.shape, dtype=np.complex))
 
-    alpha = 0.005
+    alpha = 0.01
 
     for j in range(h_0.shape[0]):
         if np.abs(vals[j]) > 1.0 + alpha:
@@ -327,30 +327,30 @@ def reduce_mode_space(energy, h_l, h_0, h_r, thr):
 
     _, vals_for_plot_1, num_of_states1 = bs_vs_e(energy, h_l_reduced, h_0_reduced, h_r_reduced)
 
-    while num_of_states != num_of_states1:
-
-        extended_basis = (1.0 - init_basis * init_basis.H) * h_0 * init_basis
-        extended_basis1 = (1.0 - init_basis * init_basis.H) * (h_l + h_r) * init_basis
-        extended_basis = np.matrix(np.hstack((extended_basis, extended_basis1)))
-        eee, vvv = np.linalg.eig(extended_basis.H * extended_basis)
-        extended_basis = extended_basis * vvv * np.matrix(np.diag(1.0 / np.sqrt(eee)))
-        extended_basis = extended_basis[:, np.where(eee > thr)[0]]
-        x0 = 0.5*np.ones(extended_basis.shape[1])
-        res = minimize(object_function,
-                       x0,
-                       args=(energy, init_basis, extended_basis, h_l, h_0, h_r, num_of_states),
-                       method='COBYLA', options={'maxiter': 300})
-        vec = np.matrix(res.x)
-
-        extended_basis = np.matrix(np.array(1.0 / np.sqrt(vec * vec.H)) * np.array(extended_basis * vec.T))
-        init_basis = np.hstack((init_basis, extended_basis))
-
-        # test reduced mode space
-        h_l_reduced = init_basis.H * h_l * init_basis
-        h_0_reduced = init_basis.H * h_0 * init_basis
-        h_r_reduced = init_basis.H * h_r * init_basis
-
-        _, vals_for_plot2, num_of_states1 = bs_vs_e(energy, h_l_reduced, h_0_reduced, h_r_reduced)
+    # while num_of_states != num_of_states1:
+    #
+    #     extended_basis = (1.0 - init_basis * init_basis.H) * h_0 * init_basis
+    #     extended_basis1 = (1.0 - init_basis * init_basis.H) * (h_l + h_r) * init_basis
+    #     extended_basis = np.matrix(np.hstack((extended_basis, extended_basis1)))
+    #     eee, vvv = np.linalg.eig(extended_basis.H * extended_basis)
+    #     extended_basis = extended_basis * vvv * np.matrix(np.diag(1.0 / np.sqrt(eee)))
+    #     extended_basis = extended_basis[:, np.where(eee > thr)[0]]
+    #     x0 = 0.5*np.ones(extended_basis.shape[1])
+    #     res = minimize(object_function,
+    #                    x0,
+    #                    args=(energy, init_basis, extended_basis, h_l, h_0, h_r, num_of_states),
+    #                    method='COBYLA', options={'maxiter': 300})
+    #     vec = np.matrix(res.x)
+    #
+    #     extended_basis = np.matrix(np.array(1.0 / np.sqrt(vec * vec.H)) * np.array(extended_basis * vec.T))
+    #     init_basis = np.hstack((init_basis, extended_basis))
+    #
+    #     # test reduced mode space
+    #     h_l_reduced = init_basis.H * h_l * init_basis
+    #     h_0_reduced = init_basis.H * h_0 * init_basis
+    #     h_r_reduced = init_basis.H * h_r * init_basis
+    #
+    #     _, vals_for_plot2, num_of_states1 = bs_vs_e(energy, h_l_reduced, h_0_reduced, h_r_reduced)
 
     return h_l_reduced, h_0_reduced, h_r_reduced, vals_for_plot, init_basis
 
