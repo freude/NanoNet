@@ -3,6 +3,10 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+
+*.pkl
+*.bak
+
 # OS generated files #
 .DS_Store
 ehthumbs.db

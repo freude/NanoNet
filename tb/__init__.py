@@ -12,4 +12,5 @@ from .aux_functions import get_k_coords, yaml_parser
 from .hamiltonian_initializer import set_tb_params, initializer
 
 from .greens_function import surface_greens_function
+from .reduced_mode_space import reduce_mode_space, bs_vs_e, bs
 
