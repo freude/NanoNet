@@ -1,8 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import tb
 from tb import Hamiltonian
 from tb import Atom
+import tb
 from tb.aux_functions import get_k_coords
 from examples import data_bi_bilayer
 

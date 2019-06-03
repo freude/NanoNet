@@ -54,17 +54,3 @@ PARAMS_BI_BI3 = {'ss_sigma': 0.000,
                  'sp_sigma': 0.000,
                  'pp_sigma': 0.156,
                  'pp_np.pi': 0.000}
-
-
-
-
-a_si = 5.50
-
-SPECIAL_K_POINTS_SI = {
-    'GAMMA': [0, 0, 0],
-    'X': [0, 2 * np.pi / a_si, 0],
-    'L': [np.pi / a_si,  np.pi / a_si,  np.pi / a_si],
-    'W': [np.pi / a_si,  2 * np.pi / a_si,  0],
-    'U': [np.pi / (2 * a_si), 2 * np.pi / a_si, np.pi/ (2 * a_si)],
-    'K': [3 * np.pi / (2 * a_si), 3 * np.pi / (2 * a_si), 0]
-}

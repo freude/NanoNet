@@ -2,9 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from tb import Hamiltonian
 from tb import Atom
-import examples.data_bi_bulk
-from examples import data_bi_bulk
-from tb.plotting import plot_bs_split, plot_atom_positions
+import examples.data_si_bulk
 
 
 def radial_dep(coords):
@@ -30,14 +28,14 @@ def main():
     basis_set = 'SiliconSP3D5S'
     sym_points = [ 'L', 'GAMMA', 'X' ]
 
-    num_points = [ 20, 20 ]
+    num_points = [20, 20]
     indices_of_bands = range( 0, 8 )
 
-    primitive_cell = examples.data_bi_bulk.a_si * np.array([[0.0, 0.5, 0.5],
-                                                            [0.5, 0.0, 0.5],
-                                                            [0.5, 0.5, 0.0]])
+    primitive_cell = examples.data_si_bulk.a * np.array([[0.0, 0.5, 0.5],
+                                                         [0.5, 0.0, 0.5],
+                                                         [0.5, 0.5, 0.0]])
 
-    Atom.orbital_sets = { species: basis_set }
+    Atom.orbital_sets = {species: basis_set}
 
     h = Hamiltonian( xyz = path_to_xyz_file)
     h.initialize()

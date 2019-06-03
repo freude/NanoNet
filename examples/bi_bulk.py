@@ -3,7 +3,6 @@ import matplotlib.pyplot as plt
 from tb import Hamiltonian
 from tb import Atom
 import examples.data_bi_bulk
-from tb.plotting import plot_atom_positions, plot_atom_positions1
 
 
 def radial_dep(coords):
