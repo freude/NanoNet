@@ -25,26 +25,24 @@ def main():
 
     path_to_xyz_file = 'input_samples/bulk_bismuth.xyz'
     # path_to_pdf_file = '../band_structure_of_bulk_bismuth.pdf'
-    path_to_data_file = '/Users/tcqp/Dropbox/research/conferences/2018/fleet/poster/data/band_structure_of_bulk_bismuth/etb/band_structure_with_spin_orbit_1.csv'
+    path_to_data_file = '/Users/tcqp/Desktop/band_structure_with_spin_orbit_1.csv'
     species = 'Bi'
     basis_set = 'Bismuth'
-    # sym_points = ['U', 'X', 'GAMMA', 'L', 'U', 'T']
-    # sym_points = ['K', 'GAMMA', 'T', 'W', 'L', 'LAMBDA']
-    # sym_points = ['K', 'X', 'GAMMA', 'L', 'U', 'T']
-    # sym_points = ['GAMMA', 'GAMMA']
-    sym_points = ['K', 'GAMMA', 'T']
+
+    sym_points = ['K', 'GAMMA', 'T', 'W', 'L', 'LAMBDA']
+    sym_points = ['K', 'X', 'GAMMA', 'L', 'U', 'T']
 
     # num_points = [40, 40, 40, 40, 40]
     # num_points = [1]
-    num_points = [10, 10]
+    num_points = [10, 10, 10, 10, 10]
     indices_of_bands = range(0, 16)
 
-    cell_a = examples.data_bi_bulk.a_bi * np.array([[(-1.0 / 2.0), (-np.sqrt(3.0) / 6.0), 0.0],
-                                                    [ (  1.0 / 2.0 ), ( -np.sqrt(3.0) / 6.0 ), 0.0 ],
-                                                    [ 0.0,            (  np.sqrt(3.0) / 3.0 ), 0.0 ]])
-    cell_c = examples.data_bi_bulk.c_bi * np.array([[0.0, 0.0, (1.0 / 3.0)],
-                                                    [ 0.0, 0.0, ( 1.0 / 3.0 ) ],
-                                                    [ 0.0, 0.0, ( 1.0 / 3.0 ) ]])
+    cell_a = examples.data_bi_bulk.a * np.array([[(-1.0 / 2.0), (-np.sqrt(3.0) / 6.0), 0.0],
+                                                 [(1.0 / 2.0), (-np.sqrt(3.0) / 6.0), 0.0],
+                                                 [0.0, (np.sqrt(3.0) / 3.0), 0.0]])
+    cell_c = examples.data_bi_bulk.c * np.array([[0.0, 0.0, (1.0 / 3.0)],
+                                                 [0.0, 0.0, (1.0 / 3.0)],
+                                                 [0.0, 0.0, (1.0 / 3.0)]])
     primitive_cell = cell_a + cell_c
 
     Atom.orbital_sets = { species: basis_set }
