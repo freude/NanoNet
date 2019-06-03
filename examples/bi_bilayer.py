@@ -22,17 +22,11 @@ def radial_dep(coords):
 
 def main():
 
-    path_to_xyz_file = """  2
-                              Bilayer Bismuth
-                              Bi   -2.2666 -1.30862212 -1.59098161
-                              Bi    0.00000000  0.00000000  0.00000000
-                       """
+    path_to_xyz_file = 'input_samples/bi_bilayer.xyz'
 
     path_to_dat_file = 'examples/data/bi_bilayer_bands.dat'
 
-    species = 'Bi'
-
-    bi = Atom(species)
+    bi = Atom('Bi')
     bi.add_orbital("s", energy=-10.906, principal=0, orbital=0, magnetic= 0, spin=0)
     bi.add_orbital("px", energy=-0.486, principal=0, orbital=1, magnetic=-1, spin=0)
     bi.add_orbital("py", energy=-0.486, principal=0, orbital=1, magnetic= 1, spin=0)
@@ -42,7 +36,7 @@ def main():
     bi.add_orbital("py", energy=-0.486, principal=0, orbital=1, magnetic= 1, spin=1)
     bi.add_orbital("pz", energy=-0.486, principal=0, orbital=1, magnetic= 0, spin=1)
 
-    Atom.orbital_sets = {species: bi}
+    Atom.orbital_sets = {'Bi': bi}
 
     tb.set_tb_params(PARAMS_BI_BI1=data_bi_bilayer.PARAMS_BI_BI1,
                      PARAMS_BI_BI2=data_bi_bilayer.PARAMS_BI_BI2,

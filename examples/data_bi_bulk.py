@@ -16,7 +16,17 @@ g = 1.3861
 gamma = 0.240385652727133
 
 
-# Reciprocal lattice vectors
+# Primitive cell
+
+primitive_cell_a = a * np.array([[(-1.0 / 2.0), (-np.sqrt(3.0) / 6.0), 0.0],
+                                 [(1.0 / 2.0), (-np.sqrt(3.0) / 6.0), 0.0],
+                                 [0.0, (np.sqrt(3.0) / 3.0), 0.0]])
+
+primitive_cell_c = c * np.array([[0.0, 0.0, (1.0 / 3.0)],
+                                 [0.0, 0.0, (1.0 / 3.0)],
+                                 [0.0, 0.0, (1.0 / 3.0)]])
+
+primitive_cell = primitive_cell_a + primitive_cell_c
 
 reciprocal_lattice_vectors_bi = g * np.matrix([[-1.0, (-np.sqrt(3.0) / 3.0), (a / c)],
                                                   [1.0, (-np.sqrt(3.0) / 3.0), (a / c)],
