@@ -2,7 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from tb import Hamiltonian
 from tb import Atom
-import examples.data_si_bulk
+from examples import data_si_bulk
+from tb import get_k_coords
 
 
 def radial_dep(coords):
@@ -21,43 +22,35 @@ def radial_dep(coords):
 
 def main():
 
-    from tb import get_k_coords
-
     path_to_xyz_file = 'input_samples/bulk_silicon.xyz'
-    species = 'Si'
-    basis_set = 'SiliconSP3D5S'
-    sym_points = [ 'L', 'GAMMA', 'X' ]
 
+    path_to_dat_file = 'examples/data/si_bulk_bands.dat'
+
+    Atom.orbital_sets = {'Si': 'SiliconSP3D5S'}
+
+    sym_points = ['L', 'GAMMA', 'X']
     num_points = [20, 20]
-    indices_of_bands = range( 0, 8 )
 
-    primitive_cell = examples.data_si_bulk.a * np.array([[0.0, 0.5, 0.5],
-                                                         [0.5, 0.0, 0.5],
-                                                         [0.5, 0.5, 0.0]])
-
-    Atom.orbital_sets = {species: basis_set}
-
-    h = Hamiltonian( xyz = path_to_xyz_file)
-    h.initialize()
-    h.set_periodic_bc( primitive_cell )
-
-    k_points = get_k_coords( sym_points, num_points, species )
+    k_points = get_k_coords(sym_points, num_points, data_si_bulk.SPECIAL_K_POINTS_SI)
 
     band_structure = []
-    for jj, item in enumerate( k_points ):
-        [ eigenvalues, _ ] = h.diagonalize_periodic_bc( k_points[ jj ] )
-        band_structure.append( eigenvalues )
+    for ii, item in enumerate(k_points):
+        h = Hamiltonian(xyz=path_to_xyz_file)
+        h.initialize()
+        h.set_periodic_bc(data_si_bulk.primitive_cell)
+        [eigenvalues, _] = h.diagonalize_periodic_bc(k_points[ii])
+        band_structure.append(eigenvalues)
 
-    band_structure = np.array( band_structure )
+    band_structure = np.array(band_structure)
+
+    k_index = np.linspace(0, 1, np.size(k_points, axis=0))
+    band_structure_data = np.c_[k_index[:, None], band_structure]
+    np.savetxt(path_to_dat_file, np.c_[band_structure_data])
 
     ax = plt.axes()
-    ax.plot( band_structure[ :, indices_of_bands ] )
-    ax.set_xlabel( "" )
-    ax.set_ylabel( "Energy (eV)" )
-    ax.set_title( "" )
-    plt.tight_layout()
+    ax.plot(band_structure)
+    plt.ylim((-15, 15))
     plt.show()
-    # plt.savefig( path_to_pdf_file )
 
 
 if __name__ == '__main__':

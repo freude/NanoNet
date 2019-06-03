@@ -1,6 +1,19 @@
 import numpy as np
 
+
+# Crystal structure parameters
+
 a = 5.50
+
+
+# Primitive cell
+
+primitive_cell = a * np.array([[0.0, 0.5, 0.5],
+                               [0.5, 0.0, 0.5],
+                               [0.5, 0.5, 0.0]])
+
+
+# High symmetry points
 
 SPECIAL_K_POINTS_SI = {
     'GAMMA': [0, 0, 0],
