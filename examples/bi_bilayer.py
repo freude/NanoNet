@@ -27,14 +27,14 @@ def main():
     path_to_dat_file = 'examples/data/bi_bilayer_bands.dat'
 
     bi = Atom('Bi')
-    bi.add_orbital("s", energy=-10.906, principal=0, orbital=0, magnetic= 0, spin=0)
-    bi.add_orbital("px", energy=-0.486, principal=0, orbital=1, magnetic=-1, spin=0)
-    bi.add_orbital("py", energy=-0.486, principal=0, orbital=1, magnetic= 1, spin=0)
-    bi.add_orbital("pz", energy=-0.486, principal=0, orbital=1, magnetic= 0, spin=0)
-    bi.add_orbital("s", energy=-10.906, principal=0, orbital=0, magnetic= 0, spin=1)
-    bi.add_orbital("px", energy=-0.486, principal=0, orbital=1, magnetic=-1, spin=1)
-    bi.add_orbital("py", energy=-0.486, principal=0, orbital=1, magnetic= 1, spin=1)
-    bi.add_orbital("pz", energy=-0.486, principal=0, orbital=1, magnetic= 0, spin=1)
+    bi.add_orbital("s",  energy=-10.906, principal=0, orbital=0, magnetic= 0, spin=0)
+    bi.add_orbital("px", energy= -0.486, principal=0, orbital=1, magnetic=-1, spin=0)
+    bi.add_orbital("py", energy= -0.486, principal=0, orbital=1, magnetic= 1, spin=0)
+    bi.add_orbital("pz", energy= -0.486, principal=0, orbital=1, magnetic= 0, spin=0)
+    bi.add_orbital("s",  energy=-10.906, principal=0, orbital=0, magnetic= 0, spin=1)
+    bi.add_orbital("px", energy= -0.486, principal=0, orbital=1, magnetic=-1, spin=1)
+    bi.add_orbital("py", energy= -0.486, principal=0, orbital=1, magnetic= 1, spin=1)
+    bi.add_orbital("pz", energy= -0.486, principal=0, orbital=1, magnetic= 0, spin=1)
 
     Atom.orbital_sets = {'Bi': bi}
 
