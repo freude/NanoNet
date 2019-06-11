@@ -24,7 +24,7 @@ def main():
 
     path_to_xyz_file = 'input_samples/bi_bilayer.xyz'
 
-    path_to_dat_file = 'examples/data/bi_bilayer_bands.dat'
+    path_to_dat_file = 'examples/data/bands_111_0.75.dat'
 
     bi = Atom('Bi')
     bi.add_orbital("s",  energy=-10.906, principal=0, orbital=0, magnetic= 0, spin=0)
@@ -42,9 +42,9 @@ def main():
                      PARAMS_BI_BI2=data_bi_bilayer.PARAMS_BI_BI2,
                      PARAMS_BI_BI3=data_bi_bilayer.PARAMS_BI_BI3)
 
-    so_couplings = np.linspace(1.5, 1.5, 1)
+    so_couplings = np.linspace(0.75, 0.75, 1)
     sym_points = ['M', 'GAMMA', 'K', 'M']
-    num_points = [10, 10, 10]
+    num_points = [100, 100, 100]
 
     k_points = get_k_coords(sym_points, num_points, data_bi_bilayer.SPECIAL_K_POINTS_BI)
 
@@ -59,7 +59,8 @@ def main():
 
     band_structure = np.array(band_structure)
 
-    k_index = np.linspace(0, 1, np.size(k_points, axis=0))
+    num_k_points = np.size(k_points, axis=0)
+    k_index = np.linspace(1, num_k_points, num_k_points)
     band_structure_data = np.c_[np.tile(so_couplings[:, None], [np.sum(num_points), 1]), np.tile(k_index[:, None], [len(so_couplings), 1]), band_structure]
     np.savetxt(path_to_dat_file, np.c_[band_structure_data])
 
