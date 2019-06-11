@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from tb import Hamiltonian
-from tb import Atom
+from tb import Orbitals
 import examples.data_bi_bulk
 from tb.plotting import plot_atom_positions, plot_atom_positions1
 
@@ -47,7 +47,7 @@ def main():
                                                     [ 0.0, 0.0, ( 1.0 / 3.0 ) ]])
     primitive_cell = cell_a + cell_c
 
-    Atom.orbital_sets = { species: basis_set }
+    Orbitals.orbital_sets = {species: basis_set}
 
     h = Hamiltonian( xyz = path_to_xyz_file, nn_distance = 4.6, so_coupling=1.5)
     h.initialize( radial_dep )

@@ -5,6 +5,7 @@ from __future__ import print_function, division
 import pickle
 import os.path
 import numpy as np
+from scipy.sparse.linalg import eigs
 from tb.greens_function import surface_greens_function_poles
 
 
@@ -112,6 +113,9 @@ def bs_vs_e(energy, h_l, h_0, h_r):
 def reduce_mode_space(energy, h_l, h_0, h_r, thr, input_file=""):
 
     # energy = np.linspace(2.0, 3.7, 50)
+
+    if os.path.isfile(input_file):
+        input_file = os.path.dirname(input_file)
 
     label = '_' + "{0:.2f}".format(np.min(energy)) + '_' + "{0:.2f}".format(np.max(energy)) + '_' + str(len(energy))
     first_file = os.path.join(input_file, 'init_basis'+label+'.pkl')

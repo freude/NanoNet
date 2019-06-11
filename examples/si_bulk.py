@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from tb import Hamiltonian
-from tb import Atom
+from tb import Orbitals
 import examples.data_bi_bulk
 from examples import data_bi_bulk
 from tb.plotting import plot_bs_split, plot_atom_positions
@@ -37,7 +37,7 @@ def main1():
                                                             [0.5, 0.0, 0.5],
                                                             [0.5, 0.5, 0.0]])
 
-    Atom.orbital_sets = { species: basis_set }
+    Orbitals.orbital_sets = {species: basis_set}
 
     h = Hamiltonian( xyz = path_to_xyz_file)
     h.initialize()
@@ -88,7 +88,7 @@ def main2():
                                                     [ 0.0, 0.0, ( 1.0 / 3.0 ) ]])
     primitive_cell = cell_a + cell_c
 
-    Atom.orbital_sets = { species: basis_set }
+    Orbitals.orbital_sets = {species: basis_set}
 
     h = Hamiltonian( xyz = path_to_xyz_file, nn_distance = 4.6, so_coupling=1.2)
     h.initialize( radial_dep )
@@ -125,7 +125,7 @@ def main3():
     :return: band gap / band structure
     """
     # define orbitals sets
-    Atom.orbital_sets = {'Si': 'SiliconSP3D5S', 'H': 'HydrogenS'}
+    Orbitals.orbital_sets = {'Si': 'SiliconSP3D5S', 'H': 'HydrogenS'}
     band_gaps = []
     band_structures = []
 
@@ -192,7 +192,7 @@ def main4():
 
     primitive_cell = data_bi_bulk.cell
 
-    Atom.orbital_sets = { species: basis_set }
+    Orbitals.orbital_sets = {species: basis_set}
 
     h = Hamiltonian(xyz=path_to_xyz_file, nn_distance=4.7, so_coupling=0.9)
     h.initialize(radial_dep)

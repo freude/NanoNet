@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 import sys
 import numpy as np
-from .atoms import Atom
+from .orbitals import Orbitals
 from . import diatomic_matrix_element as dme
 from .hamiltonian import Hamiltonian
 from .hamiltonian_sparse import HamiltonianSp
@@ -16,7 +16,7 @@ def set_tb_params(**kwargs):
 def initializer(**kwargs):
 
     set_tb_params(**kwargs)
-    Atom.orbital_sets = kwargs.get('orbital_sets', {'Si': 'SiliconSP3D5S', 'H': 'HydrogenS'})
+    Orbitals.orbital_sets = kwargs.get('orbital_sets', {'Si': 'SiliconSP3D5S', 'H': 'HydrogenS'})
     sys.modules[__name__].VERBOSITY = kwargs.get('VERBOSITY', 1)
 
     xyz = kwargs.get('xyz', {})

@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import scipy.sparse.linalg as splin
 import scipy.sparse as sp
-from tb.atoms import Atom
+from tb.orbitals import Orbitals
 from tb.hamiltonian import Hamiltonian
 
 
@@ -184,7 +184,7 @@ def main():
 
     a_si = 5.50
     PRIMITIVE_CELL = [[0, 0, a_si]]
-    Atom.orbital_sets = {'Si': 'SiliconSP3D5S', 'H': 'HydrogenS'}
+    Orbitals.orbital_sets = {'Si': 'SiliconSP3D5S', 'H': 'HydrogenS'}
 
     h = HamiltonianSp(xyz='/home/mk/TB_project/input_samples/SiNW.xyz')
     h.initialize()

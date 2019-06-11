@@ -5,7 +5,7 @@ import sys
 from tb.aux_functions import print_table
 
 
-class Atom(object):
+class Orbitals(object):
     """
     This is the parent class for all basis sets for all atoms. It also contains a factory function,
     which generates objects of Atom from a list of labels and the dictionary `orbital_sets` making
@@ -64,17 +64,17 @@ class Atom(object):
 
             try:
                 key = ''.join([i for i in label if not i.isdigit()])
-                atom = Atom.orbital_sets[key]
-                if not isinstance(atom, Atom):
+                atom = Orbitals.orbital_sets[key]
+                if not isinstance(atom, Orbitals):
                     raise KeyError
             except KeyError:
                 # TODO: simplify these statements below
                 if label.lower().startswith('si'):
-                    atom = getattr(sys.modules[__name__], Atom.orbital_sets['Si'])()
+                    atom = getattr(sys.modules[__name__], Orbitals.orbital_sets['Si'])()
                 elif label.lower().startswith('h'):
-                    atom = getattr(sys.modules[__name__], Atom.orbital_sets['H'])()
+                    atom = getattr(sys.modules[__name__], Orbitals.orbital_sets['H'])()
                 elif label.lower().startswith('b'):
-                    atom = getattr(sys.modules[__name__], Atom.orbital_sets['Bi'])()
+                    atom = getattr(sys.modules[__name__], Orbitals.orbital_sets['Bi'])()
                 else:
                     raise ValueError("There is no library entry for the atom " + label)
 
@@ -83,7 +83,7 @@ class Atom(object):
         return output
 
 
-class SiliconSP3D5S(Atom):
+class SiliconSP3D5S(Orbitals):
     """
     Class defines the `sp3d5s*` basis set for the silicon atom
     """
@@ -92,19 +92,30 @@ class SiliconSP3D5S(Atom):
 
         super(SiliconSP3D5S, self).__init__("Si")
 
-        self.add_orbital("s", energy=-2.0196)
-        self.add_orbital("c", energy=19.6748, principal=1)
-        self.add_orbital("px", energy=4.5448, orbital=1, magnetic=-1)
-        self.add_orbital("py", energy=4.5448, orbital=1, magnetic=1)
-        self.add_orbital("pz", energy=4.5448, orbital=1, magnetic=0)
-        self.add_orbital("dz2", energy=14.1836, orbital=2, magnetic=-1)
-        self.add_orbital("dxz", energy=14.1836, orbital=2, magnetic=-2)
-        self.add_orbital("dyz", energy=14.1836, orbital=2, magnetic=2)
-        self.add_orbital("dxy", energy=14.1836, orbital=2, magnetic=1)
-        self.add_orbital("dx2my2", energy=14.1836, orbital=2, magnetic=0)
+        self.add_orbital("s", energy=-2.0196, spin=0)
+        self.add_orbital("c", energy=19.6748, principal=1, spin=0)
+        self.add_orbital("px", energy=4.5448, orbital=1, magnetic=-1, spin=0)
+        self.add_orbital("py", energy=4.5448, orbital=1, magnetic=1, spin=0)
+        self.add_orbital("pz", energy=4.5448, orbital=1, magnetic=0, spin=0)
+        self.add_orbital("dz2", energy=14.1836, orbital=2, magnetic=-1, spin=0)
+        self.add_orbital("dxz", energy=14.1836, orbital=2, magnetic=-2, spin=0)
+        self.add_orbital("dyz", energy=14.1836, orbital=2, magnetic=2, spin=0)
+        self.add_orbital("dxy", energy=14.1836, orbital=2, magnetic=1, spin=0)
+        self.add_orbital("dx2my2", energy=14.1836, orbital=2, magnetic=0, spin=0)
+
+        # self.add_orbital("s", energy=-2.0196, spin=1)
+        # self.add_orbital("c", energy=19.6748, principal=1, spin=1)
+        # self.add_orbital("px", energy=4.5448, orbital=1, magnetic=-1, spin=1)
+        # self.add_orbital("py", energy=4.5448, orbital=1, magnetic=1, spin=1)
+        # self.add_orbital("pz", energy=4.5448, orbital=1, magnetic=0, spin=1)
+        # self.add_orbital("dz2", energy=14.1836, orbital=2, magnetic=-1, spin=1)
+        # self.add_orbital("dxz", energy=14.1836, orbital=2, magnetic=-2, spin=1)
+        # self.add_orbital("dyz", energy=14.1836, orbital=2, magnetic=2, spin=1)
+        # self.add_orbital("dxy", energy=14.1836, orbital=2, magnetic=1, spin=1)
+        # self.add_orbital("dx2my2", energy=14.1836, orbital=2, magnetic=0, spin=1)
 
 
-class HydrogenS(Atom):
+class HydrogenS(Orbitals):
     """
     Class defines the simplest basis set for the hydrogen atom,
     consisting of a single s-orbital
@@ -115,9 +126,10 @@ class HydrogenS(Atom):
         super(HydrogenS, self).__init__("H")
 
         self.add_orbital("s", energy=0.9998)
+        # self.add_orbital("s", energy=0.9998, spin=1)
 
 
-class Bismuth(Atom):
+class Bismuth(Orbitals):
     """
     Class defines the `sp3` basis set for the bismuth atom
     """
@@ -134,4 +146,3 @@ class Bismuth(Atom):
         self.add_orbital("px", energy=-0.486, principal=0, orbital=1, magnetic=-1, spin=1)
         self.add_orbital("py", energy=-0.486, principal=0, orbital=1, magnetic=1, spin=1)
         self.add_orbital("pz", energy=-0.486, principal=0, orbital=1, magnetic=0, spin=1)
-

@@ -13,7 +13,7 @@ import numpy as np
 from tb.abstract_interfaces import AbstractBasis
 from tb.structure_designer import StructDesignerXYZ, CyclicTopology
 from tb.diatomic_matrix_element import me
-from tb.atoms import Atom
+from tb.orbitals import Orbitals
 from tb.aux_functions import dict2xyz
 from tb.tb_script import postprocess_data
 
@@ -33,15 +33,15 @@ class BasisTB(AbstractBasis, StructDesignerXYZ):
     into a raw index and vise versa.
     """
 
-    def __init__(self, xyz, nn_distance):
+    def __init__(self, **kwargs):
 
         # parent class StructDesignerXYZ stores atom list initialized from xyz-file
-        super(BasisTB, self).__init__(xyz=xyz, nn_distance=nn_distance)
+        super(BasisTB, self).__init__(**kwargs)
 
         # each entry of the dictionary stores a label of the atom species as a key and
         # corresponding Atom object as a value. Each atom object contains infomation about number,
         # energy and symmetry of the orbitals
-        self._orbitals_dict = Atom.atoms_factory(list(self.num_of_species.keys()))
+        self._orbitals_dict = Orbitals.atoms_factory(list(self.num_of_species.keys()))
 
         # `quantum_number_lims` counts number of species and corresponding number
         # of orbitals for each; each atom kind is enumerated
@@ -99,17 +99,18 @@ class Hamiltonian(BasisTB):
 
     def __init__(self, **kwargs):
 
-        xyz = kwargs.get('xyz', "")
         nn_distance = kwargs.get('nn_distance', 2.39)
 
         logging.info('The verbosity level is {}'.format(VERBOSITY))
         logging.info('The radius of the neighbourhood is {} Ang'.format(nn_distance))
         logging.info("\n---------------------------------\n")
 
-        if isinstance(xyz, str):
-            super(Hamiltonian, self).__init__(xyz=xyz, nn_distance=nn_distance)
-        else:
-            super(Hamiltonian, self).__init__(xyz=dict2xyz(xyz), nn_distance=nn_distance)
+        kwargs['nn_distance'] = nn_distance
+
+        if not isinstance(kwargs['xyz'], str):
+            kwargs['xyz'] = dict2xyz(kwargs['xyz'])
+
+        super(Hamiltonian, self).__init__(**kwargs)
 
         self._coords = None                               # coordinates of sites
         self.h_matrix = None                            # Hamiltonian for an isolated system
@@ -435,6 +436,7 @@ class Hamiltonian(BasisTB):
 
         self.k_vector = [0.0, 0.0, 0.0]
         self._compute_h_matrix_bc_add(split_the_leads=True)
+
         return self.h_matrix_left_lead.T, self.h_matrix, self.h_matrix_right_lead.T
 
     def get_site_coordinates(self):

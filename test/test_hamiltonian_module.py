@@ -7,9 +7,9 @@ def test_simple_atomic_chain():
     coupling = -1.0
     l_const = 1.0
 
-    a = tb.Atom('A')
+    a = tb.Orbitals('A')
     a.add_orbital(title='s', energy=-1, )
-    tb.Atom.orbital_sets = {'A': a}
+    tb.Orbitals.orbital_sets = {'A': a}
 
     xyz_file = """1
     H cell
@@ -45,12 +45,12 @@ def test_atomic_chain_two_kinds_of_atoms():
     coupling = -1.0
     l_const = 2.0
 
-    a = tb.Atom('A')
+    a = tb.Orbitals('A')
     a.add_orbital(title='s', energy=site_energy1, )
-    b = tb.Atom('B')
+    b = tb.Orbitals('B')
     b.add_orbital(title='s', energy=site_energy2, )
 
-    tb.Atom.orbital_sets = {'A': a, 'B': b}
+    tb.Orbitals.orbital_sets = {'A': a, 'B': b}
 
     xyz_file = """2
     H cell
@@ -92,7 +92,7 @@ def test_bulk_silicon():
                       [0.5 * a_si, 0, 0.5 * a_si],
                       [0.5 * a_si, 0.5 * a_si, 0]]
 
-    tb.Atom.orbital_sets = {'Si': 'SiliconSP3D5S'}
+    tb.Orbitals.orbital_sets = {'Si': 'SiliconSP3D5S'}
 
     xyz_file = """2
     Si2 cell

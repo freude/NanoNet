@@ -1,13 +1,13 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from tb import Hamiltonian
-from tb import Atom
+from tb import Orbitals
 from examples import data_bi_bilayer
 from tb.plotting import plot_atom_positions, plot_atom_positions1
 import tb
 
 
-bi = Atom('Bi')
+bi = Orbitals('Bi')
 bi.add_orbital("s", energy=-10.906, principal=0, orbital=0, magnetic=0, spin=0)
 bi.add_orbital("px", energy=-0.486, principal=0, orbital=1, magnetic=-1, spin=0)
 bi.add_orbital("py", energy=-0.486, principal=0, orbital=1, magnetic=1, spin=0)
@@ -69,7 +69,7 @@ def main():
 
     primitive_cell = data_bi_bilayer.cell
 
-    Atom.orbital_sets = {species: bi}
+    Orbitals.orbital_sets = {species: bi}
 
     tb.set_tb_params(PARAMS_BI_BI1=data_bi_bilayer.PARAMS_BI_BI1,
                      PARAMS_BI_BI2=data_bi_bilayer.PARAMS_BI_BI2,

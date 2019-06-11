@@ -13,7 +13,7 @@ import os
 
 path = 'c:\users\sammy\desktop\NanoNet\input_samples'
 
-tb.Atom.orbital_sets = {'Si': 'SiliconSP3D5S', 'H': 'HydrogenS'}
+tb.Orbitals.orbital_sets = {'Si': 'SiliconSP3D5S', 'H': 'HydrogenS'}
 
 for xyz_file in os.listdir(path):
     if xyz_file.endswith('xyz'):

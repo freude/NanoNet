@@ -1,10 +1,20 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from tb import Hamiltonian
-from tb import Atom
+from tb import Orbitals
 import examples.data_bi_bulk
 from examples import data_bi_bulk
 from tb.plotting import plot_bs_split, plot_atom_positions
+
+
+def bandwidth(mat):
+
+    j = 0
+
+    while np.count_nonzero((np.diag(mat, mat.shape[0] - j - 1))) == 0 and j < mat.shape[0]:
+        j += 1
+
+    return mat.shape[0] - j - 1
 
 
 def radial_dep(coords):
@@ -37,7 +47,7 @@ def main1():
                                                             [0.5, 0.0, 0.5],
                                                             [0.5, 0.5, 0.0]])
 
-    Atom.orbital_sets = { species: basis_set }
+    Orbitals.orbital_sets = {species: basis_set}
 
     h = Hamiltonian( xyz = path_to_xyz_file)
     h.initialize()
@@ -88,7 +98,7 @@ def main2():
                                                     [ 0.0, 0.0, ( 1.0 / 3.0 ) ]])
     primitive_cell = cell_a + cell_c
 
-    Atom.orbital_sets = { species: basis_set }
+    Orbitals.orbital_sets = {species: basis_set}
 
     h = Hamiltonian( xyz = path_to_xyz_file, nn_distance = 4.6, so_coupling=1.2)
     h.initialize( radial_dep )
@@ -126,13 +136,16 @@ def main3():
     :return: band gap / band structure
     """
     # define orbitals sets
-    Atom.orbital_sets = {'Si': 'SiliconSP3D5S', 'H': 'HydrogenS'}
+    Orbitals.orbital_sets = {'Si': 'SiliconSP3D5S', 'H': 'HydrogenS'}
     band_gaps = []
     band_structures = []
 
     path = "./input_samples/SiNW2.xyz"
+    # path = "/home/mk/TB_project/tb/third_party/si_slab.xyz"
+    # path = "./input_samples/rec.xyz"
 
-    hamiltonian = Hamiltonian(xyz=path, nn_distance=2.4)
+    # hamiltonian = Hamiltonian(xyz=path, nn_distance=1.1, lead_l=[[0, 0, 1]], lead_r=[[0, 4, 3]], so_coupling=0.06)
+    hamiltonian = Hamiltonian(xyz=path, nn_distance=2.4, so_coupling=0.06, vec=[0, 0, 1])
     hamiltonian.initialize()
 
     if True:
@@ -140,6 +153,17 @@ def main3():
         plt.imshow(np.log(np.abs(hamiltonian.h_matrix)))
         plt.savefig('hamiltonian.pdf')
         plt.show()
+
+    bandwidth(hamiltonian.h_matrix)
+
+    # import scipy.spatial
+    # from scipy import sparse
+    # h_matrix_sparse = sparse.csr_matrix(hamiltonian.h_matrix)
+    # a = scipy.sparse.csgraph.reverse_cuthill_mckee(h_matrix_sparse, symmetric_mode=True)
+    # h_matrix1 = hamiltonian.h_matrix[:, a]
+    # h_matrix1 = h_matrix1[a, :]
+    #
+    # bandwidth(h_matrix1)
 
     a_si = 5.50
     PRIMITIVE_CELL = [[0, 0, a_si]]
@@ -193,7 +217,7 @@ def main4():
 
     primitive_cell = data_bi_bulk.cell
 
-    Atom.orbital_sets = { species: basis_set }
+    Orbitals.orbital_sets = {species: basis_set}
 
     h = Hamiltonian(xyz=path_to_xyz_file, nn_distance=4.7, so_coupling=0.9)
     h.initialize(radial_dep)
@@ -229,4 +253,4 @@ def main4():
 
 if __name__ == '__main__':
 
-    main2()
+    main3()
