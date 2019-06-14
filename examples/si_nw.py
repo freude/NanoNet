@@ -7,18 +7,7 @@ from examples import data_bi_bulk
 from tb.plotting import plot_bs_split, plot_atom_positions
 
 
-def bandwidth(mat):
-
-    j = 0
-
-    while np.count_nonzero((np.diag(mat, mat.shape[0] - j - 1))) == 0 and j < mat.shape[0]:
-        j += 1
-
-    return mat.shape[0] - j - 1
-
-
 def radial_dep(coords):
-
     norm_of_coords = np.linalg.norm(coords)
     print(norm_of_coords)
     if norm_of_coords < 3.3:
@@ -32,16 +21,15 @@ def radial_dep(coords):
 
 
 def main1():
-
     from tb import get_k_coords
 
     path_to_xyz_file = 'input_samples/bulk_silicon.xyz'
     species = 'Si'
     basis_set = 'SiliconSP3D5S'
-    sym_points = [ 'L', 'GAMMA', 'X' ]
+    sym_points = ['L', 'GAMMA', 'X']
 
-    num_points = [ 20, 20 ]
-    indices_of_bands = range( 0, 8 )
+    num_points = [20, 20]
+    indices_of_bands = range(0, 8)
 
     primitive_cell = examples.data_bi_bulk.a_si * np.array([[0.0, 0.5, 0.5],
                                                             [0.5, 0.0, 0.5],
@@ -49,31 +37,30 @@ def main1():
 
     Orbitals.orbital_sets = {species: basis_set}
 
-    h = Hamiltonian( xyz = path_to_xyz_file)
+    h = Hamiltonian(xyz=path_to_xyz_file)
     h.initialize()
-    h.set_periodic_bc( primitive_cell )
+    h.set_periodic_bc(primitive_cell)
 
-    k_points = get_k_coords( sym_points, num_points, species )
+    k_points = get_k_coords(sym_points, num_points, species)
 
     band_structure = []
-    for jj, item in enumerate( k_points ):
-        [ eigenvalues, _ ] = h.diagonalize_periodic_bc( k_points[ jj ] )
-        band_structure.append( eigenvalues )
+    for jj, item in enumerate(k_points):
+        [eigenvalues, _] = h.diagonalize_periodic_bc(k_points[jj])
+        band_structure.append(eigenvalues)
 
-    band_structure = np.array( band_structure )
+    band_structure = np.array(band_structure)
 
     ax = plt.axes()
-    ax.plot( band_structure[ :, indices_of_bands ] )
-    ax.set_xlabel( "" )
-    ax.set_ylabel( "Energy (eV)" )
-    ax.set_title( "" )
+    ax.plot(band_structure[:, indices_of_bands])
+    ax.set_xlabel("")
+    ax.set_ylabel("Energy (eV)")
+    ax.set_title("")
     plt.tight_layout()
     plt.show()
     # plt.savefig( path_to_pdf_file )
 
 
 def main2():
-
     from tb.aux_functions import get_k_coords
 
     path_to_xyz_file = 'input_samples/bulk_bismuth.xyz'
@@ -91,35 +78,35 @@ def main2():
     indices_of_bands = range(0, 16)
 
     cell_a = examples.data_bi_bulk.a_bi * np.array([[(-1.0 / 2.0), (-np.sqrt(3.0) / 6.0), 0.0],
-                                                    [ (  1.0 / 2.0 ), ( -np.sqrt(3.0) / 6.0 ), 0.0 ],
-                                                    [ 0.0,            (  np.sqrt(3.0) / 3.0 ), 0.0 ]])
+                                                    [(1.0 / 2.0), (-np.sqrt(3.0) / 6.0), 0.0],
+                                                    [0.0, (np.sqrt(3.0) / 3.0), 0.0]])
     cell_c = examples.data_bi_bulk.c_bi * np.array([[0.0, 0.0, (1.0 / 3.0)],
-                                                    [ 0.0, 0.0, ( 1.0 / 3.0 ) ],
-                                                    [ 0.0, 0.0, ( 1.0 / 3.0 ) ]])
+                                                    [0.0, 0.0, (1.0 / 3.0)],
+                                                    [0.0, 0.0, (1.0 / 3.0)]])
     primitive_cell = cell_a + cell_c
 
     Orbitals.orbital_sets = {species: basis_set}
 
-    h = Hamiltonian( xyz = path_to_xyz_file, nn_distance = 4.6, so_coupling=1.2)
-    h.initialize( radial_dep )
+    h = Hamiltonian(xyz=path_to_xyz_file, nn_distance=4.6, so_coupling=1.2)
+    h.initialize(radial_dep)
     h.set_periodic_bc(primitive_cell.tolist())
 
-    k_points = get_k_coords( sym_points, num_points, species )
+    k_points = get_k_coords(sym_points, num_points, species)
 
     band_structure = []
-    for jj, item in enumerate( k_points ):
-        [ eigenvalues, _ ] = h.diagonalize_periodic_bc( k_points[ jj ] )
-        band_structure.append( eigenvalues )
+    for jj, item in enumerate(k_points):
+        [eigenvalues, _] = h.diagonalize_periodic_bc(k_points[jj])
+        band_structure.append(eigenvalues)
 
-    band_structure = np.array( band_structure )
+    band_structure = np.array(band_structure)
 
     print(h.is_hermitian())
 
     ax = plt.axes()
-    ax.plot( band_structure[ :, indices_of_bands ] )
-    ax.set_xlabel( "" )
-    ax.set_ylabel( "Energy (eV)" )
-    ax.set_title( "" )
+    ax.plot(band_structure[:, indices_of_bands])
+    ax.set_xlabel("")
+    ax.set_ylabel("Energy (eV)")
+    ax.set_title("")
     plt.tight_layout()
     plt.show()
     # plt.savefig( path_to_pdf_file )
@@ -154,7 +141,10 @@ def main3():
         plt.savefig('hamiltonian.pdf')
         plt.show()
 
-    bandwidth(hamiltonian.h_matrix)
+    from tb.aux_functions import blocksandborders, split_into_subblocks
+    # a, b = blocksandborders(hamiltonian.h_matrix)
+
+    # bandwidth(hamiltonian.h_matrix)
 
     # import scipy.spatial
     # from scipy import sparse
@@ -168,6 +158,10 @@ def main3():
     a_si = 5.50
     PRIMITIVE_CELL = [[0, 0, a_si]]
     hamiltonian.set_periodic_bc(PRIMITIVE_CELL)
+
+    hl, h0, hr = hamiltonian.get_coupling_hamiltonians()
+
+    h0, hl, hr = split_into_subblocks(h0, h_l=hl, h_r=hr)
 
     num_points = 20
     kk = np.linspace(0, 0.57, num_points, endpoint=True)
@@ -196,7 +190,6 @@ def main3():
 
 
 def main4():
-
     from tb.aux_functions import get_k_coords
 
     path_to_xyz_file = """2
@@ -213,7 +206,7 @@ def main4():
 
     num_points = [40, 40]
     # num_points = [1]
-    indices_of_bands = range( 0, 16 )
+    indices_of_bands = range(0, 16)
 
     primitive_cell = data_bi_bulk.cell
 
@@ -224,7 +217,7 @@ def main4():
     h.set_periodic_bc(primitive_cell)
     plot_atom_positions(h.atom_list, h.ct.virtual_and_interfacial_atoms, radial_dep)
 
-    k_points = get_k_coords( sym_points, num_points, species )
+    k_points = get_k_coords(sym_points, num_points, species)
 
     list_of_spin_orbit_couplings = [0.27]
     # list_of_spin_orbit_couplings = np.linspace(0, 0.333333, 40)
@@ -242,15 +235,14 @@ def main4():
     band_structure = np.array(band_structure)
 
     ax = plt.axes()
-    ax.plot(band_structure[ :, indices_of_bands ])
-    ax.set_xlabel( "" )
-    ax.set_ylabel( "Energy (eV)" )
-    ax.set_title( "" )
+    ax.plot(band_structure[:, indices_of_bands])
+    ax.set_xlabel("")
+    ax.set_ylabel("Energy (eV)")
+    ax.set_title("")
     plt.tight_layout()
     plt.ylim((-2, 2))
     plt.show()
 
 
 if __name__ == '__main__':
-
     main3()
