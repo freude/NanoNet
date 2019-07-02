@@ -489,8 +489,7 @@ def split_into_subblocks(h_0, h_l, h_r):
     h_l_h = find_nonzero_lines(h_l, 'top')
     h_l_v = find_nonzero_lines(h_l[:h_l_h, :], 'right')
 
-    edge = compute_edge(h_0)
-    edge1 = compute_edge(h_0[::-1, ::-1])
+    edge, edge1 = compute_edge(h_0)
 
     left_block = max(h_l_h, h_r_v)
     right_block = max(h_r_h, h_l_v)
@@ -514,12 +513,14 @@ def compute_edge(mat):
 
     # Clever use of accumarray:
     outeredge = accum(row, col, np.max) + 1
-
-    # Fringe case, we make sure that the first element is always at least 1.
     outeredge[0] = max(0, outeredge[0])
     outeredge = np.maximum.accumulate(outeredge)
 
-    return outeredge
+    outeredge1 = accum(np.max(row) - row[::-1], np.max(row) - col[::-1], np.max) + 1
+    outeredge1[0] = max(0, outeredge1[0])
+    outeredge1 = np.maximum.accumulate(outeredge1)
+
+    return outeredge, outeredge1
 
 
 def blocksandborders_constrained(left_block, right_block, edge, edge1):
@@ -529,16 +530,19 @@ def blocksandborders_constrained(left_block, right_block, edge, edge1):
     :param left_block:             left block constrained minimal size
     :param right_block:            right block constrained minimal size
     :param edge:                   edge of sparsity pattern
+    :param edge1:                  conjugate edge of sparsity pattern
 
     :return:                       array of diagonal block sizes
     """
 
     size = len(edge)
+    left_block = max(1, left_block)
+    right_block = max(1, right_block)
 
     if left_block + right_block < size:                               # if blocks do not overlap
 
-        new_left_block = edge[left_block] - left_block
-        new_right_block = edge1[right_block] - right_block
+        new_left_block = edge[left_block - 1] - left_block
+        new_right_block = edge1[right_block - 1] - right_block
         #
         # new_right_block = np.max(np.argwhere(np.abs(edge - (size - right_block)) -
         #                                      np.min(np.abs(edge - (size - right_block))) == 0)) + 1
@@ -564,137 +568,166 @@ def blocksandborders_constrained(left_block, right_block, edge, edge1):
         return [size]
 
 
-def gen_blocks(outeredge, sza):
-    """
-    Computes decomposition of matrix into blocks
-
-    :param outeredge:       the upper edge of the sparsity pattern
-    :param sza:             maximal allowed size of the first block
-
-    :return:                array of diagonal block sizes
-    """
-
-    blocks = []
-    u_outeredge = np.where(np.abs(np.diff(outeredge)) > 1)[0] + 1
-
-    for edge_num in range(len(u_outeredge) // 2):
-
-        block = np.zeros(sza, dtype=np.int)
-
-        block[0] = u_outeredge[edge_num]
-        ii = 0
-        nn = block[0]
-
-        while nn < sza and ii < sza - 1:
-            ii += 1
-            tempblock = max(outeredge[nn] - nn, 1)  # Added max to prevent zero blocks
-            block[ii] = tempblock
-            nn = nn + tempblock
-
-        blocks.append(block)
-
-    return blocks
+# def gen_blocks(outeredge, sza):
+#     """
+#     Computes decomposition of matrix into blocks
+#
+#     :param outeredge:       the upper edge of the sparsity pattern
+#     :param sza:             maximal allowed size of the first block
+#
+#     :return:                array of diagonal block sizes
+#     """
+#
+#     blocks = []
+#     u_outeredge = np.where(np.abs(np.diff(outeredge)) > 1)[0] + 1
+#
+#     for edge_num in range(len(u_outeredge) // 2):
+#
+#         block = np.zeros(sza, dtype=np.int)
+#
+#         block[0] = u_outeredge[edge_num]
+#         ii = 0
+#         nn = block[0]
+#
+#         while nn < sza and ii < sza - 1:
+#             ii += 1
+#             tempblock = max(outeredge[nn] - nn, 1)  # Added max to prevent zero blocks
+#             block[ii] = tempblock
+#             nn = nn + tempblock
+#
+#         blocks.append(block)
+#
+#     return blocks
 
 
 if __name__ == "__main__":
 
-    import matplotlib.pyplot as plt
-    from matplotlib.patches import Rectangle
-    from tb import Orbitals, Hamiltonian
-    from tb.aux_functions import split_into_subblocks
+    a = np.array([[1, 1], [1, 1]])
+    b = np.zeros((2, 2))
+    test_matrix = np.block([[a, b, b], [b, a, b], [b, b, a]])
+    test_matrix[0, 2] = 2
+    test_matrix[2, 0] = 2
+    test_matrix[2, 4] = 3
+    test_matrix[4, 2] = 3
 
-    sym_points = ['L', 'GAMMA', 'X', 'W', 'K', 'L', 'W', 'X', 'K', 'GAMMA']
-    num_points = [15, 20, 15, 10, 15, 15, 15, 15, 20]
+    a, b = compute_edge(test_matrix)
+    ans = blocksandborders_constrained(0, 0, a, b)
+    print(ans)
+    ans = blocksandborders_constrained(1, 1, a, b)
+    print(ans)
+    ans = blocksandborders_constrained(2, 2, a, b)
+    print(ans)
+    ans = blocksandborders_constrained(3, 3, a, b)
+    print(ans)
+    ans = blocksandborders_constrained(4, 4, a, b)
+    print(ans)
+    ans = blocksandborders_constrained(5, 5, a, b)
+    print(ans)
+    ans = blocksandborders_constrained(2, 4, a, b)
+    print(ans)
+    ans = blocksandborders_constrained(2, 3, a, b)
+    print(ans)
+    ans = blocksandborders_constrained(3, 2, a, b)
+    print(ans)
 
-    k_points = get_k_coords(sym_points, num_points, 'Si')
-    print(k_points)
 
-    Orbitals.orbital_sets = {'Si': 'SiliconSP3D5S', 'H': 'HydrogenS'}
-    band_gaps = []
-    band_structures = []
-
-    path = "./input_samples/SiNW2.xyz"
-
-    hamiltonian = Hamiltonian(xyz=path, nn_distance=2.4, so_coupling=0.06, vec=[0, 0, 1])
-    hamiltonian.initialize()
-
-    if True:
-        plt.axis('off')
-        plt.imshow(np.log(np.abs(hamiltonian.h_matrix)))
-        plt.savefig('hamiltonian.pdf')
-        plt.show()
-
-    a_si = 5.50
-    PRIMITIVE_CELL = [[0, 0, a_si]]
-    hamiltonian.set_periodic_bc(PRIMITIVE_CELL)
-
-    hl, h0, hr = hamiltonian.get_coupling_hamiltonians()
-    a = np.block([[h0, hr], [hl, h0]])
-    h01, hl1, hr1, subblocks = split_into_subblocks(h0, h_l=hl, h_r=hr)
-    print(len(h01))
-
-    b = np.zeros(a.shape, np.complex)
-
-    j1 = 0
-    for j in range(2):
-        for num, item in enumerate(h01):
-            b[j1:j1 + item.shape[0], j1:j1 + item.shape[1]] = item
-            if num < len(h01) - 1:
-                b[j1:j1 + item.shape[0],
-                  j1 + item.shape[1]:j1 + item.shape[1] + h01[num + 1].shape[1]] = hr1[num]
-
-                b[j1 + item.shape[0]:j1 + item.shape[0] + h01[num + 1].shape[0],
-                  j1:j1 + item.shape[1]] = hl1[num]
-
-            if num == len(h01) - 1 and j == 0:
-                b[:j1 + item.shape[0], j1 + item.shape[1]:] = hr
-                b[j1 + item.shape[0]:, :j1 + item.shape[1]] = hl
-
-            j1 += item.shape[0]
-
-    cumsum = np.cumsum(np.array(subblocks))[:-1]
-    cumsum = np.insert(cumsum, 0, 0)
-
-    fig, ax = plt.subplots(1)
-
-    ax.spy(np.abs(b))
-
-    for jj in range(2):
-        cumsum = cumsum + jj * h0.shape[0]
-
-        if jj == 1:
-            rect = Rectangle((h0.shape[0] - h01[-1].shape[0], h0.shape[1]), h01[-1].shape[1], h01[0].shape[0],
-                             linestyle='--',
-                             linewidth=1,
-                             edgecolor='b',
-                             facecolor='none')
-            ax.add_patch(rect)
-            rect = Rectangle((h0.shape[0], h0.shape[1] - h01[-1].shape[1]), h01[0].shape[1], h01[-1].shape[0],
-                             linestyle='--',
-                             linewidth=1,
-                             edgecolor='g',
-                             facecolor='none')
-            ax.add_patch(rect)
-
-        for j, item in enumerate(cumsum):
-            if j < len(cumsum) - 1:
-                rect = Rectangle((item, cumsum[j + 1]), subblocks[j], subblocks[j + 1],
-                                 linewidth=1,
-                                 edgecolor='b',
-                                 facecolor='none')
-                ax.add_patch(rect)
-                rect = Rectangle((cumsum[j + 1], item), subblocks[j + 1], subblocks[j],
-                                 linewidth=1,
-                                 edgecolor='g',
-                                 facecolor='none')
-                ax.add_patch(rect)
-            rect = Rectangle((item, item), subblocks[j], subblocks[j],
-                             linewidth=1,
-                             edgecolor='r',
-                             facecolor='none')
-            ax.add_patch(rect)
-
-    plt.xlim(b.shape[0] / 2 + 0.5, -0.5)
-    plt.ylim(-0.5, b.shape[0] / 2 + 0.5 )
-    plt.axis('off')
-    plt.show()
+    # import matplotlib.pyplot as plt
+    # from matplotlib.patches import Rectangle
+    # from tb import Orbitals, Hamiltonian
+    # from tb.aux_functions import split_into_subblocks
+    #
+    # sym_points = ['L', 'GAMMA', 'X', 'W', 'K', 'L', 'W', 'X', 'K', 'GAMMA']
+    # num_points = [15, 20, 15, 10, 15, 15, 15, 15, 20]
+    #
+    # k_points = get_k_coords(sym_points, num_points, 'Si')
+    # print(k_points)
+    #
+    # Orbitals.orbital_sets = {'Si': 'SiliconSP3D5S', 'H': 'HydrogenS'}
+    # band_gaps = []
+    # band_structures = []
+    #
+    # path = "./input_samples/SiNW2.xyz"
+    #
+    # hamiltonian = Hamiltonian(xyz=path, nn_distance=2.4, so_coupling=0.06, vec=[0, 0, 1])
+    # hamiltonian.initialize()
+    #
+    # if True:
+    #     plt.axis('off')
+    #     plt.imshow(np.log(np.abs(hamiltonian.h_matrix)))
+    #     plt.savefig('hamiltonian.pdf')
+    #     plt.show()
+    #
+    # a_si = 5.50
+    # PRIMITIVE_CELL = [[0, 0, a_si]]
+    # hamiltonian.set_periodic_bc(PRIMITIVE_CELL)
+    #
+    # hl, h0, hr = hamiltonian.get_coupling_hamiltonians()
+    # a = np.block([[h0, hr], [hl, h0]])
+    # h01, hl1, hr1, subblocks = split_into_subblocks(h0, h_l=hl, h_r=hr)
+    # print(len(h01))
+    #
+    # b = np.zeros(a.shape, np.complex)
+    #
+    # j1 = 0
+    # for j in range(2):
+    #     for num, item in enumerate(h01):
+    #         b[j1:j1 + item.shape[0], j1:j1 + item.shape[1]] = item
+    #         if num < len(h01) - 1:
+    #             b[j1:j1 + item.shape[0],
+    #               j1 + item.shape[1]:j1 + item.shape[1] + h01[num + 1].shape[1]] = hr1[num]
+    #
+    #             b[j1 + item.shape[0]:j1 + item.shape[0] + h01[num + 1].shape[0],
+    #               j1:j1 + item.shape[1]] = hl1[num]
+    #
+    #         if num == len(h01) - 1 and j == 0:
+    #             b[:j1 + item.shape[0], j1 + item.shape[1]:] = hr
+    #             b[j1 + item.shape[0]:, :j1 + item.shape[1]] = hl
+    #
+    #         j1 += item.shape[0]
+    #
+    # cumsum = np.cumsum(np.array(subblocks))[:-1]
+    # cumsum = np.insert(cumsum, 0, 0)
+    #
+    # fig, ax = plt.subplots(1)
+    #
+    # ax.spy(np.abs(b))
+    #
+    # for jj in range(2):
+    #     cumsum = cumsum + jj * h0.shape[0]
+    #
+    #     if jj == 1:
+    #         rect = Rectangle((h0.shape[0] - h01[-1].shape[0], h0.shape[1]), h01[-1].shape[1], h01[0].shape[0],
+    #                          linestyle='--',
+    #                          linewidth=1,
+    #                          edgecolor='b',
+    #                          facecolor='none')
+    #         ax.add_patch(rect)
+    #         rect = Rectangle((h0.shape[0], h0.shape[1] - h01[-1].shape[1]), h01[0].shape[1], h01[-1].shape[0],
+    #                          linestyle='--',
+    #                          linewidth=1,
+    #                          edgecolor='g',
+    #                          facecolor='none')
+    #         ax.add_patch(rect)
+    #
+    #     for j, item in enumerate(cumsum):
+    #         if j < len(cumsum) - 1:
+    #             rect = Rectangle((item, cumsum[j + 1]), subblocks[j], subblocks[j + 1],
+    #                              linewidth=1,
+    #                              edgecolor='b',
+    #                              facecolor='none')
+    #             ax.add_patch(rect)
+    #             rect = Rectangle((cumsum[j + 1], item), subblocks[j + 1], subblocks[j],
+    #                              linewidth=1,
+    #                              edgecolor='g',
+    #                              facecolor='none')
+    #             ax.add_patch(rect)
+    #         rect = Rectangle((item, item), subblocks[j], subblocks[j],
+    #                          linewidth=1,
+    #                          edgecolor='r',
+    #                          facecolor='none')
+    #         ax.add_patch(rect)
+    #
+    # # plt.xlim(b.shape[0] / 2 + 0.5, -0.5)
+    # # plt.ylim(-0.5, b.shape[0] / 2 + 0.5 )
+    # plt.axis('off')
+    # plt.show()
