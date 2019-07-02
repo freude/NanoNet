@@ -2,8 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from tb import Hamiltonian
 from tb import Orbitals
-import examples.data_bi_bulk
-from tb.plotting import plot_atom_positions, plot_atom_positions1
+from tb.aux_functions import get_k_coords
+from examples import data_bi_bulk
 
 
 def radial_dep(coords):
@@ -21,68 +21,37 @@ def radial_dep(coords):
 
 def main():
 
-    from tb.aux_functions import get_k_coords
+    path_to_xyz_file = 'input_samples/bi_bulk.xyz'
 
-    path_to_xyz_file = 'input_samples/bulk_bismuth.xyz'
-    # path_to_pdf_file = '../band_structure_of_bulk_bismuth.pdf'
-    path_to_data_file = '/Users/tcqp/Dropbox/research/conferences/2018/fleet/poster/data/band_structure_of_bulk_bismuth/etb/band_structure_with_spin_orbit_1.csv'
-    species = 'Bi'
-    basis_set = 'Bismuth'
-    # sym_points = ['U', 'X', 'GAMMA', 'L', 'U', 'T']
-    # sym_points = ['K', 'GAMMA', 'T', 'W', 'L', 'LAMBDA']
-    # sym_points = ['K', 'X', 'GAMMA', 'L', 'U', 'T']
-    # sym_points = ['GAMMA', 'GAMMA']
-    sym_points = ['K', 'GAMMA', 'T']
+    path_to_dat_file = 'examples/data/bi_bulk_bands.dat'
 
-    # num_points = [40, 40, 40, 40, 40]
-    # num_points = [1]
-    num_points = [10, 10]
-    indices_of_bands = range(0, 16)
+    Atom.orbital_sets = {'Bi': 'Bismuth'}
 
-    cell_a = examples.data_bi_bulk.a_bi * np.array([[(-1.0 / 2.0), (-np.sqrt(3.0) / 6.0), 0.0],
-                                                    [ (  1.0 / 2.0 ), ( -np.sqrt(3.0) / 6.0 ), 0.0 ],
-                                                    [ 0.0,            (  np.sqrt(3.0) / 3.0 ), 0.0 ]])
-    cell_c = examples.data_bi_bulk.c_bi * np.array([[0.0, 0.0, (1.0 / 3.0)],
-                                                    [ 0.0, 0.0, ( 1.0 / 3.0 ) ],
-                                                    [ 0.0, 0.0, ( 1.0 / 3.0 ) ]])
-    primitive_cell = cell_a + cell_c
+    so_couplings = np.linspace(1.5, 1.5, 1)
+    sym_points = ['K', 'GAMMA', 'T', 'W', 'L', 'LAMBDA']
+    num_points = [10, 10, 10, 10, 10]
 
-    Orbitals.orbital_sets = {species: basis_set}
-
-    h = Hamiltonian( xyz = path_to_xyz_file, nn_distance = 4.6, so_coupling=1.5)
-    h.initialize( radial_dep )
-    h.set_periodic_bc(primitive_cell.tolist())
-    # plot_atom_positions(h.atom_list, h.ct.virtual_and_interfacial_atoms, radial_dep)
-    # plot_atom_positions1(h, h.ct.virtual_and_interfacial_atoms, radial_dep)
-
-    k_points = get_k_coords( sym_points, num_points, species )
+    k_points = get_k_coords(sym_points, num_points, data_bi_bulk.SPECIAL_K_POINTS_BI)
 
     band_structure = []
-    for jj, item in enumerate( k_points ):
-        [ eigenvalues, _ ] = h.diagonalize_periodic_bc( k_points[ jj ] )
-        band_structure.append( eigenvalues )
+    for ii, item in enumerate(so_couplings):
+        h = Hamiltonian(xyz=path_to_xyz_file, nn_distance=4.6, so_coupling=item)
+        h.initialize(radial_dep)
+        h.set_periodic_bc(data_bi_bulk.primitive_cell)
+        for jj, item in enumerate(k_points):
+            [eigenvalues, _] = h.diagonalize_periodic_bc(k_points[jj])
+            band_structure.append(eigenvalues)
 
     band_structure = np.array(band_structure)
 
-    print(h.is_hermitian())
+    k_index = np.linspace(0, 1, np.size(k_points, axis=0))
+    band_structure_data = np.c_[np.tile(so_couplings[:, None], [np.sum(num_points), 1]), np.tile(k_index[:, None], [len(so_couplings), 1]), band_structure]
+    np.savetxt(path_to_dat_file, np.c_[band_structure_data])
 
     ax = plt.axes()
-    ax.plot( band_structure[ :, indices_of_bands ] )
-    ax.set_xlabel( "" )
-    ax.set_ylabel( "Energy (eV)" )
-    ax.set_title( "" )
-    plt.tight_layout()
+    ax.plot(band_structure)
+    plt.ylim((-15, 5))
     plt.show()
-    # plt.savefig( path_to_pdf_file )
-
-    # plt.imshow(np.abs(h.h_matrix_bc_factor * h.h_matrix + h.h_matrix_bc_add))
-    # plt.show()
-
-    k_index = np.linspace(0, 1, np.size(k_points, axis=0))
-    # band_structure_data = np.c_[k_index[:,None],band_structure]
-    # np.savetxt(path_to_data_file, np.c_[band_structure_data])
-
-    difference_in_k_points = np.diff(k_points, n=1, axis=1)
 
 
 if __name__ == '__main__':
