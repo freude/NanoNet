@@ -68,7 +68,7 @@ Below we demonstrate band structure computation for bulk silicon using empirical
  is shown in examples in the ipython notebooks. Here we use predefined basis sets.
     
     ```python
-    tb.Atom.orbital_sets = {'Si': 'SiliconSP3D5S'}
+    tb.Orbitals.orbital_sets = {'Si': 'SiliconSP3D5S'}
     ```
 
 2. Specify geometry of the system - determine position of atoms
