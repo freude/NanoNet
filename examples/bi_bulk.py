@@ -25,7 +25,7 @@ def main():
 
     path_to_dat_file = 'examples/data/bi_bulk_bands.dat'
 
-    Atom.orbital_sets = {'Bi': 'Bismuth'}
+    Orbitals.orbital_sets = {'Bi': 'Bismuth'}
 
     so_couplings = np.linspace(1.5, 1.5, 1)
     sym_points = ['K', 'GAMMA', 'T', 'W', 'L', 'LAMBDA']
