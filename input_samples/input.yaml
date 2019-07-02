@@ -3,7 +3,7 @@
 VERBOSITY:                   1
 
 sparse:                    true
-sigma:                      1.1    # should be specified if sparse is true
+sigma:                       -3    # should be specified if sparse is true
 num_eigs:                    10    # should be specified if sparse is true
 
 # --------------------------------------------------------

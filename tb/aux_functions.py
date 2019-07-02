@@ -3,13 +3,12 @@ The module contains a set of auxiliary functions facilitating the tight-binding 
 """
 from __future__ import print_function
 from __future__ import absolute_import
-import numpy as np
 from itertools import product
+import numpy as np
 import yaml
-from tb.special_points import SPECIAL_K_POINTS_BI, SPECIAL_K_POINTS_SI
 
 
-def accum(accmap, a, func=None, size=None, fill_value=0, dtype=None):
+def accum(accmap, input, func=None, size=None, fill_value=0, dtype=None):
     """
     An accumulation function similar to Matlab's `accumarray` function.
 
@@ -26,7 +25,7 @@ def accum(accmap, a, func=None, size=None, fill_value=0, dtype=None):
         a 2D, then `accmap` must have shape (15,4,2).  The value in the
         last dimension give indices into the output array. If the output is
         1D, then the shape of `accmap` can be either (15,4) or (15,4,1)
-    a : ndarray
+    input : ndarray
         The input data to be accumulated.
     func : callable or None
         The accumulation function.  The function will be passed a list
@@ -61,7 +60,7 @@ def accum(accmap, a, func=None, size=None, fill_value=0, dtype=None):
            [-1,  8,  9]])
     >>> # Sum the diagonals.
     >>> accmap = array([[0, 1, 2], [2, 0, 1], [1, 2, 0]])
-    >>> s = accum(accmap, a)
+    >>> s = accum(accmap,a)
     >>> s
     array([ 9,  7, 15])
     >>> # A 2D output, from sub-arrays with shapes and positions like this:
@@ -69,25 +68,25 @@ def accum(accmap, a, func=None, size=None, fill_value=0, dtype=None):
     >>> # [ (1,2) (1,1)]
     >>> accmap = array([[[0,0],[0,0],[0,1]],[[0,0],[0,0],[0,1]],[[1,0],[1,0],[1,1]],])
     >>> # Accumulate using a product.
-    >>> accum(accmap, a, func=prod, dtype=float)
+    >>> accum(accmap,a,func=prod,dtype=float)
     array([[-8., 18.],
            [-8.,  9.]])
     >>> # Same accmap, but create an array of lists of values.
-    >>> accum(accmap, a, func=lambda x: x, dtype='O')
+    >>> accum(accmap,a,func=lambda x: x,dtype='O')
     array([[list([1, 2, 4, -1]), list([3, 6])],
            [list([-1, 8]), list([9])]], dtype=object)
     """
 
     # Check for bad arguments and handle the defaults.
-    if accmap.shape[:a.ndim] != a.shape:
+    if accmap.shape[:input.ndim] != input.shape:
         raise ValueError("The initial dimensions of accmap must be the same as a.shape")
     if func is None:
         func = np.sum
     if dtype is None:
-        dtype = a.dtype
-    if accmap.shape == a.shape:
+        dtype = input.dtype
+    if accmap.shape == input.shape:
         accmap = np.expand_dims(accmap, -1)
-    adims = tuple(range(a.ndim))
+    adims = tuple(range(input.ndim))
     if size is None:
         size = 1 + np.squeeze(np.apply_over_axes(np.max, accmap, axes=adims))
     size = np.atleast_1d(size)
@@ -96,9 +95,9 @@ def accum(accmap, a, func=None, size=None, fill_value=0, dtype=None):
     vals = np.empty(size, dtype='O')
     for s in product(*[range(k) for k in size]):
         vals[s] = []
-    for s in product(*[range(k) for k in a.shape]):
+    for s in product(*[range(k) for k in input.shape]):
         indx = tuple(accmap[s])
-        val = a[s]
+        val = input[s]
         vals[indx].append(val)
 
     # Create the output array.
@@ -178,9 +177,12 @@ def get_k_coords(special_points, num_of_points, label):
 
     :param special_points:   list of labels for high-symmetry points
     :param num_of_points:    list of node numbers in each section of the path in the k-space
+    :param label:            chemical element
     :return:                 array of coordinates in k-space
     :rtype:                  numpy.ndarray
     """
+
+    from tb.special_points import SPECIAL_K_POINTS_BI, SPECIAL_K_POINTS_SI
 
     if isinstance(label, str):
         if label == 'Bi':
@@ -243,12 +245,12 @@ def yaml_parser(input_data):
     if input_data.lower().endswith(('.yml', '.yaml')):
         with open(input_data, 'r') as stream:
             try:
-                output = yaml.load(stream)
+                output = yaml.safe_load(stream)
             except yaml.YAMLError as exc:
                 print(exc)
     else:
         try:
-            output = yaml.load(input_data)
+            output = yaml.safe_load(input_data)
         except yaml.YAMLError as exc:
             print(exc)
 
@@ -317,215 +319,277 @@ def bandwidth(mat):
     return mat.shape[0] - j - 1
 
 
-def split_into_subblocks(h_0, h_l=0, h_r=0):
+# def blocksandborders(A):
+#     """This is a function designed to output the blocks from a block-tridiagonal
+#     matrix, A. This function assumes that bandwidth minimization has already
+#     occurred and that this is to be applied to some matrix. There exist many
+#     algorithms to reduce bandwidth, this is only to produce blocks. This
+#     problem has likely been solved before, but the author could not find any
+#     examples, likely due to insufficient knowledge of the literature.
+#
+#     Jesse Vaitkus, 2019
+#
+#     :param A:             input matrix
+#     :return:              array of diagonal block sizes
+#     """
+#
+#     # First get some statistics
+#     sza = A.shape[0]  # Get the dimension of the input matrix
+#     bandA = bandwidth(A)  # Bandwidth of matrix
+#
+#     row, col = np.where(A != 0.0)  # Output rows and columns of all non-zero elements.
+#
+#     # Clever use of accumarray:
+#     outeredge = accum(row, col, np.max)
+#     # accumarray takes _unordered_ data and bins it, by using a function like
+#     # @max it then applies that function to the binned data. This tells us the
+#     # largest index that is nonzero, AND even tells us which rows have zero
+#     # non-zero elements.
+#
+#     # Fringe case, we make sure that the first element is always at least 1.
+#     outeredge[0] = max(0, outeredge[0])
+#
+#     # Now we loop over all the outer indices, if an outer index is smaller than
+#     # the previous, we increase it, this gives us an effective "outer edge" of
+#     # our matrix, which is useful for my block detection method.
+#
+#     outeredge = np.maximum.accumulate(outeredge)  # following commented code is the same as cummax
+#
+#     # Now that we have our outer edges we can work out the blocks. We do not
+#     # have a good guess as to what the first block should be a priori. What we
+#     # do know is that no block will ever be larger than the bandwidth. This is
+#     # our upper bound. In the ideal case the matrix is tridiagonal (not block
+#     # tridiagonal) and so our lower bound is 1.
+#
+#     testindices = np.arange(0, bandA)
+#
+#     # Now we don't know how many blocks there will be, so we overallocate in
+#     # preparation and trim afterwards. This doesn't cost anything meaningful,
+#     # and saves time from the possible matrix size increase.
+#     blocks = gen_blocks(outeredge, sza)
+#     blocks = np.array(blocks).T
+#     # The optimal block choice is the one that minimizes the sum of cubes. As
+#     # this is the scaling of the recursive Green's function algorithm.
+#     best = np.argmin(np.sum(blocks ** 3, 0))
+#     blocks = blocks[:, best]
+#     blocks = [item for item in blocks if item != 0]
+#
+#     # This last step is mainly a bookkeeping one, we add indices for the rows
+#     # that the edges correspond to, this makes plotting them easier.
+#     outeredge = [np.arange(0, sza), outeredge]
+#
+#     return blocks, outeredge
+#
+#
+# def blocksandborders_constrained(A):
+#     """A version of blocksandborders with constraints - periodic boundary conditions.
+#
+#     :param A:             input matrix
+#     :return:              array of diagonal block sizes
+#     """
+#
+#     outeredge = compute_edge(A)
+#
+#     blocks = []
+#     unique_edges, index = np.unique(outeredge, return_inverse=True)
+#     outeredges = []
+#     outeredges.append(outeredge)
+#
+#     for j1 in range(1, 5):
+#         for j in range(len(unique_edges[unique_edges < 3 * A.shape[0] / 4]) - j1):
+#             temp_edge = np.copy(unique_edges)
+#             temp_edge[j] = temp_edge[j + j1]
+#             temp_edge = np.maximum.accumulate(temp_edge)
+#             outeredges.append(temp_edge[index])
+#
+#     sza = A.shape[0]  # Get the dimension of the input matrix
+#
+#     for outeredge in outeredges:
+#         blocks += gen_blocks(outeredge, sza)
+#
+#     blocks = np.array(blocks).T
+#     indicies = []
+#
+#     for j in range(blocks.shape[1]):
+#         cumsum = np.cumsum(blocks[:, j])
+#         if A.shape[0] // 2 not in cumsum:
+#             blocks[:, j] = 0
+#             indicies.append(j)
+#         else:
+#             inds = np.where(cumsum == A.shape[0] // 2)[0]
+#
+#             for ind in inds:
+#                 if blocks[0, j] != blocks[ind + 1, j]:
+#                     blocks[:, j] = 0
+#                     indicies.append(j)
+#
+#     blocks = np.delete(blocks, indicies, 1)
+#     if blocks.tolist():
+#         best = np.argmin(np.sum(blocks ** 3, 0))
+#         blocks = blocks[:, best]
+#         blocks = [item for item in blocks if item != 0]
+#         outeredge = [np.arange(0, sza), outeredge]
+#
+#     return blocks, outeredge
+
+
+def split_into_subblocks(h_0, h_l, h_r):
+    """
+    Split Hamiltonian matrix and coupling matrices into subblocks
+
+    :param h_0:                     Hamiltonian matrix
+    :param h_l:                     left inter-cell coupling matrices
+    :param h_r:                     right inter-cell coupling matrices
+    :return h_0_s, h_l_s, h_r_s:    lists of subblocks
+    """
+
+    def find_nonzero_lines(mat, order):
+
+        if order == 'top':
+            line = mat.shape[0]
+            while line > 0:
+                if np.count_nonzero(mat[line - 1, :]) == 0:
+                    line -= 1
+                else:
+                    break
+        elif order == 'bottom':
+            line = -1
+            while line < mat.shape[0] - 1:
+                if np.count_nonzero(mat[line + 1, :]) == 0:
+                    line += 1
+                else:
+                    line = mat.shape[0] - (line + 1)
+                    break
+        elif order == 'left':
+            line = mat.shape[1]
+            while line > 0:
+                if np.count_nonzero(mat[:, line - 1]) == 0:
+                    line -= 1
+                else:
+                    break
+        elif order == 'right':
+            line = -1
+            while line < mat.shape[1] - 1:
+                if np.count_nonzero(mat[:, line + 1]) == 0:
+                    line += 1
+                else:
+                    line = mat.shape[1] - (line + 1)
+                    break
+        else:
+            raise ValueError('Wrong value of the parameter order')
+
+        return line
+
     h_0_s = []
     h_l_s = []
     h_r_s = []
 
-    if not isinstance(h_l, np.ndarray) or not isinstance(h_r, np.ndarray):
+    h_r_h = find_nonzero_lines(h_r, 'bottom')
+    h_r_v = find_nonzero_lines(h_r[-h_r_h:, :], 'left')
+    h_l_h = find_nonzero_lines(h_l, 'top')
+    h_l_v = find_nonzero_lines(h_l[:h_l_h, :], 'right')
 
-        blocks = blocksandborders(h_0)
-        j1 = 0
-        for j, block in enumerate(blocks):
-            h_0_s.append(h_0[j1:block, j1:block])
-            if j < len(blocks) - 1:
-                h_l_s.append(h_0[block:blocks[j + 1], j1:block])
-                h_r_s.append(h_0[j1:block, block:blocks[j + 1]])
-            j1 = block
+    edge = compute_edge(h_0)
+    edge1 = compute_edge(h_0[::-1, ::-1])
 
-    else:
+    left_block = max(h_l_h, h_r_v)
+    right_block = max(h_r_h, h_l_v)
 
-        # mat = np.block([[h_0, h_r, np.zeros(h_0.shape)],
-        #                 [h_l, h_0, h_r],
-        #                 [np.zeros(h_0.shape), h_l, h_0]])
-        mat = np.block([[h_0, h_r],
-                        [h_l, h_0]])
-        # blocks = blocksandborders_constrained(mat)
-        blocks, _ = blocksandborders_constrained(mat)
+    blocks = blocksandborders_constrained(left_block, right_block, edge, edge1)
+    j1 = 0
 
-        cumsum = np.cumsum(blocks)
-        ind_min = np.where(cumsum == (h_0.shape[0] - 1))[0][0]
-        # blocks = blocks[:ind_min+1]
-        cumsum = cumsum[:ind_min + 1]
+    for j, block in enumerate(blocks):
+        h_0_s.append(h_0[j1:block + j1, j1:block + j1])
+        if j < len(blocks) - 1:
+            h_l_s.append(h_0[block + j1:block + j1 + blocks[j + 1], j1:block + j1])
+            h_r_s.append(h_0[j1:block + j1, j1 + block:j1 + block + blocks[j + 1]])
+        j1 += block
 
-        j1 = 0
-        for j, block in enumerate(cumsum):
-            h_0_s.append(h_0[j1:block, j1:block])
-            if j < len(cumsum) - 1:
-                h_l_s.append(h_0[block:cumsum[j + 1], j1:block])
-                h_r_s.append(h_0[j1:block, block:cumsum[j + 1]])
-            j1 = block
-
-    return h_0_s, h_l_s, h_r_s
+    return h_0_s, h_l_s, h_r_s, blocks
 
 
-def blocksandborders(A):
-    """This is a function designed to output the blocks from a block-tridiagonal
-    matrix, A. This function assumes that bandwidth minimization has already
-    occurred and that this is to be applied to some matrix. There exist many
-    algorithms to reduce bandwidth, this is only to produce blocks. This
-    problem has likely been solved before, but the author could not find any
-    examples, likely due to insufficient knowledge of the literature.
-
-    Jesse Vaitkus, 2019
-    """
-
+def compute_edge(mat):
     # First get some statistics
-    szA = A.shape[0]  # Get the dimension of the input matrix
-    bandA = bandwidth(A)  # Bandwidth of matrix
-
-    row, col = np.where(A != 0.0)  # Output rows and columns of all non-zero elements.
+    row, col = np.where(mat != 0.0)  # Output rows and columns of all non-zero elements.
 
     # Clever use of accumarray:
-    outeredge = accum(row, col, np.max)
-    # accumarray takes _unordered_ data and bins it, by using a function like
-    # @max it then applies that function to the binned data. This tells us the
-    # largest index that is nonzero, AND even tells us which rows have zero
-    # non-zero elements.
-
-    # Fringe case, we make sure that the first element is always at least 1.
-    outeredge[0] = max(0, outeredge[0])
-
-    # Now we loop over all the outer indices, if an outer index is smaller than
-    # the previous, we increase it, this gives us an effective "outer edge" of
-    # our matrix, which is useful for my block detection method.
-
-    outeredge = np.maximum.accumulate(outeredge)  # following commented code is the same as cummax
-
-    #     for ctedge = 2:szA
-    #        if outeredge(ctedge) < outeredge(ctedge-1)
-    #           outeredge(ctedge) = outeredge(ctedge-1);
-    #        else
-    #       end
-    #     end
-
-    # Now that we have our outer edges we can work out the blocks. We do not
-    # have a good guess as to what the first block should be a priori. What we
-    # do know is that no block will ever be larger than the bandwidth. This is
-    # our upper bound. In the ideal case the matrix is tridiagonal (not block
-    # tridiagonal) and so our lower bound is 1.
-
-    testindices = np.arange(0, bandA)
-    numN = np.size(testindices)
-
-    # Now we don't know how many blocks there will be, so we overallocate in
-    # preparation and trim afterwards. This doesn't cost anything meaningful,
-    # and saves time from the possible matrix size increase.
-    blocks = np.zeros((szA, numN), dtype=np.int)
-
-    # Now we loop over all initial first block sizes, by knowing the size of the
-    # first block, this tells us something about the first off-diagonal block,
-    # by going to its outer edge, this tells us the size of the next diagonal
-    # block and so on and so forth until we have all the blocks.
-
-    for ctB in range(numN):
-        blocks[0, ctB] = testindices[ctB]  # In case the largest element is at 1
-        ii = 0
-        NN = blocks[0, ctB]
-        while NN < szA:
-            ii += 1
-            tempblock = max(outeredge[NN] - NN, 1)  # Added max to prevent zero blocks
-            blocks[ii, ctB] = tempblock
-            NN = NN + tempblock
-
-    # The optimal block choice is the one that minimizes the sum of cubes. As
-    # this is the scaling of the recursive Green's function algorithm.
-    best = np.argmin(np.sum(blocks ** 3, 0))
-    blocks = blocks[:, best]
-    blocks = [item for item in blocks if item != 0]
-
-    # This last step is mainly a bookkeeping one, we add indices for the rows
-    # that the edges correspond to, this makes plotting them easier.
-    outeredge = [np.arange(0, szA), outeredge]
-
-    return blocks, outeredge
-
-
-def blocksandborders_constrained(A, periodic=True):
-    """
-       A version of blocksandborders with constraints.
-    """
-
-    # First get some statistics
-    szA = A.shape[0]  # Get the dimension of the input matrix
-    bandA = bandwidth(A)  # Bandwidth of matrix
-    row, col = np.where(A != 0.0)  # Output rows and columns of all non-zero elements.
-
-    # Clever use of accumarray:
-    outeredge = accum(row, col, np.max)
+    outeredge = accum(row, col, np.max) + 1
 
     # Fringe case, we make sure that the first element is always at least 1.
     outeredge[0] = max(0, outeredge[0])
     outeredge = np.maximum.accumulate(outeredge)
 
-    blocks = []
-    unique_edges, index = np.unique(outeredge, return_inverse=True)
-    outeredges = []
-    outeredges.append(outeredge)
+    return outeredge
 
-    for j1 in range(1, 5):
-        for j in range(len(unique_edges[unique_edges < A.shape[0] / 2]) - j1 + 1):
-            temp_edge = np.copy(unique_edges)
-            temp_edge[j] = temp_edge[j + j1]
-            outeredges.append(temp_edge[index])
 
-    # for j1 in range(1, 5):
-    #     for j2 in range(1, 5):
-    #         for j in range(len(unique_edges[unique_edges < A.shape[0]/2]) - j1 + 1):
-    #             for jj in range(len(unique_edges[unique_edges < A.shape[0] / 2]) - j1 + 1):
-    #                 temp_edge = np.copy(unique_edges)
-    #                 temp_edge[j] = temp_edge[j + j1]
-    #                 temp_edge[jj] = temp_edge[jj + j2]
-    #                 outeredges.append(temp_edge[index])
+def blocksandborders_constrained(left_block, right_block, edge, edge1):
+    """A version of blocksandborders with constraints - periodic boundary conditions.
 
-    for outeredge in outeredges:
-        blocks += gen_blocks(outeredge, szA)
+    :param mat:                    input matrix
+    :param left_block:             left block constrained minimal size
+    :param right_block:            right block constrained minimal size
+    :param edge:                   edge of sparsity pattern
 
-    blocks = np.array(blocks).T
-    indicies = []
-    if periodic:
-        for j in range(blocks.shape[1]):
-            cumsum = np.cumsum(blocks[:, j])
-            if A.shape[0] // 2 - 1 not in cumsum:
-                blocks[:, j] = 0
-                indicies.append(j)
+    :return:                       array of diagonal block sizes
+    """
+
+    size = len(edge)
+
+    if left_block + right_block < size:                               # if blocks do not overlap
+
+        new_left_block = edge[left_block] - left_block
+        new_right_block = edge1[right_block] - right_block
+        #
+        # new_right_block = np.max(np.argwhere(np.abs(edge - (size - right_block)) -
+        #                                      np.min(np.abs(edge - (size - right_block))) == 0)) + 1
+        # new_right_block = size - new_right_block - right_block
+
+        if left_block + new_left_block <= size - right_block and\
+                size - right_block - new_right_block >= left_block:    # spacing between blocks is sufficient
+
+            blocks = blocksandborders_constrained(new_left_block,
+                                                  new_right_block,
+                                                  edge[left_block:-right_block], edge1[left_block:-right_block])
+
+            return [left_block] + blocks + [right_block]
+        else:
+            if new_left_block > new_right_block:
+                return [left_block] + [size - left_block]
             else:
+                return [size - right_block] + [right_block]
 
-                inds = np.where(cumsum == A.shape[0] // 2 - 1)[0]
-
-                for ind in inds:
-                    if blocks[0, j] != blocks[ind + 1, j]:
-                        blocks[:, j] = 0
-                        indicies.append(j)
-
-    blocks = np.delete(blocks, indicies, 1)
-    best = np.argmin(np.sum(blocks ** 3, 0))
-    blocks = blocks[:, best]
-    blocks = [item for item in blocks if item != 0]
-    outeredge = [np.arange(0, szA), outeredge]
-
-    return blocks, outeredge
+    elif left_block + right_block == size:                            # sum of blocks equal to the matrix size
+        return [left_block] + [right_block]
+    else:                                                             # blocks overlap
+        return [size]
 
 
-def gen_blocks(outeredge, szA):
+def gen_blocks(outeredge, sza):
+    """
+    Computes decomposition of matrix into blocks
+
+    :param outeredge:       the upper edge of the sparsity pattern
+    :param sza:             maximal allowed size of the first block
+
+    :return:                array of diagonal block sizes
+    """
+
     blocks = []
-    _, u_outeredge = np.unique(outeredge, return_index=True)
+    u_outeredge = np.where(np.abs(np.diff(outeredge)) > 1)[0] + 1
 
-    u_outeredge = u_outeredge - 1
-    u_outeredge = np.delete(u_outeredge, 0)
+    for edge_num in range(len(u_outeredge) // 2):
 
-    for edge_num in range(35):
+        block = np.zeros(sza, dtype=np.int)
 
-        block = np.zeros(szA, dtype=np.int)
         block[0] = u_outeredge[edge_num]
         ii = 0
-        NN = block[0]
+        nn = block[0]
 
-        while NN < szA:
+        while nn < sza and ii < sza - 1:
             ii += 1
-            tempblock = max(outeredge[NN] - NN, 1)  # Added max to prevent zero blocks
+            tempblock = max(outeredge[nn] - nn, 1)  # Added max to prevent zero blocks
             block[ii] = tempblock
-            NN = NN + tempblock
+            nn = nn + tempblock
 
         blocks.append(block)
 
@@ -534,8 +598,103 @@ def gen_blocks(outeredge, szA):
 
 if __name__ == "__main__":
 
+    import matplotlib.pyplot as plt
+    from matplotlib.patches import Rectangle
+    from tb import Orbitals, Hamiltonian
+    from tb.aux_functions import split_into_subblocks
+
     sym_points = ['L', 'GAMMA', 'X', 'W', 'K', 'L', 'W', 'X', 'K', 'GAMMA']
     num_points = [15, 20, 15, 10, 15, 15, 15, 15, 20]
 
-    k_points = get_k_coords(sym_points, num_points)
+    k_points = get_k_coords(sym_points, num_points, 'Si')
     print(k_points)
+
+    Orbitals.orbital_sets = {'Si': 'SiliconSP3D5S', 'H': 'HydrogenS'}
+    band_gaps = []
+    band_structures = []
+
+    path = "./input_samples/SiNW2.xyz"
+
+    hamiltonian = Hamiltonian(xyz=path, nn_distance=2.4, so_coupling=0.06, vec=[0, 0, 1])
+    hamiltonian.initialize()
+
+    if True:
+        plt.axis('off')
+        plt.imshow(np.log(np.abs(hamiltonian.h_matrix)))
+        plt.savefig('hamiltonian.pdf')
+        plt.show()
+
+    a_si = 5.50
+    PRIMITIVE_CELL = [[0, 0, a_si]]
+    hamiltonian.set_periodic_bc(PRIMITIVE_CELL)
+
+    hl, h0, hr = hamiltonian.get_coupling_hamiltonians()
+    a = np.block([[h0, hr], [hl, h0]])
+    h01, hl1, hr1, subblocks = split_into_subblocks(h0, h_l=hl, h_r=hr)
+    print(len(h01))
+
+    b = np.zeros(a.shape, np.complex)
+
+    j1 = 0
+    for j in range(2):
+        for num, item in enumerate(h01):
+            b[j1:j1 + item.shape[0], j1:j1 + item.shape[1]] = item
+            if num < len(h01) - 1:
+                b[j1:j1 + item.shape[0],
+                  j1 + item.shape[1]:j1 + item.shape[1] + h01[num + 1].shape[1]] = hr1[num]
+
+                b[j1 + item.shape[0]:j1 + item.shape[0] + h01[num + 1].shape[0],
+                  j1:j1 + item.shape[1]] = hl1[num]
+
+            if num == len(h01) - 1 and j == 0:
+                b[:j1 + item.shape[0], j1 + item.shape[1]:] = hr
+                b[j1 + item.shape[0]:, :j1 + item.shape[1]] = hl
+
+            j1 += item.shape[0]
+
+    cumsum = np.cumsum(np.array(subblocks))[:-1]
+    cumsum = np.insert(cumsum, 0, 0)
+
+    fig, ax = plt.subplots(1)
+
+    ax.spy(np.abs(b))
+
+    for jj in range(2):
+        cumsum = cumsum + jj * h0.shape[0]
+
+        if jj == 1:
+            rect = Rectangle((h0.shape[0] - h01[-1].shape[0], h0.shape[1]), h01[-1].shape[1], h01[0].shape[0],
+                             linestyle='--',
+                             linewidth=1,
+                             edgecolor='b',
+                             facecolor='none')
+            ax.add_patch(rect)
+            rect = Rectangle((h0.shape[0], h0.shape[1] - h01[-1].shape[1]), h01[0].shape[1], h01[-1].shape[0],
+                             linestyle='--',
+                             linewidth=1,
+                             edgecolor='g',
+                             facecolor='none')
+            ax.add_patch(rect)
+
+        for j, item in enumerate(cumsum):
+            if j < len(cumsum) - 1:
+                rect = Rectangle((item, cumsum[j + 1]), subblocks[j], subblocks[j + 1],
+                                 linewidth=1,
+                                 edgecolor='b',
+                                 facecolor='none')
+                ax.add_patch(rect)
+                rect = Rectangle((cumsum[j + 1], item), subblocks[j + 1], subblocks[j],
+                                 linewidth=1,
+                                 edgecolor='g',
+                                 facecolor='none')
+                ax.add_patch(rect)
+            rect = Rectangle((item, item), subblocks[j], subblocks[j],
+                             linewidth=1,
+                             edgecolor='r',
+                             facecolor='none')
+            ax.add_patch(rect)
+
+    plt.xlim(b.shape[0] / 2 + 0.5, -0.5)
+    plt.ylim(-0.5, b.shape[0] / 2 + 0.5 )
+    plt.axis('off')
+    plt.show()
