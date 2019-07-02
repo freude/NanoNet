@@ -26,7 +26,13 @@ class AbstractStructureDesigner(with_metaclass(ABCMeta, object)):
                                       k=25,
                                       distance_upper_bound=self._nn_distance)
         elif isinstance(query, int):
-            ans = self._kd_tree.query(list(self.atom_list.items())[query][1],
+
+            query = list(self.atom_list.items())[query][1]
+
+            if self._kd_tree.data.shape[1] > 3:
+                query = np.append(query, 0)
+
+            ans = self._kd_tree.query(query,
                                       k=25,
                                       distance_upper_bound=self._nn_distance)
         elif isinstance(query, str):

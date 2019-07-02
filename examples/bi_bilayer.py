@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from tb import Hamiltonian
-from tb import Atom
+from tb import Orbitals
 import tb
 from tb.aux_functions import get_k_coords
 from examples import data_bi_bilayer
@@ -36,7 +36,7 @@ def main():
     bi.add_orbital("py", energy= -0.486, principal=0, orbital=1, magnetic= 1, spin=1)
     bi.add_orbital("pz", energy= -0.486, principal=0, orbital=1, magnetic= 0, spin=1)
 
-    Atom.orbital_sets = {'Bi': bi}
+    Orbitals.orbital_sets = {'Bi': bi}
 
     tb.set_tb_params(PARAMS_BI_BI1=data_bi_bilayer.PARAMS_BI_BI1,
                      PARAMS_BI_BI2=data_bi_bilayer.PARAMS_BI_BI2,

@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from tb import Hamiltonian
-from tb import Atom
+from tb import Orbitals
 from tb.aux_functions import get_k_coords
 from examples import data_bi_bulk
 

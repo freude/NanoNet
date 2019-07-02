@@ -24,9 +24,9 @@ def simple_chain_greens_function(energy, h_0, h_r):
 def test_gf_single_atom_chain():
     sys.path.insert(0, '/home/mk/TB_project/tb')
 
-    a = tb.Atom('A')
+    a = tb.Orbitals('A')
     a.add_orbital('s', 0.7)
-    tb.Atom.orbital_sets = {'A': a}
+    tb.Orbitals.orbital_sets = {'A': a}
     tb.set_tb_params(PARAMS_A_A={'ss_sigma': 0.5})
 
     xyz_file = """1
@@ -63,14 +63,14 @@ def test_gf_single_atom_chain():
 def test_gf_complex_chain():
     sys.path.insert(0, '/home/mk/TB_project/tb')
 
-    a = tb.Atom('A')
+    a = tb.Orbitals('A')
     a.add_orbital('s', -0.7)
-    b = tb.Atom('B')
+    b = tb.Orbitals('B')
     b.add_orbital('s', -0.5)
-    c = tb.Atom('C')
+    c = tb.Orbitals('C')
     c.add_orbital('s', -0.3)
 
-    tb.Atom.orbital_sets = {'A': a, 'B': b, 'C': c}
+    tb.Orbitals.orbital_sets = {'A': a, 'B': b, 'C': c}
 
     tb.set_tb_params(PARAMS_A_A={'ss_sigma': -0.5},
                      PARAMS_B_B={'ss_sigma': -0.5},
@@ -481,10 +481,10 @@ def test_main():
 
     sys.path.insert(0, '/home/mk/TB_project/tb')
 
-    a = tb.Atom('A')
+    a = tb.Orbitals('A')
     a.add_orbital('s', -0.7)
 
-    tb.Atom.orbital_sets = {'A': a}
+    tb.Orbitals.orbital_sets = {'A': a}
 
     tb.set_tb_params(PARAMS_A_A={'ss_sigma': -0.5},
                      PARAMS_B_B={'ss_sigma': -0.5},
@@ -550,6 +550,8 @@ def mat2py(h_r1):
 
 
 if __name__=='__main__':
+
+    test_gf_complex_chain()
 
     h_0 = np.loadtxt('/home/mk/H0.txt', delimiter=',', dtype=np.complex)
     h_r = mat2py(np.genfromtxt('/home/mk/HR.txt', dtype=str, delimiter=','))

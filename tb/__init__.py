@@ -5,7 +5,7 @@ __version__ = get_distribution('tb').version
 __author__ = "Mike Klymenko"
 __email__ = "mike.klymenko@rmit.edu.au"
 
-from .atoms import Atom
+from .orbitals import Orbitals
 from .hamiltonian import Hamiltonian
 from .hamiltonian_sparse import HamiltonianSp
 from .aux_functions import get_k_coords, yaml_parser

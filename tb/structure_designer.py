@@ -5,13 +5,110 @@ geometrical structure and boundary conditions of the problem.
 from __future__ import print_function
 from __future__ import absolute_import
 from __future__ import division
+import copy
 from collections import OrderedDict
 import logging
 import numpy as np
 import scipy.spatial
-from .aux_functions import xyz2np, count_species
-from .abstract_interfaces import AbstractStructureDesigner
-from .aux_functions import print_dict
+from scipy.spatial.distance import euclidean
+from tb.aux_functions import xyz2np, count_species
+from tb.abstract_interfaces import AbstractStructureDesigner
+from tb.aux_functions import print_dict
+
+
+def argsort(seq):
+    # http://stackoverflow.com/questions/3071415/efficient-method-to-calculate-the-rank-vector-of-a-list-in-python
+    return sorted(range(len(seq)), key=seq.__getitem__)
+
+
+def get_spliting_indices(tree, level=3):
+    length = len(tree.indices)
+    combs = []
+
+    for j1 in range(level):
+        for comb in combs:
+            trees = []
+            for tree in comb:
+                trees.append(item.lesser)
+                trees.append(item.greater)
+                trees.append(item.greater)
+                trees.append(item.lesser)
+            tree = trees
+
+    combs = []
+
+    for item in tree:
+        combs.append(item.indices)
+
+    combs = np.hstack(tuple(combs))
+
+    ar = np.arange(0, len(combs))
+
+    ans = []
+
+    from sympy.utilities.iterables import multiset_permutations
+    for p in multiset_permutations(ar):
+        mylist = [combs[i] for i in p]
+        ans.append(np.hstack(tuple(mylist)))
+
+    return ans
+
+
+def shift(mat):
+
+    ans = np.zeros(mat.shape, dtype=np.int)
+
+    cut = mat.shape[0] // 2
+
+    ans[:cut] = mat[cut:]
+    ans[cut:] = mat[:cut]
+
+    return ans
+
+
+def bandwidth1(mat):
+
+    j = 0
+
+    while np.count_nonzero((np.diag(mat, mat.shape[0] - j - 1))) == 0 and j < mat.shape[0]:
+        j += 1
+
+    return mat.shape[0] - j - 1
+
+
+def bandwidth(mat):
+
+    ans = 0
+
+    for j in range(1, mat.shape[0]):
+        if np.count_nonzero((np.diag(mat, j))) > 0:
+            ans = j
+
+    return ans
+
+
+# Helper function to store the inroder traversal of a tree
+def storeInorder(root, inorder):
+    # Base Case
+    if root is None:
+        return
+
+        # First store the left subtree
+    storeInorder(root.left, inorder)
+
+    # Copy the root's data
+    inorder.append(root.data)
+
+    # Finally store the right subtree
+    storeInorder(root.right, inorder)
+
+
+# A helper funtion to count nodes in a binary tree
+def countNodes(root):
+    if root is None:
+        return 0
+
+    return countNodes(root.lesser) + countNodes(root.greater) + 1
 
 
 def is_in_coords(coord, coords):
@@ -29,12 +126,17 @@ class StructDesignerXYZ(AbstractStructureDesigner):
     The class builds an atomic structure from the xyz file or string.
     """
 
-    def __init__(self, xyz='/home/mk/TB_project/tb/my_si.xyz', nn_distance=2.39):
+    def __init__(self, **kwargs):
+
+        xyz = kwargs.get('xyz', '/home/mk/TB_project/tb/my_si.xyz')
+        nn_distance = kwargs.get('nn_distance', 2.39)
+        vec = kwargs.get('vec', 0)
+        lead_l = kwargs.get('lead_l', 0)
+        lead_r = kwargs.get('lead_r', 0)
 
         try:
             with open(xyz, 'r') as read_file:
                 reader = read_file.read()
-
         except IOError:
             reader = xyz
 
@@ -46,9 +148,38 @@ class StructDesignerXYZ(AbstractStructureDesigner):
         self._nn_distance = nn_distance                            # maximal distance to a neighbor
         self._num_of_species = count_species(labels)               # dictionary of elements and
                                                                    # their number per unit cell
-        self._num_of_nodes = sum(self.num_of_species.values())     # number of sites per unit cell
-        self._atom_list = OrderedDict(list(zip(labels, coords)))   # atomic coordinates of atoms in unit cell
-        self._kd_tree = scipy.spatial.cKDTree(coords, leafsize=1, balanced_tree=True)
+        self._num_of_nodes = sum(self.num_of_species.values())
+
+        if isinstance(vec, list):
+            coords1 = copy.deepcopy(coords)
+            coords1 = 100*(np.matrix(vec) * np.matrix(coords1).T).T
+            coords1 = np.vstack((coords.T, coords1.T)).T
+
+            _kd_tree = scipy.spatial.cKDTree(coords1,
+                                                  leafsize=1,
+                                                  balanced_tree=True)
+            indices = _kd_tree.indices
+
+        elif isinstance(lead_l, list) and isinstance(lead_r, list):
+
+            gamma = 0.3 * np.min(np.diff(coords[:, 2]))
+
+            pot = np.zeros(coords.shape[0])
+            for j, coord in enumerate(coords):
+                for lll in lead_l:
+                    pot[j] -= 1.0 / (euclidean(coord, np.array(lll))**2 + gamma**2)
+                for rrr in lead_r:
+                    pot[j] += 1.0 / (euclidean(coord, np.array(rrr))**2 + gamma**2)
+
+            indices = argsort(list(pot.tolist()))
+        else:
+            indices = argsort(list(coords.tolist()))
+
+        coords = coords[indices, :]
+        labels = list(np.array(labels)[indices])
+        self._atom_list = OrderedDict(list(zip(labels, coords)))
+        self._kd_tree = scipy.spatial.cKDTree(np.array(list(self._atom_list.values())), leafsize=1, balanced_tree=True)
+
 
     @property
     def atom_list(self):
@@ -242,5 +373,5 @@ class CyclicTopology(AbstractStructureDesigner):
 
 if __name__ == '__main__':
 
-    sd = StructDesignerXYZ()
+    sd = StructDesignerXYZ(xyz='/home/mk/TB_project/input_samples/SiNW2.xyz')
     print("Done!")

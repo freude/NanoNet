@@ -1,9 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from tb import Hamiltonian
-from tb import Atom
+from tb import Orbitals
 from examples import data_si_bulk
 from tb import get_k_coords
+
 
 
 def radial_dep(coords):
@@ -26,7 +27,7 @@ def main():
 
     path_to_dat_file = 'examples/data/si_bulk_bands.dat'
 
-    Atom.orbital_sets = {'Si': 'SiliconSP3D5S'}
+    Orbitals.orbital_sets = {'Si': 'SiliconSP3D5S'}
 
     sym_points = ['L', 'GAMMA', 'X']
     num_points = [20, 20]
