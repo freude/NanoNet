@@ -433,6 +433,44 @@ def bandwidth(mat):
 #     return blocks, outeredge
 
 
+def split_matrix(h_0):
+
+    edge, edge1 = compute_edge(h_0)
+
+    x = np.arange(1, np.max(edge - np.linspace(0, len(edge), len(edge), dtype=np.int)))
+    y = np.arange(1, np.max(edge1 - np.linspace(0, len(edge), len(edge), dtype=np.int)))
+    # X, Y = np.meshgrid(x, y)
+    # init_blocks = np.vstack((X.flatten(), Y.flatten())).T
+    blocks = []
+    metric = []
+    metrics = np.zeros((len(x), len(y)))
+
+    for j1, item1 in enumerate(x):
+        for j2, item2 in enumerate(y):
+            block = blocksandborders_constrained(item1, item2, edge, edge1)
+            blocks.append(block)
+            metric.append(np.sum(np.array(block) ** 3))
+            metrics[j1, j2] = np.sum(np.array(block) ** 3)
+
+    j1 = 0
+    h_0_s = []
+    h_l_s = []
+    h_r_s = []
+
+    best = np.argmin(metric)
+    blocks = blocks[best]
+    # blocks = blocks[100]
+
+    for j, block in enumerate(blocks):
+        h_0_s.append(h_0[j1:block + j1, j1:block + j1])
+        if j < len(blocks) - 1:
+            h_l_s.append(h_0[block + j1:block + j1 + blocks[j + 1], j1:block + j1])
+            h_r_s.append(h_0[j1:block + j1, j1 + block:j1 + block + blocks[j + 1]])
+        j1 += block
+
+    return h_0_s, h_l_s, h_r_s, blocks
+
+
 def split_into_subblocks(h_0, h_l, h_r):
     """
     Split Hamiltonian matrix and coupling matrices into subblocks
@@ -553,7 +591,8 @@ def blocksandborders_constrained(left_block, right_block, edge, edge1):
 
             blocks = blocksandborders_constrained(new_left_block,
                                                   new_right_block,
-                                                  edge[left_block:-right_block], edge1[left_block:-right_block])
+                                                  edge[left_block:-right_block] - left_block,
+                                                  edge1[right_block:-left_block] - right_block)
 
             return [left_block] + blocks + [right_block]
         else:
@@ -599,135 +638,3 @@ def blocksandborders_constrained(left_block, right_block, edge, edge1):
 #
 #     return blocks
 
-
-if __name__ == "__main__":
-
-    a = np.array([[1, 1], [1, 1]])
-    b = np.zeros((2, 2))
-    test_matrix = np.block([[a, b, b], [b, a, b], [b, b, a]])
-    test_matrix[0, 2] = 2
-    test_matrix[2, 0] = 2
-    test_matrix[2, 4] = 3
-    test_matrix[4, 2] = 3
-
-    a, b = compute_edge(test_matrix)
-    ans = blocksandborders_constrained(0, 0, a, b)
-    print(ans)
-    ans = blocksandborders_constrained(1, 1, a, b)
-    print(ans)
-    ans = blocksandborders_constrained(2, 2, a, b)
-    print(ans)
-    ans = blocksandborders_constrained(3, 3, a, b)
-    print(ans)
-    ans = blocksandborders_constrained(4, 4, a, b)
-    print(ans)
-    ans = blocksandborders_constrained(5, 5, a, b)
-    print(ans)
-    ans = blocksandborders_constrained(2, 4, a, b)
-    print(ans)
-    ans = blocksandborders_constrained(2, 3, a, b)
-    print(ans)
-    ans = blocksandborders_constrained(3, 2, a, b)
-    print(ans)
-
-
-    # import matplotlib.pyplot as plt
-    # from matplotlib.patches import Rectangle
-    # from tb import Orbitals, Hamiltonian
-    # from tb.aux_functions import split_into_subblocks
-    #
-    # sym_points = ['L', 'GAMMA', 'X', 'W', 'K', 'L', 'W', 'X', 'K', 'GAMMA']
-    # num_points = [15, 20, 15, 10, 15, 15, 15, 15, 20]
-    #
-    # k_points = get_k_coords(sym_points, num_points, 'Si')
-    # print(k_points)
-    #
-    # Orbitals.orbital_sets = {'Si': 'SiliconSP3D5S', 'H': 'HydrogenS'}
-    # band_gaps = []
-    # band_structures = []
-    #
-    # path = "./input_samples/SiNW2.xyz"
-    #
-    # hamiltonian = Hamiltonian(xyz=path, nn_distance=2.4, so_coupling=0.06, vec=[0, 0, 1])
-    # hamiltonian.initialize()
-    #
-    # if True:
-    #     plt.axis('off')
-    #     plt.imshow(np.log(np.abs(hamiltonian.h_matrix)))
-    #     plt.savefig('hamiltonian.pdf')
-    #     plt.show()
-    #
-    # a_si = 5.50
-    # PRIMITIVE_CELL = [[0, 0, a_si]]
-    # hamiltonian.set_periodic_bc(PRIMITIVE_CELL)
-    #
-    # hl, h0, hr = hamiltonian.get_coupling_hamiltonians()
-    # a = np.block([[h0, hr], [hl, h0]])
-    # h01, hl1, hr1, subblocks = split_into_subblocks(h0, h_l=hl, h_r=hr)
-    # print(len(h01))
-    #
-    # b = np.zeros(a.shape, np.complex)
-    #
-    # j1 = 0
-    # for j in range(2):
-    #     for num, item in enumerate(h01):
-    #         b[j1:j1 + item.shape[0], j1:j1 + item.shape[1]] = item
-    #         if num < len(h01) - 1:
-    #             b[j1:j1 + item.shape[0],
-    #               j1 + item.shape[1]:j1 + item.shape[1] + h01[num + 1].shape[1]] = hr1[num]
-    #
-    #             b[j1 + item.shape[0]:j1 + item.shape[0] + h01[num + 1].shape[0],
-    #               j1:j1 + item.shape[1]] = hl1[num]
-    #
-    #         if num == len(h01) - 1 and j == 0:
-    #             b[:j1 + item.shape[0], j1 + item.shape[1]:] = hr
-    #             b[j1 + item.shape[0]:, :j1 + item.shape[1]] = hl
-    #
-    #         j1 += item.shape[0]
-    #
-    # cumsum = np.cumsum(np.array(subblocks))[:-1]
-    # cumsum = np.insert(cumsum, 0, 0)
-    #
-    # fig, ax = plt.subplots(1)
-    #
-    # ax.spy(np.abs(b))
-    #
-    # for jj in range(2):
-    #     cumsum = cumsum + jj * h0.shape[0]
-    #
-    #     if jj == 1:
-    #         rect = Rectangle((h0.shape[0] - h01[-1].shape[0], h0.shape[1]), h01[-1].shape[1], h01[0].shape[0],
-    #                          linestyle='--',
-    #                          linewidth=1,
-    #                          edgecolor='b',
-    #                          facecolor='none')
-    #         ax.add_patch(rect)
-    #         rect = Rectangle((h0.shape[0], h0.shape[1] - h01[-1].shape[1]), h01[0].shape[1], h01[-1].shape[0],
-    #                          linestyle='--',
-    #                          linewidth=1,
-    #                          edgecolor='g',
-    #                          facecolor='none')
-    #         ax.add_patch(rect)
-    #
-    #     for j, item in enumerate(cumsum):
-    #         if j < len(cumsum) - 1:
-    #             rect = Rectangle((item, cumsum[j + 1]), subblocks[j], subblocks[j + 1],
-    #                              linewidth=1,
-    #                              edgecolor='b',
-    #                              facecolor='none')
-    #             ax.add_patch(rect)
-    #             rect = Rectangle((cumsum[j + 1], item), subblocks[j + 1], subblocks[j],
-    #                              linewidth=1,
-    #                              edgecolor='g',
-    #                              facecolor='none')
-    #             ax.add_patch(rect)
-    #         rect = Rectangle((item, item), subblocks[j], subblocks[j],
-    #                          linewidth=1,
-    #                          edgecolor='r',
-    #                          facecolor='none')
-    #         ax.add_patch(rect)
-    #
-    # # plt.xlim(b.shape[0] / 2 + 0.5, -0.5)
-    # # plt.ylim(-0.5, b.shape[0] / 2 + 0.5 )
-    # plt.axis('off')
-    # plt.show()
