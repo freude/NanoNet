@@ -43,7 +43,7 @@ def main():
         plt.savefig('hamiltonian.pdf')
         plt.show()
 
-    from tb.aux_functions import blocksandborders, split_into_subblocks
+    from tb.aux_functions import split_into_subblocks
     # a, b = blocksandborders(hamiltonian.h_matrix)
 
     # bandwidth(hamiltonian.h_matrix)
@@ -63,7 +63,7 @@ def main():
 
     hl, h0, hr = hamiltonian.get_coupling_hamiltonians()
 
-    h0, hl, hr = split_into_subblocks(h0, h_l=hl, h_r=hr)
+    h0, hl, hr, _ = split_into_subblocks(h0, h_l=hl, h_r=hr)
 
     num_points = 20
     kk = np.linspace(0, 0.57, num_points, endpoint=True)

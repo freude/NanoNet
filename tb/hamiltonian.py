@@ -391,10 +391,18 @@ class Hamiltonian(BasisTB):
             Compute additive Bloch exponentials needed to specify pbc
         """
 
+        two_leads = False
+
+        if np.array(self.ct.pcv).shape[0] == 1:
+            two_leads = True
+
         if split_the_leads:
             self.h_matrix_left_lead = np.zeros((self.basis_size, self.basis_size), dtype=np.complex)
             self.h_matrix_right_lead = np.zeros((self.basis_size, self.basis_size), dtype=np.complex)
-            flag = None
+            if two_leads:
+                flag = None
+            else:
+                flag = 'L'
 
         # loop through all interfacial atoms
         for j1 in self.ct.interfacial_atoms_ind:
@@ -406,7 +414,7 @@ class Hamiltonian(BasisTB):
                 coords = np.array(list(self.atom_list.values())[j1]) - \
                          np.array(list(self.ct.virtual_and_interfacial_atoms.values())[j2])
 
-                if split_the_leads:
+                if split_the_leads and two_leads:
                     flag = self.ct.atom_classifier(list(self.ct.virtual_and_interfacial_atoms.values())[j2], self.ct.pcv[0])
 
                 phase = np.exp(1j*np.dot(self.k_vector, coords))
@@ -436,6 +444,7 @@ class Hamiltonian(BasisTB):
 
         self.k_vector = [0.0, 0.0, 0.0]
         self._compute_h_matrix_bc_add(split_the_leads=True)
+        self.k_vector = None
 
         return self.h_matrix_left_lead.T, self.h_matrix, self.h_matrix_right_lead.T
 
