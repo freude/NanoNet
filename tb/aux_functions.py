@@ -450,7 +450,10 @@ def split_matrix(h_0):
             block = blocksandborders_constrained(item1, item2, edge, edge1)
             blocks.append(block)
             metric.append(np.sum(np.array(block) ** 3))
-            metrics[j1, j2] = np.sum(np.array(block) ** 3)
+            # metric.append(np.sum(np.array(block)))
+
+            # metrics[j1, j2] = np.sum(np.array(block) ** 3)
+            metrics[j1, j2] = np.sum(np.array(block))
 
     j1 = 0
     h_0_s = []
@@ -459,6 +462,7 @@ def split_matrix(h_0):
 
     best = np.argmin(metric)
     blocks = blocks[best]
+    blocks = [item for item in blocks if item != 0]
     # blocks = blocks[100]
 
     for j, block in enumerate(blocks):
@@ -522,10 +526,17 @@ def split_into_subblocks(h_0, h_l, h_r):
     h_l_s = []
     h_r_s = []
 
-    h_r_h = find_nonzero_lines(h_r, 'bottom')
-    h_r_v = find_nonzero_lines(h_r[-h_r_h:, :], 'left')
-    h_l_h = find_nonzero_lines(h_l, 'top')
-    h_l_v = find_nonzero_lines(h_l[:h_l_h, :], 'right')
+    if isinstance(h_l, np.ndarray) and isinstance(h_r, np.ndarray):
+        h_r_h = find_nonzero_lines(h_r, 'bottom')
+        h_r_v = find_nonzero_lines(h_r[-h_r_h:, :], 'left')
+        h_l_h = find_nonzero_lines(h_l, 'top')
+        h_l_v = find_nonzero_lines(h_l[:h_l_h, :], 'right')
+
+    if isinstance(h_l, int) and isinstance(h_r, int):
+        h_l_h = h_l
+        h_r_v = h_l
+        h_r_h = h_r
+        h_l_v = h_r
 
     edge, edge1 = compute_edge(h_0)
 
