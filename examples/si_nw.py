@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from tb import Hamiltonian
+from tb import Hamiltonian, HamiltonianSp
 from tb import Orbitals
 from tb.plotting import plot_bs_split, plot_atom_positions
 
@@ -32,18 +32,19 @@ def main():
     band_structures = []
 
     path = "input_samples/SiNW2.xyz"
+    # path = "tb/third_party/si_slab.xyz"
 
     # hamiltonian = Hamiltonian(xyz=path, nn_distance=1.1, lead_l=[[0, 0, 1]], lead_r=[[0, 4, 3]], so_coupling=0.06)
     hamiltonian = Hamiltonian(xyz=path, nn_distance=2.4, so_coupling=0.06, vec=[0, 0, 1])
     hamiltonian.initialize()
 
-    if True:
-        plt.axis('off')
-        plt.imshow(np.log(np.abs(hamiltonian.h_matrix)))
-        plt.savefig('hamiltonian.pdf')
-        plt.show()
+    # if True:
+    #     plt.axis('off')
+    #     plt.imshow(np.log(np.abs(hamiltonian.h_matrix)))
+    #     plt.savefig('hamiltonian.pdf')
+    #     plt.show()
 
-    from tb.aux_functions import blocksandborders, split_into_subblocks
+    from tb.aux_functions import split_into_subblocks
     # a, b = blocksandborders(hamiltonian.h_matrix)
 
     # bandwidth(hamiltonian.h_matrix)
@@ -63,7 +64,7 @@ def main():
 
     hl, h0, hr = hamiltonian.get_coupling_hamiltonians()
 
-    h0, hl, hr = split_into_subblocks(h0, h_l=hl, h_r=hr)
+    h0, hl, hr, _ = split_into_subblocks(h0, h_l=hl, h_r=hr)
 
     num_points = 20
     kk = np.linspace(0, 0.57, num_points, endpoint=True)
