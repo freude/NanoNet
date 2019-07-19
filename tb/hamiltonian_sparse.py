@@ -109,75 +109,17 @@ class HamiltonianSp(Hamiltonian):
         self.h_matrix_bc_factor = sp.lil_matrix(self.h_matrix_bc_factor)
         self.k_vector = None
 
-    def _compute_h_matrix_bc_factor(self):
-        """
-        Compute the exponential Bloch factors needed to specify pbc
-        """
+    def get_coupling_hamiltonians(self):
 
-        for j1 in range(self.num_of_nodes):
+        self.k_vector = [0.0, 0.0, 0.0]
 
-            list_of_neighbours = self.get_neighbours(j1)
+        self.h_matrix_left_lead = sp.lil_matrix((self.basis_size, self.basis_size), dtype=np.complex)
+        self.h_matrix_right_lead = sp.lil_matrix((self.basis_size, self.basis_size), dtype=np.complex)
 
-            for j2 in list_of_neighbours:
-                if j1 != j2:
-                    coords = np.array(list(self.atom_list.values())[j1], dtype=float) - \
-                             np.array(list(self.atom_list.values())[j2], dtype=float)
-                    phase = np.exp(1j * np.dot(self.k_vector, coords))
+        self._compute_h_matrix_bc_add(split_the_leads=True)
+        self.k_vector = None
 
-                    for l1 in range(self.orbitals_dict[list(self.atom_list.keys())[j1]].num_of_orbitals):
-                        for l2 in range(self.orbitals_dict[list(self.atom_list.keys())[j2]].num_of_orbitals):
-
-                            ind1 = self.qn2ind([('atoms', j1), ('l', l1)], )
-                            ind2 = self.qn2ind([('atoms', j2), ('l', l2)], )
-
-                            self.h_matrix_bc_factor[ind1, ind2] = phase
-                            # self.h_matrix[ind2, ind1] = self.h_matrix[ind1, ind2]
-
-    def _compute_h_matrix_bc_add(self, split_the_leads=False):
-        """
-            Compute additive Bloch exponentials needed to specify pbc
-        """
-
-        if split_the_leads:
-            self.h_matrix_left_lead = sp.lil_matrix((self.basis_size, self.basis_size), dtype=np.complex)
-            self.h_matrix_right_lead = sp.lil_matrix((self.basis_size, self.basis_size), dtype=np.complex)
-            flag = None
-
-        # loop through all interfacial atoms
-        for j1 in self.ct.interfacial_atoms_ind:
-
-            list_of_neighbours = self.ct.get_neighbours(list(self.atom_list.values())[j1])
-
-            for j2 in list_of_neighbours:
-
-                coords = np.array(list(self.atom_list.values())[j1]) - \
-                         np.array(list(self.ct.virtual_and_interfacial_atoms.values())[j2])
-
-                if split_the_leads:
-                    flag = self.ct.atom_classifier(list(self.ct.virtual_and_interfacial_atoms.values())[j2], self.ct.pcv[0])
-
-                phase = np.exp(1j*np.dot(self.k_vector, coords))
-
-                ind = int(list(self.ct.virtual_and_interfacial_atoms.keys())[j2].split('_')[2])
-
-                for l1 in range(self.orbitals_dict[list(self.atom_list.keys())[j1]].num_of_orbitals):
-                    for l2 in range(self.orbitals_dict[list(self.atom_list.keys())[ind]].num_of_orbitals):
-
-                        ind1 = self.qn2ind([('atoms', j1), ('l', l1)])
-                        ind2 = self.qn2ind([('atoms', ind), ('l', l2)])
-
-                        if split_the_leads:
-                            if flag == 'R':
-                                self.h_matrix_left_lead[ind1, ind2] += phase * \
-                                    self._get_me(j1, ind, l1, l2, coords)
-                            elif flag == 'L':
-                                self.h_matrix_right_lead[ind1, ind2] += phase * \
-                                    self._get_me(j1, ind, l1, l2, coords)
-                            else:
-                                raise ValueError("Wrong flag value")
-                        else:
-                            self.h_matrix_bc_add[ind1, ind2] += phase * \
-                                self._get_me(j1, ind, l1, l2, coords)
+        return self.h_matrix_left_lead.T, self.h_matrix, self.h_matrix_right_lead.T
 
 
 def main():

@@ -397,8 +397,6 @@ class Hamiltonian(BasisTB):
             two_leads = True
 
         if split_the_leads:
-            self.h_matrix_left_lead = np.zeros((self.basis_size, self.basis_size), dtype=np.complex)
-            self.h_matrix_right_lead = np.zeros((self.basis_size, self.basis_size), dtype=np.complex)
             if two_leads:
                 flag = None
             else:
@@ -443,6 +441,10 @@ class Hamiltonian(BasisTB):
     def get_coupling_hamiltonians(self):
 
         self.k_vector = [0.0, 0.0, 0.0]
+
+        self.h_matrix_left_lead = np.zeros((self.basis_size, self.basis_size), dtype=np.complex)
+        self.h_matrix_right_lead = np.zeros((self.basis_size, self.basis_size), dtype=np.complex)
+
         self._compute_h_matrix_bc_add(split_the_leads=True)
         self.k_vector = None
 
