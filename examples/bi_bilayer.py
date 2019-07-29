@@ -59,14 +59,14 @@ def main():
 
     band_structure = np.array(band_structure)
 
-    num_k_points = np.size(k_points, axis=0)
-    k_index = np.linspace(1, num_k_points, num_k_points)
-    band_structure_data = np.c_[np.tile(so_couplings[:, None], [np.sum(num_points), 1]), np.tile(k_index[:, None], [len(so_couplings), 1]), band_structure]
-    np.savetxt(path_to_dat_file, np.c_[band_structure_data])
+    # num_k_points = np.size(k_points, axis=0)
+    # k_index = np.linspace(1, num_k_points, num_k_points)
+    # band_structure_data = np.c_[np.tile(so_couplings[:, None], [np.sum(num_points), 1]), np.tile(k_index[:, None], [len(so_couplings), 1]), band_structure]
+    # np.savetxt(path_to_dat_file, np.c_[band_structure_data])
 
     ax = plt.axes()
     ax.plot(band_structure)
-    plt.ylim((-1, 1))
+    # plt.ylim((-1, 1))
     plt.show()
 
 

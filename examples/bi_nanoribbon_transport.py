@@ -2,9 +2,6 @@ import numpy as np
 import tb
 from negf.recursive_greens_functions import recursive_gf
 from examples import data_bi_nanoribbon
-from tb.aux_functions import get_k_coords
-import matplotlib.pyplot as plt
-
 
 def radial_dep(coords):
 
@@ -19,16 +16,16 @@ def radial_dep(coords):
         return 100
 
 
-def main():
+def main(energy):
 
-    path_to_xyz_file = 'input_samples/bi_nanoribbon_014.xyz'
+    path_to_xyz_file = 'input_samples/bi_nanoribbon_058.xyz'
 
     bi = tb.Orbitals('Bi')
-    bi.add_orbital("s",  energy=-10.906, principal=0, orbital=0, magnetic= 0, spin=0)
+    bi.add_orbital("s", energy=-10.906, principal=0, orbital=0, magnetic= 0, spin=0)
     bi.add_orbital("px", energy= -0.486, principal=0, orbital=1, magnetic=-1, spin=0)
     bi.add_orbital("py", energy= -0.486, principal=0, orbital=1, magnetic= 1, spin=0)
     bi.add_orbital("pz", energy= -0.486, principal=0, orbital=1, magnetic= 0, spin=0)
-    bi.add_orbital("s",  energy=-10.906, principal=0, orbital=0, magnetic= 0, spin=1)
+    bi.add_orbital("s", energy=-10.906, principal=0, orbital=0, magnetic= 0, spin=1)
     bi.add_orbital("px", energy= -0.486, principal=0, orbital=1, magnetic=-1, spin=1)
     bi.add_orbital("py", energy= -0.486, principal=0, orbital=1, magnetic= 1, spin=1)
     bi.add_orbital("pz", energy= -0.486, principal=0, orbital=1, magnetic= 0, spin=1)
@@ -39,27 +36,40 @@ def main():
                      PARAMS_BI_BI2=data_bi_nanoribbon.PARAMS_BI_BI2,
                      PARAMS_BI_BI3=data_bi_nanoribbon.PARAMS_BI_BI3)
 
-    sym_points = ['GAMMA', 'X']
-    num_points = [50]
-    k_points = get_k_coords(sym_points, num_points, data_bi_nanoribbon.SPECIAL_K_POINTS_BI_NANORIBBON)
-
-    band_structure = []
-    h = tb.Hamiltonian(xyz=path_to_xyz_file, nn_distance=4.7, so_coupling=2.0)
+    h = tb.Hamiltonian(xyz=path_to_xyz_file, nn_distance=4.7, so_coupling=0.0)
     h.initialize(radial_dep)
     period = data_bi_nanoribbon.lattice_constant * np.array([1.0, 0.0, 0.0])
     h.set_periodic_bc([period])
-    for jj, item in enumerate(k_points):
-        [eigenvalues, _] = h.diagonalize_periodic_bc(k_points[jj])
-        band_structure.append(eigenvalues)
-    band_structure = np.array(band_structure)
+    h_l, h_0, h_r = h.get_coupling_hamiltonians()
 
-    ax = plt.axes()
-    ax.plot(band_structure)
-    plt.ylim((-1, 1))
-    plt.show()
+    tr = np.zeros((energy.shape[0]))
+
+    for j, E in enumerate(energy):
+        L, R = tb.surface_greens_function(E, h_l, h_0, h_r, iterate=5)
+
+        g_trans, grd, grl, gru, gr_left = recursive_gf(E, [h_l], [h_0 + L + R], [h_r])
+        gamma_l = 1j * (np.matrix(L) - np.matrix(L).H)
+        gamma_r = 1j * (np.matrix(R) - np.matrix(R).H)
+        tr[j] = np.real(np.trace(gamma_l * g_trans * gamma_r * g_trans.H))
+
+        print("{} of {}: energy is {}".format(j + 1, energy.shape[0], E))
+
+        tr = np.array(tr)
+
+    return tr
 
 
 if __name__ == '__main__':
 
-    main()
+    import matplotlib.pyplot as plt
+
+    energy = np.linspace(-0.5, 0.5, 100)
+
+    tr = main(energy)
+
+    ax = plt.axes()
+    ax.plot(energy, tr)
+    ax.set_ylabel(r'Transmission probability')
+    ax.set_xlabel(r'Energy (eV)')
+    plt.show()
 
