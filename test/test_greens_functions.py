@@ -702,8 +702,8 @@ def test_double_barrier_density_recursive(single_period_test=complex_chain, peri
 
     f = Field1D(z_dependence, axis=2)
 
-    ef1 = -1.3
-    ef2 = -1.0
+    ef1 = 0.25
+    ef2 = 0.5
     tempr = 10
 
     energy, dos, tr, h, sgf_l, sgf_r = single_period_test()

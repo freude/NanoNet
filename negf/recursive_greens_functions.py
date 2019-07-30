@@ -51,7 +51,7 @@ def recursive_gf(energy, mat_l_list, mat_d_list, mat_u_list, s_in=0, s_out=0):
     # ----------------- in case they are not matrices -------------------
     # -------------------------------------------------------------------
 
-    damp = 0.5e-9
+    damp = 0.1e-3
 
     for jj, item in enumerate(mat_d_list):
         mat_d_list[jj] = np.asmatrix(item)

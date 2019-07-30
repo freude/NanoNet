@@ -173,13 +173,12 @@ class StructDesignerXYZ(AbstractStructureDesigner):
 
             indices = argsort(list(pot.tolist()))
         else:
-            indices = argsort(list(coords.tolist()))
+            indices = np.arange(len(coords))
 
         coords = coords[indices, :]
         labels = list(np.array(labels)[indices])
         self._atom_list = OrderedDict(list(zip(labels, coords)))
         self._kd_tree = scipy.spatial.cKDTree(np.array(list(self._atom_list.values())), leafsize=1, balanced_tree=True)
-
 
     @property
     def atom_list(self):
