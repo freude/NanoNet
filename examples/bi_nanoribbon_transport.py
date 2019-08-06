@@ -16,15 +16,11 @@ def radial_dep(coords):
         return 100
 
 
-def main(energy):
+def main(energy, ef1, tempr):
 
     def fd(energy, ef, temp):
         kb = 8.61733e-5  # Boltzmann constant in eV
         return 1.0 / (1.0 + np.exp((energy - ef) / (kb * temp)))
-
-    ef1 = 0.45
-    ef2 = -0.45
-    tempr = 5
 
     path_to_xyz_file = 'input_samples/bi_nanoribbon_014.xyz'
 
@@ -56,15 +52,13 @@ def main(energy):
     for j, E in enumerate(energy):
         L, R = tb.surface_greens_function(E, h_l, h_0, h_r, iterate=5)
         sgf_l = -2.0 * np.matrix(np.imag(L) * fd(E, ef1, tempr))
-        sgf = np.matrix(np.zeros(h_0.shape))
-        sgf_r = -2.0 * np.matrix(np.imag(L) * fd(E, ef2, tempr))
 
         g_trans, grd, grl, gru, gr_left,\
         gnd, gnl, gnu, gin_left = recursive_gf(E,
                                                [h_l],
                                                [h_0 + L + R],
                                                [h_r],
-                                               s_in=[sgf_l - sgf_r])
+                                               s_in=[sgf_l])
 
         gamma_l = 1j * (np.matrix(L) - np.matrix(L).H)
         gamma_r = 1j * (np.matrix(R) - np.matrix(R).H)
@@ -81,6 +75,9 @@ def main(energy):
         gn_diag = np.reshape(gn_diag, (h._orbitals_dict['Bi'].num_of_orbitals, -1))
         dens[j, :] = 2 * np.sum(gn_diag, axis=0)
 
+    plt.contourf(np.arange(h.num_of_nodes), energy, dens)
+    plt.show()
+
     return tr, dens
 
 
@@ -91,7 +88,10 @@ if __name__ == '__main__':
     energy = np.linspace(-0.5, 0.5, 150)
     # energy = np.linspace(0.2, 0.4, 200)
 
-    tr, dens = main(energy)
+    ef1 = 0.45
+    tempr = 5
+
+    tr, dens = main(energy, ef1, tempr)
 
     ax = plt.axes()
     ax.plot(energy, tr)

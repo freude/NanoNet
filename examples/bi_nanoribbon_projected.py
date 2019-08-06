@@ -50,7 +50,10 @@ def main():
     h.initialize(radial_dep)
 
     # --------------------------------------------------------------
-
+    # proj_x = np.matrix(np.diag([1, 1, 1, 1, 0, 0, 0, 0] * h.num_of_nodes, 4) +\
+    #          np.diag([1, 1, 1, 1] * h.num_of_nodes, -4))
+    # proj_y = np.matrix(np.diag([-1j, -1j, -1j, -1j] * h.num_of_nodes, 4) + \
+    #          np.diag([1j, 1j, 1j, 1j] * h.num_of_nodes, 4))
     proj_z = np.matrix(np.diag([1, 1, 1, 1, -1, -1, -1, -1] * h.num_of_nodes))
     proj_s = np.matrix(np.diag([1, 0, 0, 0, 1, 0, 0, 0] * h.num_of_nodes))
 
@@ -66,9 +69,9 @@ def main():
         measure_s = np.zeros(vec.shape[0], dtype=np.complex)
 
         for j, item in enumerate(vec.T):
-            vector = np.matrix(item)
-            measure_spin[j] = vector * proj_z * vector.T
-            measure_s[j] = np.abs(vector) * np.abs(proj_s * vector.T)
+            vector = np.matrix(item).T
+            measure_spin[j] = vector.H * proj_z * vector
+            measure_s[j] = vector.H * proj_s * vector
 
         spin_structure.append(measure_spin)
         s_structure.append(measure_s)
@@ -81,8 +84,9 @@ def main():
     fig, axs = plt.subplots(1, 2, figsize=(11, 7))
 
     for j, item in enumerate(band_structure.T):
-        im1 = axs[0].scatter(k_points[:, 0], item, c=np.abs(spin_structure[:, j]),
-                             norm=mpl.colors.Normalize(vmin=0.5, vmax=1))
+        im1 = axs[0].scatter(k_points[:, 0], item, c=spin_structure[:, j],
+                             norm=mpl.colors.Normalize(vmin=-1, vmax=1),
+                             cmap='bwr')
     axs[0].set_title('Magnitude of the z-axis spin projection', fontsize=10)
     axs[0].set_ylim((-1, 1))
     fig.colorbar(im1, ax=axs[0])
