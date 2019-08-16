@@ -175,37 +175,21 @@ mpirun -n 8 tbmpi --show=2 --save=1 --xyz=si.xyz --k_points=k_points.txt input.y
 - [Bulk silicon - initialization via an input file](jupyter_notebooks/bulk_silicon_with_input_file.ipynb)
 - [Silicon nanowire](jupyter_notebooks/silicon_nanowire.ipynb)
 
-## Computational methods
-
-The code implements a family of tight-binding method for solids 
-(empirical tight-binding method) [] and molecules (Huckel method) []. 
-All computations are performed from known coupling coefficients and 
-energy spectrum of species. The Hamiltonian matrices are build from 
-a xyz-file containing atomic coordinates. The atomic coordinates are stored
- in the kd-tree which facilitates fast neighbour searching. 
- The criteria of being neighbours is specified by the nearst neighbour distance.
-  The angular dependence of the hoping matrix elements for two orbitals with
-   different orbital and magnetic quantum numbers is computed using 
-   semi-analytical approach proposed by [Podolskiy]. 
-
-## Customize your tight-binding code
-
-### Customize atomic properties
-
-### Add distance dependence for hopping parameters
-
-## Deployment
-
-## Contributing
-
-## Versioning 
-
 ## Authors
+
+- Mykhailo Klymenko (mike.klymenko@rmit.edu.au)
+- Jackson S. Smith
+- Jesse A. Vaitkus
+- Jared H. Cole
 
 ## License
 
+This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
+
 ## Acknowledgments
 
-
+We acknowledge support of the RMIT University, 
+Australian Research Council through grant CE170100026, and
+National Computational Infrastructure, which is supported by the Australian Government.
 
 

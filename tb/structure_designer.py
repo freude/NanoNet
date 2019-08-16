@@ -150,33 +150,33 @@ class StructDesignerXYZ(AbstractStructureDesigner):
                                                                    # their number per unit cell
         self._num_of_nodes = sum(self.num_of_species.values())
 
-        if isinstance(vec, list):
-            coords1 = copy.deepcopy(coords)
-            coords1 = 100*(np.matrix(vec) * np.matrix(coords1).T).T
-            coords1 = np.vstack((coords.T, coords1.T)).T
-
-            _kd_tree = scipy.spatial.cKDTree(coords1,
-                                                  leafsize=1,
-                                                  balanced_tree=True)
-            indices = _kd_tree.indices
-
-        elif isinstance(lead_l, list) and isinstance(lead_r, list):
-
-            gamma = 0.3 * np.min(np.diff(coords[:, 2]))
-
-            pot = np.zeros(coords.shape[0])
-            for j, coord in enumerate(coords):
-                for lll in lead_l:
-                    pot[j] -= 1.0 / (euclidean(coord, np.array(lll))**2 + gamma**2)
-                for rrr in lead_r:
-                    pot[j] += 1.0 / (euclidean(coord, np.array(rrr))**2 + gamma**2)
-
-            indices = argsort(list(pot.tolist()))
-        else:
-            indices = np.arange(len(coords))
-
-        coords = coords[indices, :]
-        labels = list(np.array(labels)[indices])
+        # if isinstance(vec, list):
+        #     coords1 = copy.deepcopy(coords)
+        #     coords1 = 100*(np.matrix(vec) * np.matrix(coords1).T).T
+        #     coords1 = np.vstack((coords.T, coords1.T)).T
+        #
+        #     _kd_tree = scipy.spatial.cKDTree(coords1,
+        #                                           leafsize=1,
+        #                                           balanced_tree=True)
+        #     indices = _kd_tree.indices
+        #
+        # elif isinstance(lead_l, list) and isinstance(lead_r, list):
+        #
+        #     gamma = 0.3 * np.min(np.diff(coords[:, 2]))
+        #
+        #     pot = np.zeros(coords.shape[0])
+        #     for j, coord in enumerate(coords):
+        #         for lll in lead_l:
+        #             pot[j] -= 1.0 / (euclidean(coord, np.array(lll))**2 + gamma**2)
+        #         for rrr in lead_r:
+        #             pot[j] += 1.0 / (euclidean(coord, np.array(rrr))**2 + gamma**2)
+        #
+        #     indices = argsort(list(pot.tolist()))
+        # else:
+        #     indices = np.arange(len(coords))
+        #
+        # coords = coords[indices, :]
+        # labels = list(np.array(labels)[indices])
         self._atom_list = OrderedDict(list(zip(labels, coords)))
         self._kd_tree = scipy.spatial.cKDTree(np.array(list(self._atom_list.values())), leafsize=1, balanced_tree=True)
 
