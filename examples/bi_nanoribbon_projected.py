@@ -46,7 +46,7 @@ def main():
     band_structure = []
     spin_structure = []
     s_structure = []
-    h = tb.Hamiltonian(xyz=path_to_xyz_file, nn_distance=4.7, so_coupling=2.0)
+    h = tb.Hamiltonian(xyz=path_to_xyz_file, nn_distance=4.7, so_coupling=0.0)
     h.initialize(radial_dep)
 
     # --------------------------------------------------------------
@@ -83,13 +83,23 @@ def main():
     import matplotlib as mpl
     fig, axs = plt.subplots(1, 2, figsize=(11, 7))
 
+    spin_structure1 = np.copy(spin_structure)
+    spin_structure2 = -np.copy(spin_structure)
+    spin_structure1[spin_structure1 < 0] = 0.01
+    spin_structure2[spin_structure2 < 0] = 0.01
+
     for j, item in enumerate(band_structure.T):
-        im1 = axs[0].scatter(k_points[:, 0], item, c=spin_structure[:, j],
-                             norm=mpl.colors.Normalize(vmin=-1, vmax=1),
-                             cmap='bwr')
+        # im1 = axs[0].scatter(k_points[:, 0], item, c=spin_structure[:, j],
+        #                      norm=mpl.colors.Normalize(vmin=-1, vmax=1),
+        #                      cmap='bwr')
+
+        im1 = axs[0].scatter(k_points[:, 0], item, marker='o',
+                             s=100*spin_structure1[:, j], facecolors='none', edgecolors='r')
+        im1 = axs[0].scatter(k_points[:, 0], item, marker='v',
+                             s=100*spin_structure2[:, j], facecolors='none', edgecolors='r')
     axs[0].set_title('Magnitude of the z-axis spin projection', fontsize=10)
     axs[0].set_ylim((-1, 1))
-    fig.colorbar(im1, ax=axs[0])
+    # fig.colorbar(im1, ax=axs[0])
 
     for j, item in enumerate(band_structure.T):
         im2 = axs[1].scatter(k_points[:, 0], item, c=np.abs(s_structure[:, j]),
