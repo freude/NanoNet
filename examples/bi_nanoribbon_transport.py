@@ -22,7 +22,7 @@ def main(energy, ef1, tempr):
         kb = 8.61733e-5  # Boltzmann constant in eV
         return 1.0 / (1.0 + np.exp((energy - ef) / (kb * temp)))
 
-    path_to_xyz_file = 'input_samples/bi_nanoribbon_014.xyz'
+    path_to_xyz_file = 'input_samples/bi_nanoribbon_090.xyz'
 
     bi = tb.Orbitals('Bi')
     bi.add_orbital("s", energy=-10.906, principal=0, orbital=0, magnetic= 0, spin=0)
@@ -75,9 +75,6 @@ def main(energy, ef1, tempr):
         gn_diag = np.reshape(gn_diag, (h._orbitals_dict['Bi'].num_of_orbitals, -1))
         dens[j, :] = 2 * np.sum(gn_diag, axis=0)
 
-    plt.contourf(np.arange(h.num_of_nodes), energy, dens)
-    plt.show()
-
     return tr, dens
 
 
@@ -85,11 +82,12 @@ if __name__ == '__main__':
 
     import matplotlib.pyplot as plt
 
-    energy = np.linspace(-0.5, 0.5, 150)
-    # energy = np.linspace(0.2, 0.4, 200)
+    path_to_dat_file = 'examples/data/bi_nanoribbon_090_transmission.dat'
 
-    ef1 = 0.45
-    tempr = 5
+    energy = np.linspace(-0.5, 0.5, 150)
+
+    ef1 = 0
+    tempr = 0
 
     tr, dens = main(energy, ef1, tempr)
 
@@ -99,3 +97,5 @@ if __name__ == '__main__':
     ax.set_xlabel(r'Energy (eV)')
     plt.show()
 
+    data_to_write = np.c_[energy[:, None], tr]
+    np.savetxt(path_to_dat_file, np.c_[data_to_write])
