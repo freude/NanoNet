@@ -41,8 +41,8 @@ def main():
                      PARAMS_BI_BI3=data_bi_bilayer.PARAMS_BI_BI3)
 
     so_couplings = np.linspace(1.75, 1.75, 1)
-    sym_points = ['GAMMA', 'GAMMA']
-    num_points = [1]
+    sym_points = ['M', 'GAMMA', 'K', 'M']
+    num_points = [100, 100, 100]
 
     k_points = get_k_coords(sym_points, num_points, data_bi_bilayer.SPECIAL_K_POINTS_BI)
 
@@ -58,16 +58,22 @@ def main():
     band_structure = np.array(band_structure)
 
     num_k_points = np.size(k_points, axis=0)
-    k_index = np.linspace(1, num_k_points, num_k_points)
-    band_structure_data = np.c_[np.tile(so_couplings[:, None], [np.sum(num_points), 1]), np.tile(k_index[:, None], [len(so_couplings), 1]), band_structure]
+
+    # k_index = np.linspace(1, num_k_points, num_k_points)
+
+    k_index = np.zeros((num_k_points, 1))
+    for ii in range(0, num_k_points - 1):
+        k_index[ii + 1, :] = k_index[ii, :] + np.linalg.norm(k_points[ii + 1, :] - k_points[ii, :])
+
+    band_structure_data = np.c_[np.tile(so_couplings[:, None], [np.sum(num_points), 1]), np.tile(k_index, [len(so_couplings), 1]), band_structure]
     np.savetxt('examples/data/eigenvalues_111_1-75.dat', np.c_[band_structure_data])
 
     # np.savetxt('examples/data/eigenvectors_111_0-00_real.dat', np.array(np.real(eigenvectors)))
     # np.savetxt('examples/data/eigenvectors_111_0-00_imag.dat', np.array(np.imag(eigenvectors)))
 
     # ax = plt.axes()
-    # ax.plot(band_structure)
-    # # plt.ylim((-1, 1))
+    # ax.plot(k_index, band_structure)
+    # plt.ylim((-1, 1))
     # plt.show()
 
 
