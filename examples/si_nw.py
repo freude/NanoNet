@@ -1,4 +1,5 @@
 import numpy as np
+import tb
 import matplotlib.pyplot as plt
 from tb import Hamiltonian, HamiltonianSp
 from tb import Orbitals
@@ -95,4 +96,3 @@ def main():
 if __name__ == '__main__':
 
     main()
-

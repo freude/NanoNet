@@ -49,6 +49,8 @@ def main(energy, ef1, tempr):
     tr = np.zeros((energy.shape[0]))
     dens = np.zeros((energy.shape[0], h.num_of_nodes))
 
+    diags = np.zeros((energy.shape[0], h.num_of_nodes))
+
     for j, E in enumerate(energy):
         L, R = tb.surface_greens_function(E, h_l, h_0, h_r, iterate=5)
         sgf_l = -2.0 * np.matrix(np.imag(L) * fd(E, ef1, tempr))
@@ -64,6 +66,10 @@ def main(energy, ef1, tempr):
         gamma_r = 1j * (np.matrix(R) - np.matrix(R).H)
         tr[j] = np.real(np.trace(gamma_l * g_trans * gamma_r * g_trans.H))
 
+        gn_diag = np.diag(grd[0])
+        gn_diag = np.reshape(gn_diag, (h.num_of_nodes, -1))
+        diags[j, :] = 2 * np.sum(gn_diag, axis=1)
+
         print("{} of {}: energy is {}".format(j + 1, energy.shape[0], E))
 
         tr = np.array(tr)
@@ -72,8 +78,8 @@ def main(energy, ef1, tempr):
         ind = np.argsort(np.array(h._coords)[:, 1])
         # gn_diag = np.concatenate((np.diag(gnd[0])[ind], np.diag(gnd[1])[ind], np.diag(gnd[2])[ind]))
         gn_diag = np.diag(gnd[0])
-        gn_diag = np.reshape(gn_diag, (h._orbitals_dict['Bi'].num_of_orbitals, -1))
-        dens[j, :] = 2 * np.sum(gn_diag, axis=0)
+        gn_diag = np.reshape(gn_diag, (h.num_of_nodes, -1))
+        dens[j, :] = 2 * np.sum(gn_diag, axis=1)
 
     return tr, dens
 
@@ -99,3 +105,4 @@ if __name__ == '__main__':
 
     data_to_write = np.c_[energy[:, None], tr]
     np.savetxt(path_to_dat_file, np.c_[data_to_write])
+
