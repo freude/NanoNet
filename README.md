@@ -6,6 +6,8 @@
 [![Coverage Status](https://coveralls.io/repos/github/freude/NanoNet/badge.svg?branch=develop)](https://coveralls.io/github/freude/NanoNet?branch=develop)
 [![CodeFactor](https://www.codefactor.io/repository/github/freude/nanonet/badge/master)](https://www.codefactor.io/repository/github/freude/nanonet/overview/master)
 
+<img src="https://user-images.githubusercontent.com/4588093/65398380-1f684380-ddfa-11e9-9e87-5aab6cf417b8.png" width="200">
+
 ## Introduction
 
 The project represents an extendable Python framework for 
