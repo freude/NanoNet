@@ -54,7 +54,7 @@ def main():
     #          np.diag([1, 1, 1, 1] * h.num_of_nodes, -4))
     # proj_y = np.matrix(np.diag([-1j, -1j, -1j, -1j] * h.num_of_nodes, 4) + \
     #          np.diag([1j, 1j, 1j, 1j] * h.num_of_nodes, 4))
-    proj_z = np.matrix(np.diag([1, 1, 1, 1, -1, -1, -1, -1] * h.num_of_nodes))
+    proj_z = np.matrix(np.diag([0, 1, 1, 1, 0, -1, -1, -1] * h.num_of_nodes))
     proj_s = np.matrix(np.diag([1, 0, 0, 0, 1, 0, 0, 0] * h.num_of_nodes))
 
     # --------------------------------------------------------------
@@ -95,7 +95,7 @@ def main():
 
         im1 = axs[0].scatter(k_points[:, 0], item, marker='o',
                              s=100*spin_structure1[:, j], facecolors='none', edgecolors='r')
-        im1 = axs[0].scatter(k_points[:, 0], item, marker='v',
+        im2 = axs[0].scatter(k_points[:, 0], item, marker='v',
                              s=100*spin_structure2[:, j], facecolors='none', edgecolors='r')
     axs[0].set_title('Magnitude of the z-axis spin projection', fontsize=10)
     axs[0].set_ylim((-1, 1))

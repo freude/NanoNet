@@ -108,10 +108,9 @@ def surface_greens_function_poles(E, h_l, h_0, h_r):
 
     alpha, betha, _, eigenvects, _, _ = linalg.lapack.cggev(main_matrix, overlap_matrix)
 
-    eigenvals = np.zeros(alpha.shape, dtype=np.complex128)
+    eigenvals = np.zeros(alpha.shape, dtype=np.complex)
 
     for j, item in enumerate(zip(alpha, betha)):
-
         if np.abs(item[1]) != 0.0:
             eigenvals[j] = item[0] / item[1]
         else:
