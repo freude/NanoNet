@@ -3,6 +3,7 @@ import tb
 from negf.recursive_greens_functions import recursive_gf
 from examples import data_bi_nanoribbon
 
+
 def radial_dep(coords):
 
     norm_of_coords = np.linalg.norm(coords)
@@ -16,7 +17,7 @@ def radial_dep(coords):
         return 100
 
 
-def test_gf(energy):
+def make_tb_matrices():
 
     path_to_xyz_file = 'input_samples/bi_nanoribbon_014.xyz'
 
@@ -42,10 +43,15 @@ def test_gf(energy):
     h.set_periodic_bc([period])
     h_l, h_0, h_r = h.get_coupling_hamiltonians()
 
-    diags = np.zeros((energy.shape[0], h.num_of_nodes), dtype=np.complex)
+    return h_l, h_0, h_r, h.num_of_nodes
+
+
+def test_gf(energy, h_l, h_0, h_r, num_of_nodes):
+
+    diags = np.zeros((energy.shape[0], num_of_nodes), dtype=np.complex)
 
     for j, E in enumerate(energy):
-        L, R = tb.surface_greens_function(E, h_l, h_0, h_r, iterate=5)
+        L, R = tb.surface_greens_function(E, h_l, h_0, h_r, iterate=2)
 
         g_trans, grd, grl, gru, gr_left = recursive_gf(E,
                                                        [h_l],
@@ -54,7 +60,7 @@ def test_gf(energy):
 
         gn_diag = np.diag(grd[0])
         # gn_diag = np.reshape(gn_diag, (h._orbitals_dict['Bi'].num_of_orbitals, -1))
-        gn_diag = np.reshape(gn_diag, (h.num_of_nodes, -1))
+        gn_diag = np.reshape(gn_diag, (num_of_nodes, -1))
         diags[j, :] = 2 * np.sum(gn_diag, axis=1)
 
     return diags
@@ -63,19 +69,21 @@ def test_gf(energy):
 if __name__ == '__main__':
 
     import matplotlib.pyplot as plt
-    from tb.cfr import CFR
+    from negf.cfr import CFR
+
+    h_r, h_0, h_l, num_of_nodes = make_tb_matrices()
 
     tempr = 300
     fd = CFR(40)
     Ef = np.linspace(-1.0, 1.0, 40)
     ans = []
-    moment = 1j * CFR.val_inf * test_gf(np.array([1j * CFR.val_inf]))
+    moment = 1j * CFR.val_inf * test_gf(np.array([1j * CFR.val_inf]), h_l, h_0, h_r, num_of_nodes)
 
     for ef in Ef:
         print(ef)
         points = fd.genetate_integration_points(ef, tempr)
-        gf_vals = test_gf(points)
+        gf_vals = test_gf(points, h_l, h_0, h_r, num_of_nodes)
         ans.append(fd.integrate1(gf_vals, tempr, zero_moment=moment))
 
-    plt.plot(np.array(ans))
+    plt.plot(np.squeeze(np.array(ans)))
     plt.show()

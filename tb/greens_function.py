@@ -46,7 +46,7 @@ def surface_greens_function_poles(h_list):
 
     alpha, betha, _, eigenvects, _, _ = linalg.lapack.cggev(main_matrix, overlap_matrix)
 
-    eigenvals = np.zeros(alpha.shape, dtype=np.complex128)
+    eigenvals = np.zeros(alpha.shape, dtype=np.complex)
 
     for j, item in enumerate(zip(alpha, betha)):
 

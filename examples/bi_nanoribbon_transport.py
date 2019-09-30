@@ -22,7 +22,7 @@ def main(energy, ef1, tempr):
         kb = 8.61733e-5  # Boltzmann constant in eV
         return 1.0 / (1.0 + np.exp((energy - ef) / (kb * temp)))
 
-    path_to_xyz_file = 'input_samples/bi_nanoribbon_090.xyz'
+    path_to_xyz_file = 'input_samples/bi_nanoribbon_014.xyz'
 
     bi = tb.Orbitals('Bi')
     bi.add_orbital("s", energy=-10.906, principal=0, orbital=0, magnetic= 0, spin=0)
@@ -77,7 +77,7 @@ def main(energy, ef1, tempr):
 
         ind = np.argsort(np.array(h._coords)[:, 1])
         # gn_diag = np.concatenate((np.diag(gnd[0])[ind], np.diag(gnd[1])[ind], np.diag(gnd[2])[ind]))
-        gn_diag = np.diag(gnd[0])
+        gn_diag = np.diag(np.imag(grd[0]))
         gn_diag = np.reshape(gn_diag, (h.num_of_nodes, -1))
         dens[j, :] = 2 * np.sum(gn_diag, axis=1)
 
@@ -101,6 +101,13 @@ if __name__ == '__main__':
     ax.plot(energy, tr)
     ax.set_ylabel(r'Transmission probability')
     ax.set_xlabel(r'Energy (eV)')
+    plt.show()
+
+    plt.figure(figsize=[5, 10])
+    ax = plt.axes()
+    ax.contourf(np.arange(14), energy, dens, 200, cmap='terrain')
+    ax.set_ylabel(r'Energy (eV)')
+    ax.set_xlabel(r'Site number')
     plt.show()
 
     data_to_write = np.c_[energy[:, None], tr]
