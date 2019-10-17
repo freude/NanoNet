@@ -213,7 +213,7 @@ def run_for_periods_recursive(single_period_test, periods):
             dos1[j] = dos1[j] + np.real(np.trace(1j * (grd[jj] - grd[jj].H))) / num_periods
 
     # dos1[dos1 > 100] = 0
-    np.testing.assert_allclose(dos, dos1, atol=1)
+    np.testing.assert_allclose(dos, dos1, atol=1.5)
 
 
 def test_gf_single_atom_chain_several_periods():
