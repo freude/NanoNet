@@ -109,7 +109,7 @@ class HamiltonianSp(Hamiltonian):
         self.h_matrix_bc_factor = sp.lil_matrix(self.h_matrix_bc_factor)
         self.k_vector = None
 
-    def get_coupling_hamiltonians(self):
+    def get_hamiltonians(self):
 
         self.k_vector = [0.0, 0.0, 0.0]
 

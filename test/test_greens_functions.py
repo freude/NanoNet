@@ -54,7 +54,7 @@ def single_atom_chain():
     h = tb.Hamiltonian(xyz=xyz_file, nn_distance=1.1)
     h.initialize()
     h.set_periodic_bc([[0, 0, 1.0]])
-    h_l, h_0, h_r = h.get_coupling_hamiltonians()
+    h_l, h_0, h_r = h.get_hamiltonians()
     num_sites = h_0.shape[0]
 
     energy = np.linspace(-3.0, 3.0, 300)
@@ -111,7 +111,7 @@ def complex_chain():
     h = tb.Hamiltonian(xyz=xyz_file, nn_distance=1.1)
     h.initialize()
     h.set_periodic_bc([[0, 0, 2.0]])
-    h_l, h_0, h_r = h.get_coupling_hamiltonians()
+    h_l, h_0, h_r = h.get_hamiltonians()
 
     energy = np.linspace(-3.0, 1.5, 700)
 
@@ -145,7 +145,7 @@ def complex_chain():
 def test_single_atom_chain():
     energy, dos, tr, h, sgf_l, sgf_r = single_atom_chain()
 
-    h_l, h_0, h_r = h.get_coupling_hamiltonians()
+    h_l, h_0, h_r = h.get_hamiltonians()
 
     np.testing.assert_allclose(sgf_l, sgf_r, atol=1e-5)
     expected = h_l * simple_chain_greens_function(energy, h_0, h_r) * h_r
@@ -161,7 +161,7 @@ def test_complex_chain():
 
 def run_for_periods(single_period_test, periods):
     energy, dos, tr, h, sgf_l, sgf_r = single_period_test()
-    h_l, h_0, h_r = h.get_coupling_hamiltonians()
+    h_l, h_0, h_r = h.get_hamiltonians()
     cell = h.ct.pcv
 
     h_chain = HamiltonianChain(h_l, h_0, h_r, h.get_site_coordinates())
@@ -193,7 +193,7 @@ def run_for_periods(single_period_test, periods):
 
 def run_for_periods_recursive(single_period_test, periods):
     energy, dos, tr, h, sgf_l, sgf_r = single_period_test()
-    h_l, h_0, h_r = h.get_coupling_hamiltonians()
+    h_l, h_0, h_r = h.get_hamiltonians()
     cell = h.ct.pcv
 
     h_chain = HamiltonianChain(h_l, h_0, h_r, h.get_site_coordinates())
@@ -706,7 +706,7 @@ def test_double_barrier_density_recursive(single_period_test=complex_chain, peri
     tempr = 10
 
     energy, dos, tr, h, sgf_l, sgf_r = single_period_test()
-    h_l, h_0, h_r = h.get_coupling_hamiltonians()
+    h_l, h_0, h_r = h.get_hamiltonians()
     cell = h.ct.pcv
 
     h_chain = HamiltonianChain(h_l, h_0, h_r, h.get_site_coordinates())

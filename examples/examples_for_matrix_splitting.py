@@ -56,7 +56,7 @@ if __name__ == "__main__":
     # PRIMITIVE_CELL = [[0, 0, a_si]]
     # hamiltonian.set_periodic_bc(PRIMITIVE_CELL)
     #
-    # hl, h0, hr = hamiltonian.get_coupling_hamiltonians()
+    # hl, h0, hr = hamiltonian.get_hamiltonians()
 
     import scipy
     h0 = scipy.sparse.random(1000, 1000, density=0.0003, random_state=100)

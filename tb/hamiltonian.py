@@ -1,5 +1,5 @@
 """
-The module contains all necessary classes needed to compute the Hamiltonian matrix
+The module contains a library of classes facilitating computations of Hamiltonian matrices.
 """
 from __future__ import print_function, division
 from __future__ import absolute_import
@@ -112,7 +112,7 @@ class Hamiltonian(BasisTB):
 
         super(Hamiltonian, self).__init__(**kwargs)
 
-        self._coords = None                               # coordinates of sites
+        self._coords = None                             # coordinates of sites
         self.h_matrix = None                            # Hamiltonian for an isolated system
         self.h_matrix_bc_factor = None                  # exponential Bloch factors for pbc
         self.h_matrix_bc_add = None                     # additive Bloch exponentials for pbc
@@ -128,8 +128,9 @@ class Hamiltonian(BasisTB):
 
     def initialize(self, radial_dep=None):
         """
-        The function computes matrix elements of the Hamiltonian.
+        Compute matrix elements of the Hamiltonian.
         """
+
         if radial_dep is None:
             logging.info('Radial dependence function: None')
             logging.info("\n---------------------------------\n")
@@ -175,7 +176,12 @@ class Hamiltonian(BasisTB):
                             self.h_matrix[ind1, ind2] = self._get_me(j1, j2, l1, l2, radial_dep=self.radial_dependence)
 
     def set_periodic_bc(self, primitive_cell):
+        """
+        Set periodic boundary conditions.
+        The function creates an object of the class CyclicTopology.
 
+        :param primitive_cell: list of vectors defining a primitive cell
+        """
         if list(primitive_cell):
             self.ct = CyclicTopology(primitive_cell,
                                      list(self.atom_list.keys()),
@@ -220,31 +226,15 @@ class Hamiltonian(BasisTB):
 
         return vals[ind], vects[:, ind]
 
-    def is_hermitian(self, visualize=False):
-        """
-        Check if the Hamiltonian is a Hermitian matrix. Useful for testing.
-
-        :param visualize:   Show the matrix with the non-Hermitian elements marked
-        :return:            True is the Hamiltonian is a Hermitian matrix, False otherwise
-        """
-
-        h_matrix = self.h_matrix * self.h_matrix_bc_factor + self.h_matrix_bc_add
-
-        if visualize:
-            plt.imshow((np.abs(h_matrix - h_matrix.conj().T)))
-
-        if (np.abs(h_matrix - h_matrix.conj().T) > 0.001).any():
-            return False
-
-        return True
-
     def _ind2atom(self, ind):
 
         return self.orbitals_dict[list(self.atom_list.keys())[ind]]
 
     def _get_me(self, atom1, atom2, l1, l2, coords=None, radial_dep=None):
         """
-        Compute the matrix element <atom1, l1|H|l2, atom2>
+        Compute the matrix element <atom1, l1|H|l2, atom2>.
+        The function is called in the member function initialize() and invokes the function
+        me() from the module diatomic_matrix_element.
 
         :param atom1:    atom index
         :param atom2:    atom index
@@ -354,7 +344,7 @@ class Hamiltonian(BasisTB):
 
     def _reset_periodic_bc(self):
         """
-        Resets the matrices determining periodic boundary conditions to their default state
+        Reset the matrices determining periodic boundary conditions to their default state
         :return:
         """
 
@@ -364,7 +354,7 @@ class Hamiltonian(BasisTB):
 
     def _compute_h_matrix_bc_factor(self):
         """
-        Compute the exponential Bloch factors needed to specify pbc
+        Compute the exponential Bloch factors needed when the periodic boundary conditions are applied.
         """
 
         for j1 in range(self.num_of_nodes):
@@ -438,7 +428,16 @@ class Hamiltonian(BasisTB):
                             self.h_matrix_bc_add[ind1, ind2] += phase * \
                                 self._get_me(j1, ind, l1, l2, coords, radial_dep=self.radial_dependence)
 
-    def get_coupling_hamiltonians(self):
+    def get_hamiltonians(self):
+        """
+        Return a list of Hamiltonian matrices. For 1D systems, the list is [Hl, Hc, Hr],
+        where Hc is the Hamiltonian describing interactions between atoms within a unit cell,
+        Hl and Hr are Hamiltonians describing couplings between atoms in the unit cell
+        and atoms in the left and right adjacent unit cells.
+
+        :return:         list of Hamiltonians
+        :rtype:          list
+        """
 
         self.k_vector = [0.0, 0.0, 0.0]
 
@@ -452,9 +451,11 @@ class Hamiltonian(BasisTB):
 
     def get_site_coordinates(self):
         """
-        Returns coordinates of atoms in the order of Hamiltonian matrix indexing
+        Return coordinates of atoms.
 
-        :return:
+        :return:         atomic coordinates
+        :rtype:          numpy.ndarray
         """
 
         return np.array(self._coords)
+

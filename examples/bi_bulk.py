@@ -39,7 +39,7 @@ def main():
         h.initialize(radial_dep)
         h.set_periodic_bc(data_bi_bulk.primitive_cell)
 
-        hl, h0, hr = h.get_coupling_hamiltonians()
+        hl, h0, hr = h.get_hamiltonians()
 
         for jj, item in enumerate(k_points):
             [eigenvalues, _] = h.diagonalize_periodic_bc(k_points[jj])
