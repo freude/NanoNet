@@ -124,9 +124,10 @@ class Hamiltonian(BasisTB):
         self.k_vector = 0                               # default value of the wave vector
         self.ct = None
         self.radial_dependence = None
+        self.int_radial_dependence = None
         self.so_coupling = kwargs.get('so_coupling', 0.0)
 
-    def initialize(self, radial_dep=None):
+    def initialize(self, int_radial_dep=None, radial_dep=None):
         """
         Compute matrix elements of the Hamiltonian.
         """
@@ -138,7 +139,16 @@ class Hamiltonian(BasisTB):
             logging.info('Radial dependence function:\n\n{}'.format(inspect.getsource(radial_dep)))
             logging.info("\n---------------------------------\n")
 
+        if int_radial_dep is None:
+            logging.info('Discrete radial dependence function: None')
+            logging.info("\n---------------------------------\n")
+        else:
+            logging.info('Discrete radial dependence function:\n\n{}'.format(inspect.getsource(int_radial_dep)))
+            logging.info("\n---------------------------------\n")
+
         self.radial_dependence = radial_dep
+        self.int_radial_dependence = int_radial_dep
+
         self._coords = [0 for _ in range(self.basis_size)]
         # initialize Hamiltonian matrices
         self.h_matrix = np.zeros((self.basis_size, self.basis_size), dtype=np.complex)
@@ -156,14 +166,13 @@ class Hamiltonian(BasisTB):
                 if j1 == j2:
                     for l1 in range(self.orbitals_dict[list(self.atom_list.keys())[j1]].num_of_orbitals):
                         ind1 = self.qn2ind([('atoms', j1), ('l', l1)], )
-                        self.h_matrix[ind1, ind1] = self._get_me(j1, j2, l1, l1, radial_dep=self.radial_dependence)
+                        self.h_matrix[ind1, ind1] = self._get_me(j1, j2, l1, l1)
                         self._coords[ind1] = list(self.atom_list.values())[j1]
 
                         if self.so_coupling != 0:
                             for l2 in range(self.orbitals_dict[list(self.atom_list.keys())[j1]].num_of_orbitals):
                                 ind2 = self.qn2ind([('atoms', j1), ('l', l2)], )
-                                self.h_matrix[ind1, ind2] = self._get_me(j1, j2, l1, l2,
-                                                                         radial_dep=self.radial_dependence)
+                                self.h_matrix[ind1, ind2] = self._get_me(j1, j2, l1, l2)
 
                 # nearest neighbours interaction
                 else:
@@ -173,7 +182,7 @@ class Hamiltonian(BasisTB):
                             ind1 = self.qn2ind([('atoms', j1), ('l', l1)], )
                             ind2 = self.qn2ind([('atoms', j2), ('l', l2)], )
 
-                            self.h_matrix[ind1, ind2] = self._get_me(j1, j2, l1, l2, radial_dep=self.radial_dependence)
+                            self.h_matrix[ind1, ind2] = self._get_me(j1, j2, l1, l2)
 
     def set_periodic_bc(self, primitive_cell):
         """
@@ -230,7 +239,7 @@ class Hamiltonian(BasisTB):
 
         return self.orbitals_dict[list(self.atom_list.keys())[ind]]
 
-    def _get_me(self, atom1, atom2, l1, l2, coords=None, radial_dep=None):
+    def _get_me(self, atom1, atom2, l1, l2, coords=None):
         """
         Compute the matrix element <atom1, l1|H|l2, atom2>.
         The function is called in the member function initialize() and invokes the function
@@ -279,15 +288,20 @@ class Hamiltonian(BasisTB):
                     logging.info("Unique distances: \n    {}".format("\n    ".join(unique_distances)))
                     logging.info("---------------------------------\n")
 
-            if radial_dep is None:
+            if self.int_radial_dependence is None:
                 which_neighbour = ""
             else:
-                which_neighbour = radial_dep(norm)
+                which_neighbour = self.int_radial_dependence(norm)
+
+            if self.radial_dependence is None:
+                factor = 1.0
+            else:
+                factor = self.radial_dependence(norm)
 
             # compute directional cosines
             coords1 /= norm
 
-            return me(atom_kind1, l1, atom_kind2, l2, coords1, which_neighbour)
+            return me(atom_kind1, l1, atom_kind2, l2, coords1, which_neighbour) * factor
 
     def _comp_so(self, atom, ind1, ind2):
 
@@ -418,15 +432,15 @@ class Hamiltonian(BasisTB):
                         if split_the_leads:
                             if flag == 'R':
                                 self.h_matrix_left_lead[ind1, ind2] += phase * \
-                                    self._get_me(j1, ind, l1, l2, coords, radial_dep=self.radial_dependence)
+                                    self._get_me(j1, ind, l1, l2, coords)
                             elif flag == 'L':
                                 self.h_matrix_right_lead[ind1, ind2] += phase * \
-                                    self._get_me(j1, ind, l1, l2, coords, radial_dep=self.radial_dependence)
+                                    self._get_me(j1, ind, l1, l2, coords)
                             else:
                                 raise ValueError("Wrong flag value")
                         else:
                             self.h_matrix_bc_add[ind1, ind2] += phase * \
-                                self._get_me(j1, ind, l1, l2, coords, radial_dep=self.radial_dependence)
+                                self._get_me(j1, ind, l1, l2, coords)
 
     def get_hamiltonians(self):
         """
