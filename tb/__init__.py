@@ -8,7 +8,7 @@ __email__ = "mike.klymenko@rmit.edu.au"
 from .orbitals import Orbitals
 from .hamiltonian import Hamiltonian
 from .hamiltonian_sparse import HamiltonianSp
-from .aux_functions import get_k_coords, yaml_parser, split_into_subblocks
+from .aux_functions import get_k_coords, yaml_parser
 from .hamiltonian_initializer import set_tb_params, initializer
 
 from .greens_function import surface_greens_function

@@ -21,39 +21,6 @@ def argsort(seq):
     return sorted(range(len(seq)), key=seq.__getitem__)
 
 
-def get_spliting_indices(tree, level=3):
-    length = len(tree.indices)
-    combs = []
-
-    for j1 in range(level):
-        for comb in combs:
-            trees = []
-            for tree in comb:
-                trees.append(item.lesser)
-                trees.append(item.greater)
-                trees.append(item.greater)
-                trees.append(item.lesser)
-            tree = trees
-
-    combs = []
-
-    for item in tree:
-        combs.append(item.indices)
-
-    combs = np.hstack(tuple(combs))
-
-    ar = np.arange(0, len(combs))
-
-    ans = []
-
-    from sympy.utilities.iterables import multiset_permutations
-    for p in multiset_permutations(ar):
-        mylist = [combs[i] for i in p]
-        ans.append(np.hstack(tuple(mylist)))
-
-    return ans
-
-
 def shift(mat):
 
     ans = np.zeros(mat.shape, dtype=np.int)
@@ -130,9 +97,10 @@ class StructDesignerXYZ(AbstractStructureDesigner):
 
         xyz = kwargs.get('xyz', '/home/mk/TB_project/tb/my_si.xyz')
         nn_distance = kwargs.get('nn_distance', 2.39)
-        vec = kwargs.get('vec', 0)
-        lead_l = kwargs.get('lead_l', 0)
-        lead_r = kwargs.get('lead_r', 0)
+
+        self.left_lead = kwargs.get('left_lead', [])
+        self.right_lead = kwargs.get('right_lead', [])
+        self.sort_func = kwargs.get('sort_func', None)
 
         try:
             with open(xyz, 'r') as read_file:
@@ -150,35 +118,41 @@ class StructDesignerXYZ(AbstractStructureDesigner):
                                                                    # their number per unit cell
         self._num_of_nodes = sum(self.num_of_species.values())
 
-        # if isinstance(vec, list):
-        #     coords1 = copy.deepcopy(coords)
-        #     coords1 = 100*(np.matrix(vec) * np.matrix(coords1).T).T
-        #     coords1 = np.vstack((coords.T, coords1.T)).T
-        #
-        #     _kd_tree = scipy.spatial.cKDTree(coords1,
-        #                                           leafsize=1,
-        #                                           balanced_tree=True)
-        #     indices = _kd_tree.indices
-        #
-        # elif isinstance(lead_l, list) and isinstance(lead_r, list):
-        #
-        #     gamma = 0.3 * np.min(np.diff(coords[:, 2]))
-        #
-        #     pot = np.zeros(coords.shape[0])
-        #     for j, coord in enumerate(coords):
-        #         for lll in lead_l:
-        #             pot[j] -= 1.0 / (euclidean(coord, np.array(lll))**2 + gamma**2)
-        #         for rrr in lead_r:
-        #             pot[j] += 1.0 / (euclidean(coord, np.array(rrr))**2 + gamma**2)
-        #
-        #     indices = argsort(list(pot.tolist()))
-        # else:
-        #     indices = np.arange(len(coords))
-        #
-        # coords = coords[indices, :]
-        # labels = list(np.array(labels)[indices])
         self._atom_list = OrderedDict(list(zip(labels, coords)))
         self._kd_tree = scipy.spatial.cKDTree(np.array(list(self._atom_list.values())), leafsize=1, balanced_tree=True)
+
+        if self.sort_func is not None:
+            self._sort(labels, coords)
+
+    def _sort(self, labels, coords):
+
+        coords = np.array(coords)
+        h_matrix = np.zeros((coords.shape[0], coords.shape[0]))
+
+        self._nn_distance = 2 * self._nn_distance
+        for j in range(len(coords)):
+            ans = self.get_neighbours(j)
+            print(j, ans)
+            h_matrix[j, ans] = 1
+
+        self._nn_distance = self._nn_distance / 2
+
+        indices = self.sort_func(coords, self.left_lead, self.right_lead)
+
+        # indices = sort_matrix(coords, h_matrix, self.left_lead, self.right_lead)
+        # indices = np.argsort(coords[:, 2])
+        # indices = sort_matrix_bfs(coords, h_matrix, self.left_lead, self.right_lead)
+        self.left_lead = np.squeeze(np.concatenate([np.where(indices == item) for item in self.left_lead]))
+        self.right_lead = np.squeeze(np.concatenate([np.where(indices == item) for item in self.right_lead]))
+        coords = coords[indices]
+        labels = [labels[i] for i in indices]
+
+        self._atom_list = OrderedDict(list(zip(labels, coords)))
+        self._kd_tree = scipy.spatial.cKDTree(np.array(list(self._atom_list.values())), leafsize=1, balanced_tree=True)
+
+    def add_leads(self, left_lead, right_lead):
+        self.left_lead = left_lead
+        self.right_lead = right_lead
 
     @property
     def atom_list(self):
@@ -373,4 +347,6 @@ class CyclicTopology(AbstractStructureDesigner):
 if __name__ == '__main__':
 
     sd = StructDesignerXYZ(xyz='/home/mk/TB_project/input_samples/SiNW2.xyz')
+    sd.sort([np.argmin(np.array(list(sd.atom_list.values()))[:, 2])],
+            [np.argmax(np.array(list(sd.atom_list.values()))[:, 2])])
     print("Done!")

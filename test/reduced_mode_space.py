@@ -13,7 +13,7 @@ if __name__ == '__main__':
     h.initialize()
     period = [0, 0, 5.50]
     h.set_periodic_bc([period])
-    h_l, h_0, h_r = h.get_coupling_hamiltonians()
+    h_l, h_0, h_r = h.get_hamiltonians()
 
     # compute band structure
     energy = np.linspace(1.4, 1.9, 30)

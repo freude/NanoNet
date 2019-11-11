@@ -331,7 +331,7 @@ def main():
     h = tb.Hamiltonian(xyz=xyz_file, nn_distance=1.1)
     h.initialize()
     h.set_periodic_bc([[0, 0, 2.0]])
-    h_l, h_0, h_r = h.get_coupling_hamiltonians()
+    h_l, h_0, h_r = h.get_hamiltonians()
 
     energy = np.linspace(-3.0, 1.5, 700)
 
@@ -381,7 +381,7 @@ def main1():
     h = tb.Hamiltonian(xyz='/home/mk/NEGF_project/SiNW.xyz', nn_distance=2.4)
     h.initialize()
     h.set_periodic_bc([[0, 0, 5.50]])
-    h_l, h_0, h_r = h.get_coupling_hamiltonians()
+    h_l, h_0, h_r = h.get_hamiltonians()
 
     # energy = np.linspace(2.07, 2.3, 50)
     # energy = np.linspace(2.07, 2.3, 50) + 0.2
@@ -514,7 +514,7 @@ def inverse_bs_problem():
     h.initialize()
     h.set_periodic_bc([[0, 0, 5.50]])
 
-    h_l, h_0, h_r = h.get_coupling_hamiltonians()
+    h_l, h_0, h_r = h.get_hamiltonians()
 
     # energy = np.linspace(2.13, 2.15, 20)
     # energy = np.linspace(-2.1, 1.0, 50)
@@ -574,7 +574,7 @@ def main2():
     h = tb.Hamiltonian(xyz=xyz_file, nn_distance=2.1)
     h.initialize()
     h.set_periodic_bc([[0, 0, 1.0]])
-    h_l, h_0, h_r = h.get_coupling_hamiltonians()
+    h_l, h_0, h_r = h.get_hamiltonians()
 
     energy = np.concatenate(np.linspace(-3.0, 1.5, 150), np.linspace(2.05, 2.5, 150))
 
@@ -630,7 +630,7 @@ def main3():
     h = tb.Hamiltonian(xyz=xyz_file, nn_distance=2.1)
     h.initialize()
     h.set_periodic_bc([[0, 0, 1.0]])
-    h_l, h_0, h_r = h.get_coupling_hamiltonians()
+    h_l, h_0, h_r = h.get_hamiltonians()
 
     energy = np.linspace(-3.0, 1.5, 700)
 

@@ -19,8 +19,6 @@ def test_simple_atomic_chain():
     h = tb.Hamiltonian(xyz=xyz_file, nn_distance=1.1)
     h.initialize()
 
-    assert (h.is_hermitian(), True)
-
     PRIMITIVE_CELL = [[0, 0, l_const]]
     h.set_periodic_bc(PRIMITIVE_CELL)
 
@@ -60,8 +58,6 @@ def test_atomic_chain_two_kinds_of_atoms():
     tb.set_tb_params(PARAMS_A_B={'ss_sigma': coupling})
     h = tb.Hamiltonian(xyz=xyz_file, nn_distance=1.1)
     h.initialize()
-
-    assert(h.is_hermitian(), True)
 
     PRIMITIVE_CELL = [[0, 0, l_const]]
     h.set_periodic_bc(PRIMITIVE_CELL)

@@ -1,5 +1,5 @@
 """
-The module contains all necessary classes needed to compute the Hamiltonian matrix
+The module contains a library of classes facilitating computations of Hamiltonian matrices.
 """
 from __future__ import print_function, division
 from __future__ import absolute_import
@@ -112,7 +112,7 @@ class Hamiltonian(BasisTB):
 
         super(Hamiltonian, self).__init__(**kwargs)
 
-        self._coords = None                               # coordinates of sites
+        self._coords = None                             # coordinates of sites
         self.h_matrix = None                            # Hamiltonian for an isolated system
         self.h_matrix_bc_factor = None                  # exponential Bloch factors for pbc
         self.h_matrix_bc_add = None                     # additive Bloch exponentials for pbc
@@ -124,12 +124,14 @@ class Hamiltonian(BasisTB):
         self.k_vector = 0                               # default value of the wave vector
         self.ct = None
         self.radial_dependence = None
+        self.int_radial_dependence = None
         self.so_coupling = kwargs.get('so_coupling', 0.0)
 
-    def initialize(self, radial_dep=None):
+    def initialize(self, int_radial_dep=None, radial_dep=None):
         """
-        The function computes matrix elements of the Hamiltonian.
+        Compute matrix elements of the Hamiltonian.
         """
+
         if radial_dep is None:
             logging.info('Radial dependence function: None')
             logging.info("\n---------------------------------\n")
@@ -137,7 +139,16 @@ class Hamiltonian(BasisTB):
             logging.info('Radial dependence function:\n\n{}'.format(inspect.getsource(radial_dep)))
             logging.info("\n---------------------------------\n")
 
+        if int_radial_dep is None:
+            logging.info('Discrete radial dependence function: None')
+            logging.info("\n---------------------------------\n")
+        else:
+            logging.info('Discrete radial dependence function:\n\n{}'.format(inspect.getsource(int_radial_dep)))
+            logging.info("\n---------------------------------\n")
+
         self.radial_dependence = radial_dep
+        self.int_radial_dependence = int_radial_dep
+
         self._coords = [0 for _ in range(self.basis_size)]
         # initialize Hamiltonian matrices
         self.h_matrix = np.zeros((self.basis_size, self.basis_size), dtype=np.complex)
@@ -155,14 +166,13 @@ class Hamiltonian(BasisTB):
                 if j1 == j2:
                     for l1 in range(self.orbitals_dict[list(self.atom_list.keys())[j1]].num_of_orbitals):
                         ind1 = self.qn2ind([('atoms', j1), ('l', l1)], )
-                        self.h_matrix[ind1, ind1] = self._get_me(j1, j2, l1, l1, radial_dep=self.radial_dependence)
+                        self.h_matrix[ind1, ind1] = self._get_me(j1, j2, l1, l1)
                         self._coords[ind1] = list(self.atom_list.values())[j1]
 
                         if self.so_coupling != 0:
                             for l2 in range(self.orbitals_dict[list(self.atom_list.keys())[j1]].num_of_orbitals):
                                 ind2 = self.qn2ind([('atoms', j1), ('l', l2)], )
-                                self.h_matrix[ind1, ind2] = self._get_me(j1, j2, l1, l2,
-                                                                         radial_dep=self.radial_dependence)
+                                self.h_matrix[ind1, ind2] = self._get_me(j1, j2, l1, l2)
 
                 # nearest neighbours interaction
                 else:
@@ -172,10 +182,15 @@ class Hamiltonian(BasisTB):
                             ind1 = self.qn2ind([('atoms', j1), ('l', l1)], )
                             ind2 = self.qn2ind([('atoms', j2), ('l', l2)], )
 
-                            self.h_matrix[ind1, ind2] = self._get_me(j1, j2, l1, l2, radial_dep=self.radial_dependence)
+                            self.h_matrix[ind1, ind2] = self._get_me(j1, j2, l1, l2)
 
     def set_periodic_bc(self, primitive_cell):
+        """
+        Set periodic boundary conditions.
+        The function creates an object of the class CyclicTopology.
 
+        :param primitive_cell: list of vectors defining a primitive cell
+        """
         if list(primitive_cell):
             self.ct = CyclicTopology(primitive_cell,
                                      list(self.atom_list.keys()),
@@ -220,31 +235,15 @@ class Hamiltonian(BasisTB):
 
         return vals[ind], vects[:, ind]
 
-    def is_hermitian(self, visualize=False):
-        """
-        Check if the Hamiltonian is a Hermitian matrix. Useful for testing.
-
-        :param visualize:   Show the matrix with the non-Hermitian elements marked
-        :return:            True is the Hamiltonian is a Hermitian matrix, False otherwise
-        """
-
-        h_matrix = self.h_matrix * self.h_matrix_bc_factor + self.h_matrix_bc_add
-
-        if visualize:
-            plt.imshow((np.abs(h_matrix - h_matrix.conj().T)))
-
-        if (np.abs(h_matrix - h_matrix.conj().T) > 0.001).any():
-            return False
-
-        return True
-
     def _ind2atom(self, ind):
 
         return self.orbitals_dict[list(self.atom_list.keys())[ind]]
 
-    def _get_me(self, atom1, atom2, l1, l2, coords=None, radial_dep=None):
+    def _get_me(self, atom1, atom2, l1, l2, coords=None):
         """
-        Compute the matrix element <atom1, l1|H|l2, atom2>
+        Compute the matrix element <atom1, l1|H|l2, atom2>.
+        The function is called in the member function initialize() and invokes the function
+        me() from the module diatomic_matrix_element.
 
         :param atom1:    atom index
         :param atom2:    atom index
@@ -289,15 +288,20 @@ class Hamiltonian(BasisTB):
                     logging.info("Unique distances: \n    {}".format("\n    ".join(unique_distances)))
                     logging.info("---------------------------------\n")
 
-            if radial_dep is None:
+            if self.int_radial_dependence is None:
                 which_neighbour = ""
             else:
-                which_neighbour = radial_dep(norm)
+                which_neighbour = self.int_radial_dependence(norm)
+
+            if self.radial_dependence is None:
+                factor = 1.0
+            else:
+                factor = self.radial_dependence(norm)
 
             # compute directional cosines
             coords1 /= norm
 
-            return me(atom_kind1, l1, atom_kind2, l2, coords1, which_neighbour)
+            return me(atom_kind1, l1, atom_kind2, l2, coords1, which_neighbour) * factor
 
     def _comp_so(self, atom, ind1, ind2):
 
@@ -354,7 +358,7 @@ class Hamiltonian(BasisTB):
 
     def _reset_periodic_bc(self):
         """
-        Resets the matrices determining periodic boundary conditions to their default state
+        Reset the matrices determining periodic boundary conditions to their default state
         :return:
         """
 
@@ -364,7 +368,7 @@ class Hamiltonian(BasisTB):
 
     def _compute_h_matrix_bc_factor(self):
         """
-        Compute the exponential Bloch factors needed to specify pbc
+        Compute the exponential Bloch factors needed when the periodic boundary conditions are applied.
         """
 
         for j1 in range(self.num_of_nodes):
@@ -428,17 +432,26 @@ class Hamiltonian(BasisTB):
                         if split_the_leads:
                             if flag == 'R':
                                 self.h_matrix_left_lead[ind1, ind2] += phase * \
-                                    self._get_me(j1, ind, l1, l2, coords, radial_dep=self.radial_dependence)
+                                    self._get_me(j1, ind, l1, l2, coords)
                             elif flag == 'L':
                                 self.h_matrix_right_lead[ind1, ind2] += phase * \
-                                    self._get_me(j1, ind, l1, l2, coords, radial_dep=self.radial_dependence)
+                                    self._get_me(j1, ind, l1, l2, coords)
                             else:
                                 raise ValueError("Wrong flag value")
                         else:
                             self.h_matrix_bc_add[ind1, ind2] += phase * \
-                                self._get_me(j1, ind, l1, l2, coords, radial_dep=self.radial_dependence)
+                                self._get_me(j1, ind, l1, l2, coords)
 
-    def get_coupling_hamiltonians(self):
+    def get_hamiltonians(self):
+        """
+        Return a list of Hamiltonian matrices. For 1D systems, the list is [Hl, Hc, Hr],
+        where Hc is the Hamiltonian describing interactions between atoms within a unit cell,
+        Hl and Hr are Hamiltonians describing couplings between atoms in the unit cell
+        and atoms in the left and right adjacent unit cells.
+
+        :return:         list of Hamiltonians
+        :rtype:          list
+        """
 
         self.k_vector = [0.0, 0.0, 0.0]
 
@@ -452,9 +465,11 @@ class Hamiltonian(BasisTB):
 
     def get_site_coordinates(self):
         """
-        Returns coordinates of atoms in the order of Hamiltonian matrix indexing
+        Return coordinates of atoms.
 
-        :return:
+        :return:         atomic coordinates
+        :rtype:          numpy.ndarray
         """
 
         return np.array(self._coords)
+
