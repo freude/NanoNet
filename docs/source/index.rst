@@ -12,9 +12,8 @@ Welcome to Nanonet's documentation!
    :caption: Contents:
 
    README.md
-   bulk_silicon.ipynb
-
    modules
+   notebooks
 
 Indices and tables
 ==================

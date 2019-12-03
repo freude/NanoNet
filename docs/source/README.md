@@ -1,4 +1,4 @@
-# NanoNet
+# NanoNet project
 
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/5186e15b951d4df6b4f20c2365870b7c)](https://app.codacy.com/app/freude/NanoNet?utm_source=github.com&utm_medium=referral&utm_content=freude/NanoNet&utm_campaign=Badge_Grade_Dashboard)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
@@ -8,8 +8,7 @@
 
 <img src="https://user-images.githubusercontent.com/4588093/65398380-1f684380-ddfa-11e9-9e87-5aab6cf417b8.png" width="200">
 
-## Introduction
-
+## What is Nanonet?
 The project represents an extendable Python framework for 
 the electronic structure computations based on 
 the tight-binding method. The code can deal with both finite
@@ -17,7 +16,7 @@ and periodic systems translated in one, two or three dimensions.
 
 All computations can be governed by means of the python application programming interface (pyAPI) or the command line interface (CLI).
 
-## Getting Started
+## Installation
 
 ### Prerequisites
 
@@ -52,15 +51,9 @@ All tests may be run by invoking the command:
 nosetests --with-doctest
 ```
 
-### Examples of usage
+## Usage and interfaces
 
-- [Atomic chain](jupyter_notebooks/atom_chains.ipynb)
-- [Huckel model](jupyter_notebooks/Hukel_model.ipynb)
-- [Bulk silicon](jupyter_notebooks/bulk_silicon.ipynb)
-- [Bulk silicon - initialization via an input file](jupyter_notebooks/bulk_silicon_with_input_file.ipynb)
-- [Silicon nanowire](jupyter_notebooks/silicon_nanowire.ipynb)
-
-### Python interface
+### Python application programming interface
 
 Below is a short example demonstrating usage of the `tb` package.
 More illustrative examples can be found in the ipython notebooks
@@ -177,16 +170,33 @@ This script can be used together with the command `mpirun` (below is an example 
 mpirun -n 8 tbmpi --show=2 --save=1 --xyz=si.xyz --k_points=k_points.txt input.yaml 
 ```    
 
-## Authors
-
-- Mykhailo V. Klymenko (mike.klymenko@rmit.edu.au)
-- Jackson S. Smith
-- Jesse A. Vaitkus
-- Jared H. Cole
-
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
+This project is licensed under the MIT License.
+
+MIT License
+
+Copyright (c) 2019 RMIT
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
 
 ## Acknowledgments
 

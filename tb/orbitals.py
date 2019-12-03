@@ -18,6 +18,7 @@ class Orbitals(object):
         self.title = title
         self.orbitals = []
         self.num_of_orbitals = 0
+        Orbitals.orbital_sets[self.title] = self
 
     def add_orbital(self, title, energy=0.0, principal=0, orbital=0, magnetic=0, spin=0):
         """
@@ -41,6 +42,8 @@ class Orbitals(object):
 
         self.orbitals.append(orbital)
         self.num_of_orbitals += 1
+
+        Orbitals.orbital_sets[self.title] = self
 
     def generate_info(self):
 

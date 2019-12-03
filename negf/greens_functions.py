@@ -119,7 +119,7 @@ def iterate_gf(E, h_0, h_l, h_r, gf, num_iter):
     return gf
 
 
-def surface_greens_function(E, h_l, h_0, h_r, iterate=False):
+def surface_greens_function(E, h_l, h_0, h_r, iterate=False, damp=0.0001j):
     """
     Computes surface self-energies using the eigenvalue decomposition.
     The procedure is described in
@@ -131,11 +131,12 @@ def surface_greens_function(E, h_l, h_0, h_r, iterate=False):
     :param h_0:       channel Hamiltonian
     :param h_r:       right-side coupling Hamiltonian
     :param iterate:   iterate to stabilize TB matrix
+    :param damp:      damping
 
     :return:          left- and right-side self-energies
     """
 
-    h_list = [h_l, h_0 - E * np.identity(h_0.shape[0]), h_r]
+    h_list = [h_l, h_0 - (E+damp) * np.identity(h_0.shape[0]), h_r]
     vals, vects = surface_greens_function_poles(h_list)
     vals = np.diag(vals)
 

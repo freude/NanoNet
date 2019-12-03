@@ -285,8 +285,8 @@ def surface_greens_function(E, h_l, h_0, h_r):
     # sgf_l = u_right[h_0.shape[0]:, :] * np.linalg.pinv(u_right[:h_0.shape[0], :])
     # sgf_r = h_l * u_left * lambda_right * np.linalg.pinv(u_left)
 
-    return iterate_gf(E, h_0, h_l, h_r, sgf_l, 2), iterate_gf(E, h_0, h_r, h_l, sgf_r, 2), \
-           lambda_right, lambda_left, vals
+    return iterate_gf(E, h_0, h_l, h_r, sgf_l, 2), iterate_gf(E, h_0, h_r, h_l, sgf_r, 2)#, \
+           #lambda_right, lambda_left, vals
 
     # return h_r * u_right * lambda_right * np.linalg.pinv(u_right), \
     #        h_l * u_left * lambda_right * np.linalg.pinv(u_left), \

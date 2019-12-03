@@ -1,106 +1,54 @@
 """
-The module contains classes serving to define
-geometrical structure and boundary conditions of the problem.
+The module contains classes defining
+geometrical structure and boundary conditions for the tight-binding model.
 """
 from __future__ import print_function
 from __future__ import absolute_import
 from __future__ import division
-import copy
 from collections import OrderedDict
 import logging
 import numpy as np
 import scipy.spatial
-from scipy.spatial.distance import euclidean
-from tb.aux_functions import xyz2np, count_species
 from tb.abstract_interfaces import AbstractStructureDesigner
-from tb.aux_functions import print_dict
-
-
-def argsort(seq):
-    # http://stackoverflow.com/questions/3071415/efficient-method-to-calculate-the-rank-vector-of-a-list-in-python
-    return sorted(range(len(seq)), key=seq.__getitem__)
-
-
-def shift(mat):
-
-    ans = np.zeros(mat.shape, dtype=np.int)
-
-    cut = mat.shape[0] // 2
-
-    ans[:cut] = mat[cut:]
-    ans[cut:] = mat[:cut]
-
-    return ans
-
-
-def bandwidth1(mat):
-
-    j = 0
-
-    while np.count_nonzero((np.diag(mat, mat.shape[0] - j - 1))) == 0 and j < mat.shape[0]:
-        j += 1
-
-    return mat.shape[0] - j - 1
-
-
-def bandwidth(mat):
-
-    ans = 0
-
-    for j in range(1, mat.shape[0]):
-        if np.count_nonzero((np.diag(mat, j))) > 0:
-            ans = j
-
-    return ans
-
-
-# Helper function to store the inroder traversal of a tree
-def storeInorder(root, inorder):
-    # Base Case
-    if root is None:
-        return
-
-        # First store the left subtree
-    storeInorder(root.left, inorder)
-
-    # Copy the root's data
-    inorder.append(root.data)
-
-    # Finally store the right subtree
-    storeInorder(root.right, inorder)
-
-
-# A helper funtion to count nodes in a binary tree
-def countNodes(root):
-    if root is None:
-        return 0
-
-    return countNodes(root.lesser) + countNodes(root.greater) + 1
-
-
-def is_in_coords(coord, coords):
-
-    ans = False
-
-    for xyz in list(coords):
-        ans += (np.linalg.norm(coord - xyz) < 0.01)
-
-    return ans
+from tb.aux_functions import xyz2np, count_species, is_in_coords, print_dict
 
 
 class StructDesignerXYZ(AbstractStructureDesigner):
     """
-    The class builds an atomic structure from the xyz file or string.
+    The class builds an atomic structure from either
+    the filename of a xyz-file or
+    xyz data itself represented as a Python string.
+    The class arrange atomic coordinates in kd-tree and
+    sorts them if needed according to a specified sorting procedure.
+
+    Attributes
+    ----------
+    nn_distance : float
+        nearest neighbour search radius (default 0)
+    num_of_species : int
+        number of chemical elements corresponding to the number of distinct basis sets.
+    atom_list : OrderedDict
+        list of atomic species and their coordinates
+    kd_tree : scipy.spatial.ckdtree.cKDTree
+        kd-tree for fast nearest-neighbour search
+    left_lead : list
+        list of atomic indices connected to the left lead,
+        needed for sorting atomic coordinates (default [])
+    right_lead : list
+        list of atomic indices connected to the right lead,
+        needed for sorting atomic coordinates (default [])
+    sort_func : func
+        function for sorting atomic coordinates (default None)
+
+    Methods
+    -------
+    says(sound=None)
+        Prints the animals name and what sound it makes
     """
 
     def __init__(self, **kwargs):
-
-        xyz = kwargs.get('xyz', '/home/mk/TB_project/tb/my_si.xyz')
-        nn_distance = kwargs.get('nn_distance', 2.39)
-
-        self.left_lead = kwargs.get('left_lead', [])
-        self.right_lead = kwargs.get('right_lead', [])
-        self.sort_func = kwargs.get('sort_func', None)
+        # ------------ parse xyz file or string --------------
+        xyz = kwargs.get('xyz', None)
 
         try:
             with open(xyz, 'r') as read_file:
@@ -113,13 +61,22 @@ class StructDesignerXYZ(AbstractStructureDesigner):
         logging.info("The xyz-file:\n {}".format(reader))
         logging.info("---------------------------------\n")
 
-        self._nn_distance = nn_distance                            # maximal distance to a neighbor
+        # ------------- count species and nodes --------------
+        self._nn_distance = kwargs.get('nn_distance', 0)           # maximal distance to a neighbor
         self._num_of_species = count_species(labels)               # dictionary of elements and
                                                                    # their number per unit cell
         self._num_of_nodes = sum(self.num_of_species.values())
-
+        # ------- make list of coordinates and kd-tree -------
         self._atom_list = OrderedDict(list(zip(labels, coords)))
-        self._kd_tree = scipy.spatial.cKDTree(np.array(list(self._atom_list.values())), leafsize=1, balanced_tree=True)
+        self._kd_tree = scipy.spatial.cKDTree(np.array(list(self._atom_list.values())),
+                                              leafsize=1,
+                                              balanced_tree=True)
+
+        # ------- rearrange list of atomic coordinates -------
+        self.left_lead = kwargs.get('left_lead', [])
+        self.right_lead = kwargs.get('right_lead', [])
+        self.sort_func = kwargs.get('sort_func', None)
+        self.reorder = None
 
         if self.sort_func is not None:
             self._sort(labels, coords)
@@ -132,16 +89,16 @@ class StructDesignerXYZ(AbstractStructureDesigner):
         self._nn_distance = 2 * self._nn_distance
         for j in range(len(coords)):
             ans = self.get_neighbours(j)
-            print(j, ans)
             h_matrix[j, ans] = 1
 
         self._nn_distance = self._nn_distance / 2
 
-        indices = self.sort_func(coords, self.left_lead, self.right_lead)
+        indices = self.sort_func(coords=coords,
+                                 left_lead=self.left_lead,
+                                 right_lead=self.right_lead,
+                                 mat=h_matrix)
 
-        # indices = sort_matrix(coords, h_matrix, self.left_lead, self.right_lead)
-        # indices = np.argsort(coords[:, 2])
-        # indices = sort_matrix_bfs(coords, h_matrix, self.left_lead, self.right_lead)
+        self.reorder = indices
         self.left_lead = np.squeeze(np.concatenate([np.where(indices == item) for item in self.left_lead]))
         self.right_lead = np.squeeze(np.concatenate([np.where(indices == item) for item in self.right_lead]))
         coords = coords[indices]
@@ -205,7 +162,7 @@ class CyclicTopology(AbstractStructureDesigner):
                                               leafsize=100, balanced_tree=True)
 
         logging.info("Primitive_cell_vectors: \n {} \n".format(primitive_cell_vectors))
-        logging.info("Virtual and interfacial atoms: \n "
+        logging.debug("Virtual and interfacial atoms: \n "
                      "{} ".format(print_dict(self.virtual_and_interfacial_atoms)))
         logging.info("---------------------------------\n")
 

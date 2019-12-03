@@ -61,6 +61,8 @@ class HamiltonianSp(Hamiltonian):
 
                             self.h_matrix[ind1, ind2] = self._get_me(j1, j2, l1, l2)
 
+        return self
+
     def diagonalize(self):
         """
         Diagonalize the Hamiltonian matrix for the finite isolated system
@@ -91,8 +93,13 @@ class HamiltonianSp(Hamiltonian):
             self._compute_h_matrix_bc_factor()
             self._compute_h_matrix_bc_add()
 
-        vals, vects = splin.eigsh(self.h_matrix_bc_factor.multiply(self.h_matrix) + self.h_matrix_bc_add,
-                                  k=self.num_eigs, sigma=self.sigma)
+        try:
+            vals, vects = splin.eigsh(self.h_matrix_bc_factor.multiply(self.h_matrix) + self.h_matrix_bc_add,
+                                      k=self.num_eigs, sigma=self.sigma)
+        except TypeError:
+            mat = self.h_matrix_bc_factor.multiply(self.h_matrix) + self.h_matrix_bc_add
+            vals, vects = np.linalg.eigh(mat.todense())
+
         vals = np.real(vals)
         ind = np.argsort(vals)
 

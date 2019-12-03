@@ -6,3 +6,4 @@ PyYAML
 nose
 mpi4py
 future
+pyfiglet
