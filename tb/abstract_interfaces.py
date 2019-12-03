@@ -10,8 +10,7 @@ import numpy as np
 
 class AbstractStructureDesigner(with_metaclass(ABCMeta, object)):
     """
-    The class builds the atomic structure represented by a list of atoms
-    and their neighbouring.
+    The class is an abstraction for the list of atomic coordinates.
     """
 
     def __init__(self):

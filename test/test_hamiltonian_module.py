@@ -9,7 +9,6 @@ def test_simple_atomic_chain():
 
     a = tb.Orbitals('A')
     a.add_orbital(title='s', energy=-1, )
-    tb.Orbitals.orbital_sets = {'A': a}
 
     xyz_file = """1
     H cell
@@ -47,8 +46,6 @@ def test_atomic_chain_two_kinds_of_atoms():
     a.add_orbital(title='s', energy=site_energy1, )
     b = tb.Orbitals('B')
     b.add_orbital(title='s', energy=site_energy2, )
-
-    tb.Orbitals.orbital_sets = {'A': a, 'B': b}
 
     xyz_file = """2
     H cell
@@ -364,5 +361,5 @@ def expected_bulk_silicon_band_structure():
 
 if __name__ == '__main__':
     # test_simple_atomic_chain()
-    # test_atomic_chain_two_kinds_of_atoms()
-    test_bulk_silicon()
+    test_atomic_chain_two_kinds_of_atoms()
+    # test_bulk_silicon()

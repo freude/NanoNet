@@ -8,20 +8,16 @@ from functools import reduce
 import logging
 import inspect
 from operator import mul
-import matplotlib.pyplot as plt
 import numpy as np
 from tb.abstract_interfaces import AbstractBasis
 from tb.structure_designer import StructDesignerXYZ, CyclicTopology
 from tb.diatomic_matrix_element import me
 from tb.orbitals import Orbitals
 from tb.aux_functions import dict2xyz
-from tb.tb_script import postprocess_data
+from tb.block_tridiagonalization import split_into_subblocks_optimized, cut_in_blocks
 
 
 VERBOSITY = 2
-# logging.basicConfig(format='%(asctime)s[%(filename)s:%(lineno)s - %(funcName)10s() ]:%(message)s', level=logging.INFO)
-logging.basicConfig(format='%(message)s', level=logging.INFO)
-logging.StreamHandler(stream=None)
 unique_distances = set()
 
 
@@ -184,6 +180,11 @@ class Hamiltonian(BasisTB):
 
                             self.h_matrix[ind1, ind2] = self._get_me(j1, j2, l1, l2)
 
+        logging.info("Unique distances: \n    {}".format("\n    ".join(unique_distances)))
+        logging.info("---------------------------------\n")
+
+        return self
+
     def set_periodic_bc(self, primitive_cell):
         """
         Set periodic boundary conditions.
@@ -285,8 +286,6 @@ class Hamiltonian(BasisTB):
 
                 if coordinates not in unique_distances:
                     unique_distances.add(coordinates)
-                    logging.info("Unique distances: \n    {}".format("\n    ".join(unique_distances)))
-                    logging.info("---------------------------------\n")
 
             if self.int_radial_dependence is None:
                 which_neighbour = ""
@@ -473,3 +472,9 @@ class Hamiltonian(BasisTB):
 
         return np.array(self._coords)
 
+    def get_hamiltonians_block_tridiagonal(self):
+
+        subblocks = split_into_subblocks_optimized(self.h_matrix, left=5, right=5)
+        h01, hl1, hr1 = cut_in_blocks(self.h_matrix, subblocks)
+
+        return hl1, h01, hr1, subblocks

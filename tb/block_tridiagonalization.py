@@ -1,12 +1,7 @@
-"""
-The module contains a set of auxiliary functions facilitating the tight-binding computations
-"""
-from __future__ import print_function
-from __future__ import absolute_import
+import numpy as np
 from itertools import product
 import math
-import numpy as np
-import yaml
+import scipy
 
 
 def accum(accmap, input, func=None, size=None, fill_value=0, dtype=None):
@@ -112,203 +107,161 @@ def accum(accmap, input, func=None, size=None, fill_value=0, dtype=None):
     return out
 
 
-def xyz2np(xyz):
-    """
-    Transforms xyz-file formatted string to lists of atomic labels and coordinates
-
-    :param xyz:  xyz-formatted string
-    :return:     list of labels and list of coordinates
-    :rtype:      list, list
+def cut_in_blocks(h_0, blocks):
     """
 
-    xyz = xyz.splitlines()
-    num_of_atoms = int(xyz[0])
-    ans = np.zeros((num_of_atoms, 3))
-    j = 0
-    atoms = []
-    unique_labels = dict()
-
-    for line in xyz[2:]:
-        if len(line.strip()) > 0:
-            temp = line.split()
-            label = ''.join([i for i in temp[0] if not i.isdigit()])
-
-            try:
-                unique_labels[label] += 1
-                temp[0] = label + str(unique_labels[label])
-            except KeyError:
-                temp[0] = label + '1'
-                unique_labels[label] = 1
-
-            atoms.append(temp[0])
-            ans[j, 0] = float(temp[1])
-            ans[j, 1] = float(temp[2])
-            ans[j, 2] = float(temp[3])
-            j += 1
-
-    return atoms, ans
-
-
-def count_species(list_of_labels):
-    """
-    From the list of labels creates a dictionary where the keys represents labels and
-    values are numbers of their repetitions in the list
-
-    :param list_of_labels:
+    :param h_0:
+    :param blocks:
     :return:
     """
-    counter = {}
 
-    for item in list_of_labels:
+    j1 = 0
 
-        key = ''.join([i for i in item if not i.isdigit()])
+    h_0_s = []
+    h_l_s = []
+    h_r_s = []
 
-        try:
-            counter[key] += 1
-        except KeyError:
-            counter[key] = 1
+    for j, block in enumerate(blocks):
+        h_0_s.append(h_0[j1:block + j1, j1:block + j1])
+        if j < len(blocks) - 1:
+            h_l_s.append(h_0[block + j1:block + j1 + blocks[j + 1], j1:block + j1])
+            h_r_s.append(h_0[j1:block + j1, j1 + block:j1 + block + blocks[j + 1]])
+        j1 += block
 
-    return counter
+    return h_0_s, h_l_s, h_r_s
 
 
-def get_k_coords(special_points, num_of_points, label):
-    """
-    Generates a array of the coordinates in the k-space from the set of
-    high-symmetry points and number of nodes between them
-
-    :param special_points:   list of labels for high-symmetry points
-    :param num_of_points:    list of node numbers in each section of the path in the k-space
-    :param label:            chemical element
-    :return:                 array of coordinates in k-space
-    :rtype:                  numpy.ndarray
+def find_optimal_cut(edge, edge1, left, right):
     """
 
-    from tb.special_points import SPECIAL_K_POINTS_BI, SPECIAL_K_POINTS_SI
+    :param edge:
+    :param edge1:
+    :param left:
+    :param right:
+    :return:
+    """
 
-    if isinstance(label, str):
-        if label == 'Bi':
-            SPECIAL_K_POINTS = SPECIAL_K_POINTS_BI
-        if label == 'Si':
-            SPECIAL_K_POINTS = SPECIAL_K_POINTS_SI
+    unique_indices = np.arange(left, len(edge) - right + 1)
+    blocks = []
+    seps = []
+    sizes = []
+    metric = []
+    size = len(edge)
+
+    for j1, item1 in enumerate(unique_indices):
+
+        seps.append(item1)
+        item2 = size-item1
+
+        # print(item1, item2)
+        # print(item1)
+
+        edge_1 = edge[:item1]
+        # edge_1[edge_1 > item1] = item1
+        edge_2 = (edge1-np.arange(len(edge1)))[item2:] + np.arange(item1)
+
+        edge_3 = edge1[:item2]
+        # edge_3[edge_3 > item2] = item2
+        edge_4 = (edge-np.arange(len(edge)))[item1:] + np.arange(item2)
+
+        block1 = compute_blocks(left, (edge1 - np.arange(len(edge)))[item2],
+                                edge_1, edge_2)
+
+        block2 = compute_blocks(right, (edge - np.arange(len(edge1)))[item1],
+                                edge_3, edge_4)
+
+        block = block1 + block2[::-1]
+        blocks.append(block)
+        metric.append(np.sum(np.array(block) ** 3))
+        sizes.append((block1[-1], block2[-1]))
+
+    if len(metric) == 0:
+        return [left, right], np.nan, 0, 0
     else:
-        SPECIAL_K_POINTS = label
 
-    k_vectors = np.zeros((sum(num_of_points), 3))
-    offset = 0
+        best = np.argmin(np.array(metric))
 
-    for j in range(len(num_of_points)):
-        sequence1 = np.linspace(SPECIAL_K_POINTS[special_points[j]][0],
-                                SPECIAL_K_POINTS[special_points[j + 1]][0], num_of_points[j])
-        sequence2 = np.linspace(SPECIAL_K_POINTS[special_points[j]][1],
-                                SPECIAL_K_POINTS[special_points[j + 1]][1], num_of_points[j])
-        sequence3 = np.linspace(SPECIAL_K_POINTS[special_points[j]][2],
-                                SPECIAL_K_POINTS[special_points[j + 1]][2], num_of_points[j])
+        blocks = blocks[best]
+        blocks = [item for item in blocks if item != 0]
 
-        k_vectors[offset:offset + num_of_points[j], :] = \
-            np.vstack((sequence1, sequence2, sequence3)).T
+        sep = seps[best]
 
-        offset += num_of_points[j]
+        right_block, left_block = sizes[best]
 
-    return k_vectors
+        return blocks, sep, right_block, left_block
 
 
-def dict2xyz(input_data):
+def compute_blocks_optimized(edge, edge1, left=1, right=1):
     """
 
-    :param input_data:
+    :param edge:
+    :param edge1:
+    :param left:
+    :param right:
     :return:
     """
 
-    if not isinstance(input_data, dict):
-        return input_data
+    blocks, sep, right_block, left_block = find_optimal_cut(edge, edge1, left=left, right=right)
 
-    output = str(input_data['num_atoms']) + '\n'
-    output += str(input_data['title']) + '\n'
+    print(sep)
+    flag= False
 
-    for j in range(input_data['num_atoms']):
-        output += list(input_data['atoms'][j].keys())[0] + \
-                  "    " + str(list(input_data['atoms'][j].values())[0][0]) + \
-                  "    " + str(list(input_data['atoms'][j].values())[0][1]) + \
-                  "    " + str(list(input_data['atoms'][j].values())[0][2]) + "\n"
+    if not math.isnan(sep):
 
-    return output
+        # print(left, right_block, sep)
+
+        if left + right_block < sep:
+
+            edge_1 = edge[:sep]
+            # edge_1[edge_1 > sep] = sep
+            edge_2 = (edge1-np.arange(len(edge1)))[-sep:] + np.arange(sep)
+
+            blocks1 = compute_blocks_optimized(edge_1, edge_2, left=left, right=right_block)
+
+        elif left + right_block == sep:
+
+            blocks1 = [left, right_block]
+        else:
+
+            flag = True
+
+        # print(left_block, right, len(edge) - sep)
+
+        if right + left_block < len(edge) - sep:
+
+            edge_3 = (edge-np.arange(len(edge)))[sep:] + np.arange(len(edge) - sep)
+            edge_4 = edge1[:-sep]
+            # edge_4[edge_4 > len(edge) - sep] = len(edge) - sep
+
+            blocks2 = compute_blocks_optimized(edge_3, edge_4, left=left_block, right=right)
+
+        elif right + left_block == len(edge) - sep:
+            blocks2 = [left_block, right]
+        else:
+            flag=True
+
+        if flag:
+            return blocks
+        else:
+            blocks = blocks1 + blocks2
+
+            return blocks
 
 
-def yaml_parser(input_data):
+def split_into_subblocks_optimized(h_0, left=1, right=1):
     """
 
-    :param input_data:
+    :param h_0:
+    :param left:
+    :param right:
     :return:
     """
 
-    output = None
-
-    if input_data.lower().endswith(('.yml', '.yaml')):
-        with open(input_data, 'r') as stream:
-            try:
-                output = yaml.safe_load(stream)
-            except yaml.YAMLError as exc:
-                print(exc)
+    if left + right > h_0.shape[0]:
+        return [h_0.shape[0]]
     else:
-        try:
-            output = yaml.safe_load(input_data)
-        except yaml.YAMLError as exc:
-            print(exc)
-
-    output['primitive_cell'] = np.array(output['primitive_cell']) * output['lattice_constant']
-
-    return output
-
-
-def print_table(myDict, colList=None, sep='\uFFFA'):
-    """ Pretty print a list of dictionaries (myDict) as a dynamically sized table.
-    If column names (colList) aren't specified, they will show in random order.
-    sep: row separator. Ex: sep='\n' on Linux. Default: dummy to not split line.
-    Author: Thierry Husson - Use it as you want but don't blame me.
-    """
-
-    if not colList:
-        colList = list(myDict[0].keys() if myDict else [])
-
-    myList = [colList]  # 1st row = header
-
-    for item in myDict:
-        myList.append([str(item[col]) for col in colList])
-
-    colSize = [max(map(len, (sep.join(col)).split(sep))) for col in zip(*myList)]
-
-    formatStr = ' | '.join(["{{:<{}}}".format(i) for i in colSize])
-    line = formatStr.replace(' | ', '-+-').format(*['-' * i for i in colSize])
-    item = myList.pop(0)
-    lineDone = False
-
-    out = "\n"
-
-    while myList:
-        if all(not i for i in item):
-            item = myList.pop(0)
-            if line and (sep != '\uFFFA' or not lineDone):
-                out += line
-                out += "\n"
-                lineDone = True
-
-        row = [i.split(sep, 1) for i in item]
-        out += formatStr.format(*[i[0] for i in row])
-        out += "\n"
-        item = [i[1] if len(i) > 1 else '' for i in row]
-
-    out += line
-    out += "\n"
-
-    return out
-
-
-def print_dict(dictionary):
-    out = "{:<18} {:<15} \n".format('Label', 'Coordinates')
-    for key, value in dictionary.items():
-        out += "{:<18} {:<15} \n".format(key, str(value))
-
-    return out
+        edge, edge1 = compute_edge(h_0)
+        return compute_blocks_optimized(edge, edge1, left=left, right=right)
 
 
 def split_into_subblocks(h_0, h_l, h_r):
@@ -379,27 +332,30 @@ def split_into_subblocks(h_0, h_l, h_r):
     left_block = max(h_l_h, h_r_v)
     right_block = max(h_r_h, h_l_v)
 
-    from tb.sorting_algorithms import split_matrix_0, cut_in_blocks, split_matrix
+    blocks = compute_blocks(left_block, right_block, edge, edge1)
+    j1 = 0
 
-    blocks = split_matrix_0(h_0, left=left_block, right=right_block)
-    h_0_s, h_l_s, h_r_s = cut_in_blocks(h_0, blocks)
-
-    # blocks = compute_blocks(left_block, right_block, edge, edge1)
-    # j1 = 0
-    #
-    # for j, block in enumerate(blocks):
-    #     h_0_s.append(h_0[j1:block + j1, j1:block + j1])
-    #     if j < len(blocks) - 1:
-    #         h_l_s.append(h_0[block + j1:block + j1 + blocks[j + 1], j1:block + j1])
-    #         h_r_s.append(h_0[j1:block + j1, j1 + block:j1 + block + blocks[j + 1]])
-    #     j1 += block
+    for j, block in enumerate(blocks):
+        h_0_s.append(h_0[j1:block + j1, j1:block + j1])
+        if j < len(blocks) - 1:
+            h_l_s.append(h_0[block + j1:block + j1 + blocks[j + 1], j1:block + j1])
+            h_r_s.append(h_0[j1:block + j1, j1 + block:j1 + block + blocks[j + 1]])
+        j1 += block
 
     return h_0_s, h_l_s, h_r_s, blocks
 
 
 def compute_edge(mat):
+    """
+
+    :param mat:
+    :return:
+    """
     # First get some statistics
-    row, col = np.where(mat != 0.0)  # Output rows and columns of all non-zero elements.
+    if isinstance(mat, scipy.sparse.lil.lil_matrix):
+        row, col = mat.nonzero()
+    else:
+        row, col = np.where(mat != 0.0)  # Output rows and columns of all non-zero elements.
 
     # Clever use of accumarray:
     outeredge = accum(row, col, np.max) + 1
@@ -413,7 +369,7 @@ def compute_edge(mat):
     return outeredge, outeredge1
 
 
-def blocksandborders_constrained(left_block, right_block, edge, edge1):
+def compute_blocks(left_block, right_block, edge, edge1):
     """A version of blocksandborders with constraints - periodic boundary conditions.
 
     :param mat:                    input matrix
@@ -441,8 +397,8 @@ def blocksandborders_constrained(left_block, right_block, edge, edge1):
         if left_block + new_left_block <= size - right_block and\
                 size - right_block - new_right_block >= left_block:    # spacing between blocks is sufficient
 
-            blocks = blocksandborders_constrained(new_left_block,
-                                                  new_right_block,
+            blocks = compute_blocks(new_left_block,
+                                    new_right_block,
                                                   edge[left_block:-right_block] - left_block,
                                                   edge1[right_block:-left_block] - right_block)
 
@@ -458,74 +414,3 @@ def blocksandborders_constrained(left_block, right_block, edge, edge1):
     else:                                                             # blocks overlap
         return [size]
 
-
-def argsort(seq):
-    # http://stackoverflow.com/questions/3071415/efficient-method-to-calculate-the-rank-vector-of-a-list-in-python
-    return sorted(range(len(seq)), key=seq.__getitem__)
-
-
-def shift(mat):
-
-    ans = np.zeros(mat.shape, dtype=np.int)
-
-    cut = mat.shape[0] // 2
-
-    ans[:cut] = mat[cut:]
-    ans[cut:] = mat[:cut]
-
-    return ans
-
-
-def bandwidth1(mat):
-
-    j = 0
-
-    while np.count_nonzero((np.diag(mat, mat.shape[0] - j - 1))) == 0 and j < mat.shape[0]:
-        j += 1
-
-    return mat.shape[0] - j - 1
-
-
-def bandwidth(mat):
-
-    ans = 0
-
-    for j in range(1, mat.shape[0]):
-        if np.count_nonzero((np.diag(mat, j))) > 0:
-            ans = j
-
-    return ans
-
-
-# Helper function to store the inroder traversal of a tree
-def storeInorder(root, inorder):
-    # Base Case
-    if root is None:
-        return
-
-        # First store the left subtree
-    storeInorder(root.left, inorder)
-
-    # Copy the root's data
-    inorder.append(root.data)
-
-    # Finally store the right subtree
-    storeInorder(root.right, inorder)
-
-
-# A helper funtion to count nodes in a binary tree
-def countNodes(root):
-    if root is None:
-        return 0
-
-    return countNodes(root.lesser) + countNodes(root.greater) + 1
-
-
-def is_in_coords(coord, coords):
-
-    ans = False
-
-    for xyz in list(coords):
-        ans += (np.linalg.norm(coord - xyz) < 0.01)
-
-    return ans
