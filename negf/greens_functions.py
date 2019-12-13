@@ -101,17 +101,6 @@ def group_velocity(eigenvector, eigenvalue, h_r):
 
 
 def iterate_gf(E, h_0, h_l, h_r, gf, num_iter):
-    """
-    Iterates a self-energy to achieve self-consistency
-
-    :param E:
-    :param h_0:
-    :param h_l:
-    :param h_r:
-    :param gf:
-    :param num_iter:
-    :return:
-    """
 
     for _ in range(num_iter):
         gf = h_r * np.linalg.pinv(E * np.identity(h_0.shape[0]) - h_0 - gf) * h_l

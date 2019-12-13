@@ -76,15 +76,6 @@ class AbstractBasis(with_metaclass(ABCMeta, object)):
 
     @abstractmethod
     def ind2qn(self, ind):
-        """
-        The member function trasform a dictionary of quantum numbers into a matrix index
-
-        :param ind:    index
-        :type ind:     int
-
-        :return qn:
-        :rtype:
-        """
         pass
 
     @property

@@ -15,9 +15,9 @@ from tb.diatomic_matrix_element import me
 from tb.orbitals import Orbitals
 from tb.aux_functions import dict2xyz
 from tb.block_tridiagonalization import split_into_subblocks_optimized, cut_in_blocks
+import verbosity
 
 
-VERBOSITY = 2
 unique_distances = set()
 
 
@@ -26,7 +26,34 @@ class BasisTB(AbstractBasis, StructDesignerXYZ):
     The class contains information about sets of quantum numbers and
     dimensionality of the Hilbert space.
     It is also equipped with the member functions translating quantum numbers
-    into a raw index and vise versa.
+    into a matrix index and vise versa using a set of index offsets.
+    
+    Examples
+    --------
+    >>> from verbosity import set_verbosity
+    >>> import tb
+    >>> set_verbosity(0)
+    >>> orb = tb.Orbitals('A')
+    >>> orb.add_orbital(title='s', energy=-1)
+    >>> orb.add_orbital(title='1s', energy=0)
+    >>> tb.Orbitals('B').add_orbital(title='s', energy=0)
+    >>> xyz = '''2
+    ... Two atoms
+    ... A1 0 0 0
+    ... B1 0 0 1'''
+    >>> basis = tb.hamiltonian.BasisTB(xyz=xyz)
+    >>> print(basis.basis_size)
+    3
+    >>> print(basis.atom_list['B1'])
+    [0. 0. 1.]
+    >>> print(basis.qn2ind({'atoms': 0, 'l': 0}))
+    0
+    >>> print(basis.qn2ind({'atoms': 0, 'l': 1}))
+    1
+    >>> print(basis.qn2ind({'atoms': 1, 'l': 0}))
+    2
+    >>> print(type(basis.orbitals_dict['A']))
+    <class 'tb.orbitals.Orbitals'>
     """
 
     def __init__(self, **kwargs):
@@ -53,7 +80,7 @@ class BasisTB(AbstractBasis, StructDesignerXYZ):
 
         # compute offset index for each atom
         self._offsets = [0]
-        for j in range(len(self.atom_list)-1):
+        for j in range(len(self.atom_list) - 1):
             self._offsets.append(self.orbitals_dict[list(self.atom_list.keys())[j]].num_of_orbitals)
         self._offsets = np.cumsum(self._offsets)
 
@@ -64,11 +91,25 @@ class BasisTB(AbstractBasis, StructDesignerXYZ):
         logging.info("---------------------------------\n")
 
     def qn2ind(self, qn):
+        """
+        Computes a matrix index of an element from the index of atom and the index of atomic orbital.
+
+        Parameters
+        ----------
+        qn : dict
+            A dictionary with two keys `atoms` and `l`, where the fist one is the atom index and
+            the later is the orbital index.
+
+        Returns
+        -------
+            ans : int
+                index of an element in the TB matrix
+        """
 
         qn = OrderedDict(qn)
 
         if list(qn.keys()) == list(self.quantum_numbers_lims[0].keys()):  # check if the input is
-                                                              # a proper set of quantum numbers
+            # a proper set of quantum numbers
             return self._offsets[qn['atoms']] + qn['l']
         else:
             raise IndexError("Wrong set of quantum numbers")
@@ -78,6 +119,12 @@ class BasisTB(AbstractBasis, StructDesignerXYZ):
 
     @property
     def orbitals_dict(self):
+        """
+        Returns the dictionary data structure of orbitals. In the dictionary
+        Returns
+        -------
+
+        """
 
         class MyDict(dict):
             def __getitem__(self, key):
@@ -91,13 +138,30 @@ class Hamiltonian(BasisTB):
     """
     Class defines a Hamiltonian matrix as well as a set of member-functions
     allowing to build, diagonalize and visualize the matrix.
+
+    Examples
+    --------
+    >>> from verbosity import set_verbosity
+    >>> import tb
+    >>> set_verbosity(0)
+    >>> tb.Orbitals('A').add_orbital(title='s', energy=-1)
+    >>> tb.Orbitals('B').add_orbital(title='s', energy=-2)
+    >>> xyz_file = '''2
+    ... Two atoms
+    ... A1 0 0 0
+    ... B1 0 0 1.5'''
+    >>> tb.set_tb_params(PARAMS_A_B={'ss_sigma': 0.1})
+    >>> h = tb.Hamiltonian(xyz=xyz_file, nn_distance=2.0).initialize()
+    >>> h.h_matrix
+    array([[-1. +0.j,  0.1+0.j],
+           [ 0.1+0.j, -2. +0.j]])
     """
 
     def __init__(self, **kwargs):
 
         nn_distance = kwargs.get('nn_distance', 2.39)
 
-        logging.info('The verbosity level is {}'.format(VERBOSITY))
+        logging.info('The verbosity level is {}'.format(verbosity.VERBOSITY))
         logging.info('The radius of the neighbourhood is {} Ang'.format(nn_distance))
         logging.info("\n---------------------------------\n")
 
@@ -108,16 +172,16 @@ class Hamiltonian(BasisTB):
 
         super(Hamiltonian, self).__init__(**kwargs)
 
-        self._coords = None                             # coordinates of sites
-        self.h_matrix = None                            # Hamiltonian for an isolated system
-        self.h_matrix_bc_factor = None                  # exponential Bloch factors for pbc
-        self.h_matrix_bc_add = None                     # additive Bloch exponentials for pbc
-                                                        # (interaction with virtual neighbours
-                                                        # in adacent primitive cells due to pbc)
+        self._coords = None  # coordinates of sites
+        self.h_matrix = None  # Hamiltonian for an isolated system
+        self.h_matrix_bc_factor = None  # exponential Bloch factors for pbc
+        self.h_matrix_bc_add = None  # additive Bloch exponentials for pbc
+        # (interaction with virtual neighbours
+        # in adacent primitive cells due to pbc)
 
         self.h_matrix_left_lead = None
         self.h_matrix_right_lead = None
-        self.k_vector = 0                               # default value of the wave vector
+        self.k_vector = 0  # default value of the wave vector
         self.ct = None
         self.radial_dependence = None
         self.int_radial_dependence = None
@@ -174,7 +238,6 @@ class Hamiltonian(BasisTB):
                 else:
                     for l1 in range(self.orbitals_dict[list(self.atom_list.keys())[j1]].num_of_orbitals):
                         for l2 in range(self.orbitals_dict[list(self.atom_list.keys())[j2]].num_of_orbitals):
-
                             ind1 = self.qn2ind([('atoms', j1), ('l', l1)], )
                             ind2 = self.qn2ind([('atoms', j2), ('l', l2)], )
 
@@ -224,7 +287,6 @@ class Hamiltonian(BasisTB):
 
         # reset previous wave vector if any
         if k_vector != self.k_vector:
-
             self._reset_periodic_bc()
             self.k_vector = k_vector
             self._compute_h_matrix_bc_factor()
@@ -250,7 +312,7 @@ class Hamiltonian(BasisTB):
         :param atom2:    atom index
         :param l1:       index of a localized basis function
         :param l2:       index of a localized basis function
-        :param coords:   imposed coordinates of radius vector pointing from one atom to another
+        :param coords:   coordinates of radius vector pointing from one atom to another
                          it may differ from the actual coordinates of atoms
         :return:         matrix element
         :rtype:          float
@@ -273,15 +335,15 @@ class Hamiltonian(BasisTB):
             # compute radius vector pointing from one atom to another
             if coords is None:
                 coords1 = np.array(list(self.atom_list.values())[atom1], dtype=float) - \
-                         np.array(list(self.atom_list.values())[atom2], dtype=float)
+                          np.array(list(self.atom_list.values())[atom2], dtype=float)
             else:
                 coords1 = coords.copy()
 
             norm = np.linalg.norm(coords1)
 
-            if VERBOSITY > 1:
+            if verbosity.VERBOSITY > 0:
 
-                coordinates = np.array2string(norm, precision=4) + " Ang between atoms " +\
+                coordinates = np.array2string(norm, precision=4) + " Ang between atoms " + \
                               self._ind2atom(atom1).title + " and " + self._ind2atom(atom2).title
 
                 if coordinates not in unique_distances:
@@ -382,7 +444,6 @@ class Hamiltonian(BasisTB):
 
                     for l1 in range(self.orbitals_dict[list(self.atom_list.keys())[j1]].num_of_orbitals):
                         for l2 in range(self.orbitals_dict[list(self.atom_list.keys())[j2]].num_of_orbitals):
-
                             ind1 = self.qn2ind([('atoms', j1), ('l', l1)], )
                             ind2 = self.qn2ind([('atoms', j2), ('l', l2)], )
 
@@ -416,9 +477,10 @@ class Hamiltonian(BasisTB):
                          np.array(list(self.ct.virtual_and_interfacial_atoms.values())[j2])
 
                 if split_the_leads and two_leads:
-                    flag = self.ct.atom_classifier(list(self.ct.virtual_and_interfacial_atoms.values())[j2], self.ct.pcv[0])
+                    flag = self.ct.atom_classifier(list(self.ct.virtual_and_interfacial_atoms.values())[j2],
+                                                   self.ct.pcv[0])
 
-                phase = np.exp(1j*np.dot(self.k_vector, coords))
+                phase = np.exp(1j * np.dot(self.k_vector, coords))
 
                 ind = int(list(self.ct.virtual_and_interfacial_atoms.keys())[j2].split('_')[2])
 
@@ -431,15 +493,15 @@ class Hamiltonian(BasisTB):
                         if split_the_leads:
                             if flag == 'R':
                                 self.h_matrix_left_lead[ind1, ind2] += phase * \
-                                    self._get_me(j1, ind, l1, l2, coords)
+                                                                       self._get_me(j1, ind, l1, l2, coords)
                             elif flag == 'L':
                                 self.h_matrix_right_lead[ind1, ind2] += phase * \
-                                    self._get_me(j1, ind, l1, l2, coords)
+                                                                        self._get_me(j1, ind, l1, l2, coords)
                             else:
                                 raise ValueError("Wrong flag value")
                         else:
                             self.h_matrix_bc_add[ind1, ind2] += phase * \
-                                self._get_me(j1, ind, l1, l2, coords)
+                                                                self._get_me(j1, ind, l1, l2, coords)
 
     def get_hamiltonians(self):
         """
@@ -472,9 +534,9 @@ class Hamiltonian(BasisTB):
 
         return np.array(self._coords)
 
-    def get_hamiltonians_block_tridiagonal(self):
+    def get_hamiltonians_block_tridiagonal(self, left=5, right=5):
 
-        subblocks = split_into_subblocks_optimized(self.h_matrix, left=5, right=5)
+        subblocks = split_into_subblocks_optimized(self.h_matrix, left=left, right=right)
         h01, hl1, hr1 = cut_in_blocks(self.h_matrix, subblocks)
 
         return hl1, h01, hr1, subblocks

@@ -40,10 +40,6 @@ class StructDesignerXYZ(AbstractStructureDesigner):
     sort_func : func
         function for sorting atomic coordinates (default None)
 
-    Methods
-    -------
-    says(sound=None)
-        Prints the animals name and what sound it makes
     """
 
     def __init__(self, **kwargs):
@@ -58,7 +54,15 @@ class StructDesignerXYZ(AbstractStructureDesigner):
 
         labels, coords = xyz2np(reader)
 
-        logging.info("The xyz-file:\n {}".format(reader))
+        num_lines = reader.count('\n')
+        if num_lines > 11:
+            logging.info("The xyz-file:\n {}".format('\n'.join(reader.split('\n')[:11])))
+            logging.info("                  .                    ")
+            logging.info("                  .                    ")
+            logging.info("                  .                    ")
+            logging.info("There are {} more coordinates".format(str(num_lines-10)))
+        else:
+            logging.info("The xyz-file:\n {}".format(reader))
         logging.info("---------------------------------\n")
 
         # ------------- count species and nodes --------------

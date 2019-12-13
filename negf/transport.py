@@ -10,8 +10,8 @@ def fermi_window(energy, tempr):
 
 def tr2cond(energy, tr, tempr=300):
 
-    tr = np.pad(tr, 'edge')
-    energy = np.pad(energy, 'linear_ramp')
+    tr = np.pad(tr, 30000, 'edge')
+    energy = np.pad(energy, 30000,'linear_ramp')
     ans = np.convolve(tr, fermi_window(energy, tempr), mode='same')
 
     return energy, ans

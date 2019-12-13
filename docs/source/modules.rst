@@ -39,6 +39,22 @@ Module hamiltonian
     :private-members:
     :no-undoc-members:
 
+Module hamiltonian_sparse
+-------------------------
+
+.. automodule:: tb.hamiltonian_sparse
+    :members:
+    :private-members:
+    :no-undoc-members:
+
+Module hamiltonian_initializer
+------------------------------
+
+.. automodule:: tb.hamiltonian_initializer
+    :members:
+    :private-members:
+    :no-undoc-members:
+
 Module structure_designer
 -------------------------
 
@@ -46,5 +62,53 @@ Module structure_designer
     :members:
     :no-undoc-members:
 
+Module orbitals
+---------------
+
+.. automodule:: tb.orbitals
+    :members:
+    :private-members:
+    :no-undoc-members:
+
+Module diatomic_matrix_element
+------------------------------
+
+.. automodule:: tb.diatomic_matrix_element
+    :members:
+    :private-members:
+    :no-undoc-members:
 
 
+Module block_tridiagonalization
+-------------------------------
+
+.. automodule:: tb.block_tridiagonalization
+    :members:
+    :private-members:
+    :no-undoc-members:
+
+Module sorting_algorithms
+-------------------------
+
+.. automodule:: tb.sorting_algorithms
+    :members:
+    :private-members:
+    :no-undoc-members:
+
+
+Package negf
+************
+
+Module greens_functions
+-----------------------
+.. automodule:: negf.greens_functions
+    :members:
+    :private-members:
+    :no-undoc-members:
+
+Module recursive_greens_functions
+---------------------------------
+.. automodule:: negf.recursive_greens_functions
+    :members:
+    :private-members:
+    :no-undoc-members:

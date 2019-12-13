@@ -74,13 +74,7 @@ def main():
     hamiltonian.set_periodic_bc(PRIMITIVE_CELL)
 
     hl, h0, hr = hamiltonian.get_hamiltonians()
-    # subblocks = split_matrix0(h0, left=hl.shape[0], right=hr.shape[0])
-    # # plt.plot(np.array(subblocks) ** 3)
-    # print(np.sum(np.array(subblocks) ** 3))1
-    # h01, hl1, hr1 = cut_in_blocks(h0, subblocks)
-    from tb.aux_functions import split_into_subblocks
-    # from tb.slicer import split_into_subblocks
-    h0, hl, hr, _ = split_into_subblocks(h0, h_l=hl, h_r=hr)
+    h0, hl, hr, _ = hamiltonian.get_hamiltonians_block_tridiagonal()
 
     num_points = 20
     kk = np.linspace(0, 0.57, num_points, endpoint=True)
