@@ -36,15 +36,20 @@ def recursive_gf(energy, mat_l_list, mat_d_list, mat_u_list, s_in=0, s_out=0):
 
 
     :param energy:                     energy
+    :type energy:                      numpy array
     :param mat_d_list:                 list of diagonal blocks
+    :type mat_d_list:                  list of numpy arrays
     :param mat_u_list:                 list of upper-diagonal blocks
+    :type mat_u_list:                  list of numpy arrays
     :param mat_l_list:                 list of lower-diagonal blocks
+    :type mat_l_list:                  list of numpy arrays
 
     :return grd, grl, gru, gr_left:    retarded Green's
                                        function: block-diagonal,
                                                  lower block-diagonal,
                                                  upper block-diagonal,
                                                  left-connected
+    :rtype grd, grl, gru, gr_left:     list of numpy arrays
     """
     # -------------------------------------------------------------------
     # ---------- convert input arrays to the matrix data type -----------

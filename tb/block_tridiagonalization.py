@@ -1,4 +1,6 @@
 import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.patches import Rectangle
 from itertools import product
 import math
 import scipy
@@ -45,32 +47,6 @@ def accum(accmap, input, func=None, size=None, fill_value=0, dtype=None):
         shape is determined by the (lexicographically) largest indices of
         the output found in `accmap`.
 
-
-    Examples
-    --------
-    >>> from numpy import array, prod
-    >>> a = array([[1, 2, 3], [4, -1, 6], [-1, 8, 9]])
-    >>> a
-    array([[ 1,  2,  3],
-           [ 4, -1,  6],
-           [-1,  8,  9]])
-    >>> # Sum the diagonals.
-    >>> accmap = array([[0, 1, 2], [2, 0, 1], [1, 2, 0]])
-    >>> s = accum(accmap,a)
-    >>> s
-    array([ 9,  7, 15])
-    >>> # A 2D output, from sub-arrays with shapes and positions like this:
-    >>> # [ (2,2) (2,1)]
-    >>> # [ (1,2) (1,1)]
-    >>> accmap = array([[[0,0],[0,0],[0,1]],[[0,0],[0,0],[0,1]],[[1,0],[1,0],[1,1]],])
-    >>> # Accumulate using a product.
-    >>> accum(accmap,a,func=prod,dtype=float)
-    array([[-8., 18.],
-           [-8.,  9.]])
-    >>> # Same accmap, but create an array of lists of values.
-    >>> accum(accmap,a,func=lambda x: x,dtype='O')
-    array([[list([1, 2, 4, -1]), list([3, 6])],
-           [list([-1, 8]), list([9])]], dtype=object)
     """
 
     # Check for bad arguments and handle the defaults.
@@ -109,10 +85,51 @@ def accum(accmap, input, func=None, size=None, fill_value=0, dtype=None):
 
 def cut_in_blocks(h_0, blocks):
     """
+    Cut a matrix into diagonal, upper-diagonal and lower-diagonal blocks
+    if sizes of the diagonal blocks are specified.
 
-    :param h_0:
-    :param blocks:
-    :return:
+    Parameters
+    ----------
+    h_0 : ndarray
+        Input matrix
+    blocks : ndarray(dtype=int)
+        Sizes of diagonal blocks
+
+    Returns
+    -------
+    h_0_s, h_l_s, h_r_s : ndarray
+        List of diagonal matrices,
+        list of lower-diagonal matrices and
+        list of upper-diagonal matrices.
+
+        Note that if the size of the list h_0_s is N,
+        the sizes of h_l_s, h_r_s are N-1.
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> from tb.block_tridiagonalization import cut_in_blocks
+    >>> a = np.array([[1, 1, 0, 0], [1, 1, 1, 0], [0, 1, 1, 1], [0, 0, 1, 1]])
+    >>> a
+    array([[1, 1, 0, 0],
+           [1, 1, 1, 0],
+           [0, 1, 1, 1],
+           [0, 0, 1, 1]])
+    >>> # Sum the diagonals.
+    >>> blocks = [2, 2]
+    >>> blocks
+    [2, 2]
+    >>> h0, h1, h2 = cut_in_blocks(a, blocks)
+    >>> h0
+    [array([[1, 1],
+           [1, 1]]), array([[1, 1],
+           [1, 1]])]
+    >>> h1
+    [array([[0, 1],
+           [0, 0]])]
+    >>> h2
+    [array([[0, 0],
+           [1, 0]])]
     """
 
     j1 = 0
@@ -133,12 +150,37 @@ def cut_in_blocks(h_0, blocks):
 
 def find_optimal_cut(edge, edge1, left, right):
     """
+    Computes the index corresponding to the optimal cut such that applying
+    the function compute_blocks() to the subblocks defined by the cut reduces
+    the cost function comparing to the case when the function compute_blocks() is
+    applied to the whole matrix. If cutting point can not be find, the algorithm returns
+    the result from the function compute_blocks().
 
-    :param edge:
-    :param edge1:
-    :param left:
-    :param right:
-    :return:
+    Parameters
+    ----------
+    edge : ndarray
+        sparsity pattern profile of the matrix
+    edge1 : ndarray
+        conjugated sparsity pattern profile of the matrix
+    left : int
+        size of the leftmost diagonal block
+    right : int
+        size of the rightmost diagonal block
+
+    Returns
+    -------
+    blocks : list
+        list of diaginal block sizes
+
+    sep : int
+        the index of the optimal cut
+
+    right_block : int
+        size of the rightmost subblock of the left block (relative to the cutting point)
+
+    left_block : int
+        size of the leftmost subblock of the right block (relative to the cutting point)
+
     """
 
     unique_indices = np.arange(left, len(edge) - right + 1)
@@ -157,11 +199,9 @@ def find_optimal_cut(edge, edge1, left, right):
         # print(item1)
 
         edge_1 = edge[:item1]
-        # edge_1[edge_1 > item1] = item1
         edge_2 = (edge1-np.arange(len(edge1)))[item2:] + np.arange(item1)
 
         edge_3 = edge1[:item2]
-        # edge_3[edge_3 > item2] = item2
         edge_4 = (edge-np.arange(len(edge)))[item1:] + np.arange(item2)
 
         block1 = compute_blocks(left, (edge1 - np.arange(len(edge)))[item2],
@@ -193,18 +233,32 @@ def find_optimal_cut(edge, edge1, left, right):
 
 def compute_blocks_optimized(edge, edge1, left=1, right=1):
     """
+    Computes optimal sizes of diagonal blocks of a matrix whose
+    sparsity pattern is defined by the sparsity pattern profiles edge and edge1.
+    This function is based on the algorithm which uses defined above function
+    find_optimal_cut() to subdivide the problem into subproblems in a optimal way
+    according to some cost function.
 
-    :param edge:
-    :param edge1:
-    :param left:
-    :param right:
-    :return:
+    Parameters
+    ----------
+    edge : ndarray
+        sparsity pattern profile of the matrix
+    edge1 : ndarray
+        conjugated sparsity pattern profile of the matrix
+    left : int
+        size of the leftmost diagonal block (constrained)
+    right : int
+        size of the rightmost diagonal block (constrained)
+
+    Returns
+    -------
+    blocks : list
+        list of optimal sizes of diagonal blocks
+
     """
 
     blocks, sep, right_block, left_block = find_optimal_cut(edge, edge1, left=left, right=right)
-
-    print(sep)
-    flag= False
+    flag = False
 
     if not math.isnan(sep):
 
@@ -414,3 +468,59 @@ def compute_blocks(left_block, right_block, edge, edge1):
     else:                                                             # blocks overlap
         return [size]
 
+
+def show_blocks(subblocks, input_mat):
+
+    cumsum = np.cumsum(np.array(subblocks))[:-1]
+    cumsum = np.insert(cumsum, 0, 0)
+
+    fig, ax = plt.subplots(1)
+    plt.spy(input_mat, marker='.', markersize=0.9, c='k')
+    # plt.plot(edge)
+
+    for jj in range(2):
+        cumsum = cumsum + jj * input_mat.shape[0]
+
+        if jj == 1:
+            rect = Rectangle((input_mat.shape[0] - subblocks[-1] - 0.5, input_mat.shape[1] - 0.5),
+                             subblocks[-1], subblocks[0],
+                             linestyle='--',
+                             linewidth=1.3,
+                             edgecolor='b',
+                             facecolor='none')
+            ax.add_patch(rect)
+            rect = Rectangle((input_mat.shape[0] - 0.5, input_mat.shape[1] - subblocks[-1] - 0.5),
+                             subblocks[0], subblocks[-1],
+                             linestyle='--',
+                             linewidth=1.3,
+                             edgecolor='g',
+                             facecolor='none')
+            ax.add_patch(rect)
+
+        for j, item in enumerate(cumsum):
+            if j < len(cumsum) - 1:
+                rect = Rectangle((item - 0.5, cumsum[j + 1] - 0.5), subblocks[j], subblocks[j + 1],
+                                 linewidth=1.3,
+                                 edgecolor='b',
+                                 facecolor='none')
+                ax.add_patch(rect)
+                rect = Rectangle((cumsum[j + 1] - 0.5, item - 0.5), subblocks[j + 1], subblocks[j],
+                                 linewidth=1.3,
+                                 edgecolor='g',
+                                 facecolor='none')
+                ax.add_patch(rect)
+            rect = Rectangle((item - 0.5, item -0.5), subblocks[j], subblocks[j],
+                             linewidth=1.3,
+                             edgecolor='r',
+                             facecolor='none')
+            ax.add_patch(rect)
+
+    plt.xlim(input_mat.shape[0] - 0.5, -1.0)
+    plt.ylim(-1.0, input_mat.shape[0] - 0.5)
+    plt.axis('off')
+    plt.show()
+
+
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod()
