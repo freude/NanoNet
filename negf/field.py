@@ -191,7 +191,7 @@ class Field(object):
 
     def add_screening(self, eps, mol_y_length, spacing):
 
-        from negf.poisson import laplacian, PoissonSolver
+        # from negf.poisson import laplacian, PoissonSolver
 
         num_points = 256
 
@@ -231,15 +231,15 @@ class Field(object):
         # perm = np.ones(perm.shape)
 
         pot = self._interpolant(np.vstack((X[0].flatten(), X[1].flatten(), X[2].flatten())).T).reshape(X[0].shape)
-        pot1 = np.zeros(pot.shape)
-        dens = -laplacian(pot, x[2] - x[1]) / (4 * np.pi)
+        pot1 = pot / eps
+        # dens = -laplacian(pot, x[2] - x[1]) / (4 * np.pi)
 
-        ps = PoissonSolver()
-        ps.solve_mesh(X[0], X[1], X[2], pot1, dens, perm)
+        # ps = PoissonSolver()
+        # ps.solve_mesh(X[0], X[1], X[2], pot1, dens, perm)
 
         # pot1 = pot1 + 0.1 * perm / np.max(perm)
 
-        pot1 = np.swapaxes(pot1, 1, 0)
+        # pot1 = np.swapaxes(pot1, 1, 0)
         self._interpolant = RegularGridInterpolator((x, y, z), pot1, bounds_error=False)
 
 

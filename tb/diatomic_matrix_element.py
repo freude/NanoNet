@@ -32,7 +32,7 @@ PARAMS_SI_SI = {'ss_sigma': -1.9413,
 
 #  NN - Si-H
 PARAMS_H_SI = {'ss_sigma': -3.9997,
-               'cs_sigma': -1.6977,
+               's1s_sigma': -1.6977,
                'sp_sigma': 4.2518,
                'sd_sigma': -2.1055}
 

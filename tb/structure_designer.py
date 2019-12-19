@@ -103,8 +103,10 @@ class StructDesignerXYZ(AbstractStructureDesigner):
                                  mat=h_matrix)
 
         self.reorder = indices
-        self.left_lead = np.squeeze(np.concatenate([np.where(indices == item) for item in self.left_lead]))
-        self.right_lead = np.squeeze(np.concatenate([np.where(indices == item) for item in self.right_lead]))
+        if self.left_lead:
+            self.left_lead = np.squeeze(np.concatenate([np.where(indices == item) for item in self.left_lead]))
+        if self.right_lead:
+            self.right_lead = np.squeeze(np.concatenate([np.where(indices == item) for item in self.right_lead]))
         coords = coords[indices]
         labels = [labels[i] for i in indices]
 
