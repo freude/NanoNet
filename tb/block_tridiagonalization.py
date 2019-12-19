@@ -1,3 +1,6 @@
+"""This module contains a set of functions facilitating computations of
+the block-tridiagonal structure of a band matrix.
+"""
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
@@ -151,7 +154,7 @@ def cut_in_blocks(h_0, blocks):
 def find_optimal_cut(edge, edge1, left, right):
     """
     Computes the index corresponding to the optimal cut such that applying
-    the function compute_blocks() to the subblocks defined by the cut reduces
+    the function compute_blocks() to the sub-blocks defined by the cut reduces
     the cost function comparing to the case when the function compute_blocks() is
     applied to the whole matrix. If cutting point can not be find, the algorithm returns
     the result from the function compute_blocks().
@@ -170,16 +173,16 @@ def find_optimal_cut(edge, edge1, left, right):
     Returns
     -------
     blocks : list
-        list of diaginal block sizes
+        list of diagonal block sizes
 
     sep : int
         the index of the optimal cut
 
     right_block : int
-        size of the rightmost subblock of the left block (relative to the cutting point)
+        size of the rightmost sub-block of the left block (relative to the cutting point)
 
     left_block : int
-        size of the leftmost subblock of the right block (relative to the cutting point)
+        size of the leftmost sub-block of the right block (relative to the cutting point)
 
     """
 
@@ -191,18 +194,17 @@ def find_optimal_cut(edge, edge1, left, right):
     size = len(edge)
 
     for j1, item1 in enumerate(unique_indices):
-
         seps.append(item1)
-        item2 = size-item1
+        item2 = size - item1
 
         # print(item1, item2)
         # print(item1)
 
         edge_1 = edge[:item1]
-        edge_2 = (edge1-np.arange(len(edge1)))[item2:] + np.arange(item1)
+        edge_2 = (edge1 - np.arange(len(edge1)))[item2:] + np.arange(item1)
 
         edge_3 = edge1[:item2]
-        edge_4 = (edge-np.arange(len(edge)))[item1:] + np.arange(item2)
+        edge_4 = (edge - np.arange(len(edge)))[item1:] + np.arange(item2)
 
         block1 = compute_blocks(left, (edge1 - np.arange(len(edge)))[item2],
                                 edge_1, edge_2)
@@ -236,7 +238,7 @@ def compute_blocks_optimized(edge, edge1, left=1, right=1):
     Computes optimal sizes of diagonal blocks of a matrix whose
     sparsity pattern is defined by the sparsity pattern profiles edge and edge1.
     This function is based on the algorithm which uses defined above function
-    find_optimal_cut() to subdivide the problem into subproblems in a optimal way
+    find_optimal_cut() to subdivide the problem into sub-problems in a optimal way
     according to some cost function.
 
     Parameters
@@ -268,7 +270,7 @@ def compute_blocks_optimized(edge, edge1, left=1, right=1):
 
             edge_1 = edge[:sep]
             # edge_1[edge_1 > sep] = sep
-            edge_2 = (edge1-np.arange(len(edge1)))[-sep:] + np.arange(sep)
+            edge_2 = (edge1 - np.arange(len(edge1)))[-sep:] + np.arange(sep)
 
             blocks1 = compute_blocks_optimized(edge_1, edge_2, left=left, right=right_block)
 
@@ -283,7 +285,7 @@ def compute_blocks_optimized(edge, edge1, left=1, right=1):
 
         if right + left_block < len(edge) - sep:
 
-            edge_3 = (edge-np.arange(len(edge)))[sep:] + np.arange(len(edge) - sep)
+            edge_3 = (edge - np.arange(len(edge)))[sep:] + np.arange(len(edge) - sep)
             edge_4 = edge1[:-sep]
             # edge_4[edge_4 > len(edge) - sep] = len(edge) - sep
 
@@ -292,7 +294,7 @@ def compute_blocks_optimized(edge, edge1, left=1, right=1):
         elif right + left_block == len(edge) - sep:
             blocks2 = [left_block, right]
         else:
-            flag=True
+            flag = True
 
         if flag:
             return blocks
@@ -300,6 +302,95 @@ def compute_blocks_optimized(edge, edge1, left=1, right=1):
             blocks = blocks1 + blocks2
 
             return blocks
+
+
+def find_nonzero_lines(mat, order):
+
+    if scipy.sparse.issparse(mat):
+        lines = _find_nonzero_lines_sparse(mat, order)
+    else:
+        lines = _find_nonzero_lines(mat, order)
+
+    if lines == max(mat.shape[0], mat.shape[1]) - 1:
+        lines = 1
+    if lines == 0:
+        lines = 1
+
+    return lines
+
+
+def _find_nonzero_lines(mat, order):
+    if order == 'top':
+        line = mat.shape[0]
+        while line > 0:
+            if np.count_nonzero(mat[line - 1, :]) == 0:
+                line -= 1
+            else:
+                break
+    elif order == 'bottom':
+        line = -1
+        while line < mat.shape[0] - 1:
+            if np.count_nonzero(mat[line + 1, :]) == 0:
+                line += 1
+            else:
+                line = mat.shape[0] - (line + 1)
+                break
+    elif order == 'left':
+        line = mat.shape[1]
+        while line > 0:
+            if np.count_nonzero(mat[:, line - 1]) == 0:
+                line -= 1
+            else:
+                break
+    elif order == 'right':
+        line = -1
+        while line < mat.shape[1] - 1:
+            if np.count_nonzero(mat[:, line + 1]) == 0:
+                line += 1
+            else:
+                line = mat.shape[1] - (line + 1)
+                break
+    else:
+        raise ValueError('Wrong value of the parameter order')
+
+    return line
+
+
+def _find_nonzero_lines_sparse(mat, order):
+    if order == 'top':
+        line = mat.shape[0]
+        while line > 0:
+            if np.count_nonzero(mat[line - 1, :].todense()) == 0:
+                line -= 1
+            else:
+                break
+    elif order == 'bottom':
+        line = -1
+        while line < mat.shape[0] - 1:
+            if np.count_nonzero(mat[line + 1, :].todense()) == 0:
+                line += 1
+            else:
+                line = mat.shape[0] - (line + 1)
+                break
+    elif order == 'left':
+        line = mat.shape[1]
+        while line > 0:
+            if np.count_nonzero(mat[:, line - 1].todense()) == 0:
+                line -= 1
+            else:
+                break
+    elif order == 'right':
+        line = -1
+        while line < mat.shape[1] - 1:
+            if np.count_nonzero(mat[:, line + 1].todense()) == 0:
+                line += 1
+            else:
+                line = mat.shape[1] - (line + 1)
+                break
+    else:
+        raise ValueError('Wrong value of the parameter order')
+
+    return line
 
 
 def split_into_subblocks_optimized(h_0, left=1, right=1):
@@ -310,6 +401,14 @@ def split_into_subblocks_optimized(h_0, left=1, right=1):
     :param right:
     :return:
     """
+
+    if not (isinstance(left, int) and isinstance(right, int)):
+        h_r_h = find_nonzero_lines(right, 'bottom')
+        h_r_v = find_nonzero_lines(right[-h_r_h:, :], 'left')
+        h_l_h = find_nonzero_lines(left, 'top')
+        h_l_v = find_nonzero_lines(left[:h_l_h, :], 'right')
+        left = max(h_l_h, h_r_v)
+        right = max(h_r_h, h_l_v)
 
     if left + right > h_0.shape[0]:
         return [h_0.shape[0]]
@@ -328,83 +427,70 @@ def split_into_subblocks(h_0, h_l, h_r):
     :return h_0_s, h_l_s, h_r_s:    lists of subblocks
     """
 
-    def find_nonzero_lines(mat, order):
-
-        if order == 'top':
-            line = mat.shape[0]
-            while line > 0:
-                if np.count_nonzero(mat[line - 1, :]) == 0:
-                    line -= 1
-                else:
-                    break
-        elif order == 'bottom':
-            line = -1
-            while line < mat.shape[0] - 1:
-                if np.count_nonzero(mat[line + 1, :]) == 0:
-                    line += 1
-                else:
-                    line = mat.shape[0] - (line + 1)
-                    break
-        elif order == 'left':
-            line = mat.shape[1]
-            while line > 0:
-                if np.count_nonzero(mat[:, line - 1]) == 0:
-                    line -= 1
-                else:
-                    break
-        elif order == 'right':
-            line = -1
-            while line < mat.shape[1] - 1:
-                if np.count_nonzero(mat[:, line + 1]) == 0:
-                    line += 1
-                else:
-                    line = mat.shape[1] - (line + 1)
-                    break
-        else:
-            raise ValueError('Wrong value of the parameter order')
-
-        return line
-
-    h_0_s = []
-    h_l_s = []
-    h_r_s = []
-
     if isinstance(h_l, np.ndarray) and isinstance(h_r, np.ndarray):
         h_r_h = find_nonzero_lines(h_r, 'bottom')
         h_r_v = find_nonzero_lines(h_r[-h_r_h:, :], 'left')
         h_l_h = find_nonzero_lines(h_l, 'top')
         h_l_v = find_nonzero_lines(h_l[:h_l_h, :], 'right')
-
-    if isinstance(h_l, int) and isinstance(h_r, int):
-        h_l_h = h_l
-        h_r_v = h_l
-        h_r_h = h_r
-        h_l_v = h_r
+        left_block = max(h_l_h, h_r_v)
+        right_block = max(h_r_h, h_l_v)
+    elif isinstance(h_l, int) and isinstance(h_r, int):
+        left_block = h_l
+        right_block = h_r
+    else:
+        raise TypeError
 
     edge, edge1 = compute_edge(h_0)
 
-    left_block = max(h_l_h, h_r_v)
-    right_block = max(h_r_h, h_l_v)
-
     blocks = compute_blocks(left_block, right_block, edge, edge1)
-    j1 = 0
 
-    for j, block in enumerate(blocks):
-        h_0_s.append(h_0[j1:block + j1, j1:block + j1])
-        if j < len(blocks) - 1:
-            h_l_s.append(h_0[block + j1:block + j1 + blocks[j + 1], j1:block + j1])
-            h_r_s.append(h_0[j1:block + j1, j1 + block:j1 + block + blocks[j + 1]])
-        j1 += block
-
-    return h_0_s, h_l_s, h_r_s, blocks
+    return blocks
 
 
 def compute_edge(mat):
     """
+    Computes edges of the sparsity pattern of a matrix.
 
-    :param mat:
-    :return:
+    Parameters
+    ----------
+    mat : ndarray
+        Input matrix
+
+    Returns
+    -------
+    edge : ndarray
+        edge of the sparsity pattern
+    edge1 : ndarray
+        conjugate edge of the sparsity pattern
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> from tb.block_tridiagonalization import compute_edge
+    >>> input_matrix = np.array([[1, 1, 0, 0], [1, 1, 1, 0], [0, 1, 1, 1], [0, 0, 1, 1]])
+    >>> input_matrix
+    array([[1, 1, 0, 0],
+           [1, 1, 1, 0],
+           [0, 1, 1, 1],
+           [0, 0, 1, 1]])
+    >>> e1, e2 = compute_edge(input_matrix)
+    >>> e1
+    array([2, 3, 4, 4])
+    >>> e2
+    array([2, 3, 4, 4])
+    >>> input_matrix = np.array([[1, 0, 0, 0], [0, 1, 1, 0], [0, 1, 1, 1], [0, 0, 1, 1]])
+    >>> input_matrix
+    array([[1, 0, 0, 0],
+           [0, 1, 1, 0],
+           [0, 1, 1, 1],
+           [0, 0, 1, 1]])
+    >>> e1, e2 = compute_edge(input_matrix)
+    >>> e1
+    array([1, 3, 4, 4])
+    >>> e2
+    array([2, 3, 3, 4])
     """
+
     # First get some statistics
     if isinstance(mat, scipy.sparse.lil.lil_matrix):
         row, col = mat.nonzero()
@@ -412,34 +498,70 @@ def compute_edge(mat):
         row, col = np.where(mat != 0.0)  # Output rows and columns of all non-zero elements.
 
     # Clever use of accumarray:
-    outeredge = accum(row, col, np.max) + 1
-    outeredge[0] = max(0, outeredge[0])
-    outeredge = np.maximum.accumulate(outeredge)
+    edge = accum(row, col, np.max) + 1
+    edge[0] = max(0, edge[0])
+    edge = np.maximum.accumulate(edge)
 
-    outeredge1 = accum(np.max(row) - row[::-1], np.max(row) - col[::-1], np.max) + 1
-    outeredge1[0] = max(0, outeredge1[0])
-    outeredge1 = np.maximum.accumulate(outeredge1)
+    edge1 = accum(np.max(row) - row[::-1], np.max(row) - col[::-1], np.max) + 1
+    edge1[0] = max(0, edge1[0])
+    edge1 = np.maximum.accumulate(edge1)
 
-    return outeredge, outeredge1
+    return edge, edge1
 
 
 def compute_blocks(left_block, right_block, edge, edge1):
-    """A version of blocksandborders with constraints - periodic boundary conditions.
+    """This is an implementation of the greedy algorithm for
+     computing block-tridiagonal representation of a matrix.
+     The information regarding the input matrix is represented
+     by the sparsity patters edges, `edge` and `edge1`.
 
-    :param mat:                    input matrix
-    :param left_block:             left block constrained minimal size
-    :param right_block:            right block constrained minimal size
-    :param edge:                   edge of sparsity pattern
-    :param edge1:                  conjugate edge of sparsity pattern
+    Parameters
+    ----------
+    left_block : int
+        a predefined size of the leftmost block
+    right_block : int
+        a predefined size of the rightmost block
+    edge : ndarray
+        edge of sparsity pattern
+    edge1  : ndarray
+        conjugate edge of sparsity pattern
 
-    :return:                       array of diagonal block sizes
+    Returns
+    -------
+    ans : list
+        list of diagonal block sizes
+    Examples
+    --------
+    >>> import numpy as np
+    >>> from tb.block_tridiagonalization import compute_edge
+    >>> input_matrix = np.array([[1, 1, 0, 0], [1, 1, 1, 0], [0, 1, 1, 1], [0, 0, 1, 1]])
+    >>> input_matrix
+    array([[1, 1, 0, 0],
+           [1, 1, 1, 0],
+           [0, 1, 1, 1],
+           [0, 0, 1, 1]])
+    >>> e1, e2 = compute_edge(input_matrix)
+    >>> compute_blocks(1, 1, e1, e2)
+    [1, 1, 1, 1]
+    >>> input_matrix = np.array([[1, 1, 1, 0], [1, 1, 1, 0], [1, 1, 1, 1], [0, 0, 1, 1]])
+    >>> input_matrix
+    array([[1, 1, 1, 0],
+           [1, 1, 1, 0],
+           [1, 1, 1, 1],
+           [0, 0, 1, 1]])
+    >>> e1, e2 = compute_edge(input_matrix)
+    >>> compute_blocks(1, 1, e1, e2)
+    [1, 2, 1]
+    >>> e1, e2 = compute_edge(input_matrix)
+    >>> compute_blocks(2, 2, e1, e2)
+    [2, 2]
     """
 
     size = len(edge)
     left_block = max(1, left_block)
     right_block = max(1, right_block)
 
-    if left_block + right_block < size:                               # if blocks do not overlap
+    if left_block + right_block < size:  # if blocks do not overlap
 
         new_left_block = edge[left_block - 1] - left_block
         new_right_block = edge1[right_block - 1] - right_block
@@ -448,13 +570,13 @@ def compute_blocks(left_block, right_block, edge, edge1):
         #                                      np.min(np.abs(edge - (size - right_block))) == 0)) + 1
         # new_right_block = size - new_right_block - right_block
 
-        if left_block + new_left_block <= size - right_block and\
-                size - right_block - new_right_block >= left_block:    # spacing between blocks is sufficient
+        if left_block + new_left_block <= size - right_block and \
+                size - right_block - new_right_block >= left_block:  # spacing between blocks is sufficient
 
             blocks = compute_blocks(new_left_block,
                                     new_right_block,
-                                                  edge[left_block:-right_block] - left_block,
-                                                  edge1[right_block:-left_block] - right_block)
+                                    edge[left_block:-right_block] - left_block,
+                                    edge1[right_block:-left_block] - right_block)
 
             return [left_block] + blocks + [right_block]
         else:
@@ -463,19 +585,30 @@ def compute_blocks(left_block, right_block, edge, edge1):
             else:
                 return [size - right_block] + [right_block]
 
-    elif left_block + right_block == size:                            # sum of blocks equal to the matrix size
+    elif left_block + right_block == size:  # sum of blocks equal to the matrix size
         return [left_block] + [right_block]
-    else:                                                             # blocks overlap
+    else:  # blocks overlap
         return [size]
 
 
 def show_blocks(subblocks, input_mat):
+    """
+    This is a script for visualizing the sparsity pattern and
+     a block-tridiagonal structure of a matrix.
+
+    Parameters
+    ----------
+    subblocks : list
+        list of sizes of the diagonal blocks
+    input_mat : ndarray
+        Hamiltonian matrix
+    """
 
     cumsum = np.cumsum(np.array(subblocks))[:-1]
     cumsum = np.insert(cumsum, 0, 0)
 
     fig, ax = plt.subplots(1)
-    plt.spy(input_mat, marker='.', markersize=0.9, c='k')
+    plt.spy(input_mat, markersize=0.9, c='k')
     # plt.plot(edge)
 
     for jj in range(2):
@@ -487,14 +620,14 @@ def show_blocks(subblocks, input_mat):
                              linestyle='--',
                              linewidth=1.3,
                              edgecolor='b',
-                             facecolor='none')
+                             facecolor='none', zorder=200)
             ax.add_patch(rect)
             rect = Rectangle((input_mat.shape[0] - 0.5, input_mat.shape[1] - subblocks[-1] - 0.5),
                              subblocks[0], subblocks[-1],
                              linestyle='--',
                              linewidth=1.3,
                              edgecolor='g',
-                             facecolor='none')
+                             facecolor='none', zorder=200)
             ax.add_patch(rect)
 
         for j, item in enumerate(cumsum):
@@ -502,17 +635,17 @@ def show_blocks(subblocks, input_mat):
                 rect = Rectangle((item - 0.5, cumsum[j + 1] - 0.5), subblocks[j], subblocks[j + 1],
                                  linewidth=1.3,
                                  edgecolor='b',
-                                 facecolor='none')
+                                 facecolor='none', zorder=200)
                 ax.add_patch(rect)
                 rect = Rectangle((cumsum[j + 1] - 0.5, item - 0.5), subblocks[j + 1], subblocks[j],
                                  linewidth=1.3,
                                  edgecolor='g',
-                                 facecolor='none')
+                                 facecolor='none', zorder=200)
                 ax.add_patch(rect)
-            rect = Rectangle((item - 0.5, item -0.5), subblocks[j], subblocks[j],
+            rect = Rectangle((item - 0.5, item - 0.5), subblocks[j], subblocks[j],
                              linewidth=1.3,
                              edgecolor='r',
-                             facecolor='none')
+                             facecolor='none', zorder=200)
             ax.add_patch(rect)
 
     plt.xlim(input_mat.shape[0] - 0.5, -1.0)
@@ -523,4 +656,5 @@ def show_blocks(subblocks, input_mat):
 
 if __name__ == "__main__":
     import doctest
+
     doctest.testmod()

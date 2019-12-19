@@ -66,7 +66,7 @@ def single_atom_chain():
     sgf_r = []
 
     for j, E in enumerate(energy):
-        se_l, se_r = negf.surface_greens_function(E, h_l, h_0, h_r)
+        se_l, se_r = negf.surface_greens_function(E, h_l, h_0, h_r, iterate=False)
         sgf_l.append(se_l)
         sgf_r.append(se_r)
         gf = np.linalg.pinv(E * np.identity(num_sites) - h_0 - se_l - se_r)

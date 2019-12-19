@@ -457,51 +457,52 @@ class Hamiltonian(BasisTB):
 
         two_leads = False
 
-        if np.array(self.ct.pcv).shape[0] == 1:
-            two_leads = True
+        if self.ct is not None:
+            if np.array(self.ct.pcv).shape[0] == 1:
+                two_leads = True
 
-        if split_the_leads:
-            if two_leads:
-                flag = None
-            else:
-                flag = 'L'
+            if split_the_leads:
+                if two_leads:
+                    flag = None
+                else:
+                    flag = 'L'
 
-        # loop through all interfacial atoms
-        for j1 in self.ct.interfacial_atoms_ind:
+            # loop through all interfacial atoms
+            for j1 in self.ct.interfacial_atoms_ind:
 
-            list_of_neighbours = self.ct.get_neighbours(list(self.atom_list.values())[j1])
+                list_of_neighbours = self.ct.get_neighbours(list(self.atom_list.values())[j1])
 
-            for j2 in list_of_neighbours:
+                for j2 in list_of_neighbours:
 
-                coords = np.array(list(self.atom_list.values())[j1]) - \
-                         np.array(list(self.ct.virtual_and_interfacial_atoms.values())[j2])
+                    coords = np.array(list(self.atom_list.values())[j1]) - \
+                             np.array(list(self.ct.virtual_and_interfacial_atoms.values())[j2])
 
-                if split_the_leads and two_leads:
-                    flag = self.ct.atom_classifier(list(self.ct.virtual_and_interfacial_atoms.values())[j2],
-                                                   self.ct.pcv[0])
+                    if split_the_leads and two_leads:
+                        flag = self.ct.atom_classifier(list(self.ct.virtual_and_interfacial_atoms.values())[j2],
+                                                       self.ct.pcv[0])
 
-                phase = np.exp(1j * np.dot(self.k_vector, coords))
+                    phase = np.exp(1j * np.dot(self.k_vector, coords))
 
-                ind = int(list(self.ct.virtual_and_interfacial_atoms.keys())[j2].split('_')[2])
+                    ind = int(list(self.ct.virtual_and_interfacial_atoms.keys())[j2].split('_')[2])
 
-                for l1 in range(self.orbitals_dict[list(self.atom_list.keys())[j1]].num_of_orbitals):
-                    for l2 in range(self.orbitals_dict[list(self.atom_list.keys())[ind]].num_of_orbitals):
+                    for l1 in range(self.orbitals_dict[list(self.atom_list.keys())[j1]].num_of_orbitals):
+                        for l2 in range(self.orbitals_dict[list(self.atom_list.keys())[ind]].num_of_orbitals):
 
-                        ind1 = self.qn2ind([('atoms', j1), ('l', l1)])
-                        ind2 = self.qn2ind([('atoms', ind), ('l', l2)])
+                            ind1 = self.qn2ind([('atoms', j1), ('l', l1)])
+                            ind2 = self.qn2ind([('atoms', ind), ('l', l2)])
 
-                        if split_the_leads:
-                            if flag == 'R':
-                                self.h_matrix_left_lead[ind1, ind2] += phase * \
-                                                                       self._get_me(j1, ind, l1, l2, coords)
-                            elif flag == 'L':
-                                self.h_matrix_right_lead[ind1, ind2] += phase * \
-                                                                        self._get_me(j1, ind, l1, l2, coords)
+                            if split_the_leads:
+                                if flag == 'R':
+                                    self.h_matrix_left_lead[ind1, ind2] += phase * \
+                                                                           self._get_me(j1, ind, l1, l2, coords)
+                                elif flag == 'L':
+                                    self.h_matrix_right_lead[ind1, ind2] += phase * \
+                                                                            self._get_me(j1, ind, l1, l2, coords)
+                                else:
+                                    raise ValueError("Wrong flag value")
                             else:
-                                raise ValueError("Wrong flag value")
-                        else:
-                            self.h_matrix_bc_add[ind1, ind2] += phase * \
-                                                                self._get_me(j1, ind, l1, l2, coords)
+                                self.h_matrix_bc_add[ind1, ind2] += phase * \
+                                                                    self._get_me(j1, ind, l1, l2, coords)
 
     def get_hamiltonians(self):
         """
@@ -534,9 +535,16 @@ class Hamiltonian(BasisTB):
 
         return np.array(self._coords)
 
-    def get_hamiltonians_block_tridiagonal(self, left=5, right=5):
+    def get_hamiltonians_block_tridiagonal(self, left=None, right=None):
 
-        subblocks = split_into_subblocks_optimized(self.h_matrix, left=left, right=right)
-        h01, hl1, hr1 = cut_in_blocks(self.h_matrix, subblocks)
+        if left is None and right is None:
+            hl, h0, hr = self.get_hamiltonians()
+        else:
+            hl = left
+            h0 = self.h_matrix
+            hr = right
+
+        subblocks = split_into_subblocks_optimized(h0, hl, hr)
+        h01, hl1, hr1 = cut_in_blocks(h0, subblocks)
 
         return hl1, h01, hr1, subblocks
