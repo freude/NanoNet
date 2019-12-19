@@ -10,5 +10,5 @@ Learning by examples
    silicon_nanowire.ipynb
    bismuth_bulk.ipynb
    chain_greens_function.ipynb
-    
+   block_tridiagonal_and_sorting.ipynb    
 
