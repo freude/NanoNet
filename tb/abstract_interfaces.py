@@ -10,8 +10,7 @@ import numpy as np
 
 class AbstractStructureDesigner(with_metaclass(ABCMeta, object)):
     """
-    The class builds the atomic structure represented by a list of atoms
-    and their neighbouring.
+    The class is an abstraction for the list of atomic coordinates.
     """
 
     def __init__(self):
@@ -77,15 +76,6 @@ class AbstractBasis(with_metaclass(ABCMeta, object)):
 
     @abstractmethod
     def ind2qn(self, ind):
-        """
-        The member function trasform a dictionary of quantum numbers into a matrix index
-
-        :param ind:    index
-        :type ind:     int
-
-        :return qn:
-        :rtype:
-        """
         pass
 
     @property

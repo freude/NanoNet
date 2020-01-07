@@ -46,7 +46,7 @@ def surface_greens_function_poles(h_list):
 
     alpha, betha, _, eigenvects, _, _ = linalg.lapack.cggev(main_matrix, overlap_matrix)
 
-    eigenvals = np.zeros(alpha.shape, dtype=np.complex128)
+    eigenvals = np.zeros(alpha.shape, dtype=np.complex)
 
     for j, item in enumerate(zip(alpha, betha)):
 
@@ -101,17 +101,6 @@ def group_velocity(eigenvector, eigenvalue, h_r):
 
 
 def iterate_gf(E, h_0, h_l, h_r, gf, num_iter):
-    """
-    Iterates a self-energy to achieve self-consistency
-
-    :param E:
-    :param h_0:
-    :param h_l:
-    :param h_r:
-    :param gf:
-    :param num_iter:
-    :return:
-    """
 
     for _ in range(num_iter):
         gf = h_r * np.linalg.pinv(E * np.identity(h_0.shape[0]) - h_0 - gf) * h_l
@@ -119,7 +108,7 @@ def iterate_gf(E, h_0, h_l, h_r, gf, num_iter):
     return gf
 
 
-def surface_greens_function(E, h_l, h_0, h_r, iterate=False):
+def surface_greens_function(E, h_l, h_0, h_r, iterate=True, damp=0.0001j):
     """
     Computes surface self-energies using the eigenvalue decomposition.
     The procedure is described in
@@ -131,11 +120,12 @@ def surface_greens_function(E, h_l, h_0, h_r, iterate=False):
     :param h_0:       channel Hamiltonian
     :param h_r:       right-side coupling Hamiltonian
     :param iterate:   iterate to stabilize TB matrix
+    :param damp:      damping
 
     :return:          left- and right-side self-energies
     """
 
-    h_list = [h_l, h_0 - E * np.identity(h_0.shape[0]), h_r]
+    h_list = [h_l, h_0 - (E+damp) * np.identity(h_0.shape[0]), h_r]
     vals, vects = surface_greens_function_poles(h_list)
     vals = np.diag(vals)
 

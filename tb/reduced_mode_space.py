@@ -5,8 +5,7 @@ from __future__ import print_function, division
 import pickle
 import os.path
 import numpy as np
-from scipy.sparse.linalg import eigs
-from tb.greens_function import surface_greens_function_poles
+from negf.greens_functions import surface_greens_function_poles
 
 
 # def object_function(vec, energy, initial_basis, extended_basis, h_0, h_0_reduced):

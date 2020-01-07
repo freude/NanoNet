@@ -29,7 +29,7 @@ def main(energy):
     h.initialize()
     period = [0, 0, 1.0]
     h.set_periodic_bc([period])
-    h_l, h_0, h_r = h.get_coupling_hamiltonians()
+    h_l, h_0, h_r = h.get_hamiltonians()
 
     # ---------------------------------------------------------------------------------
     # -------------------- compute Green's functions of the system --------------------

@@ -3,7 +3,7 @@ The module contains functions computing hopping parameters
 with arbitrary rotations of atomic orbitals based on the table of
 empirical diatomic couplings defined in the module params.
 Computations are based mostly on analytical equations derived in
-A.V. Podolskiy and P. Vogl, Phys. Rev. B. 69, 233101 (2004)
+[A.V. Podolskiy and P. Vogl, Phys. Rev. B. 69, 233101 (2004)].
 """
 from __future__ import print_function
 from __future__ import absolute_import
@@ -15,12 +15,12 @@ import warnings
 
 #  NN - Si-Si
 PARAMS_SI_SI = {'ss_sigma': -1.9413,
-                'cc_sigma': -3.3081,
-                'cs_sigma': -1.6933,
+                '1s1s_sigma': -3.3081,
+                's1s_sigma': -1.6933,
                 'sp_sigma': 2.7836,
-                'cp_sigma': 2.8428,
+                '1sp_sigma': 2.8428,
                 'sd_sigma': -2.7998,
-                'cd_sigma': -0.7003,
+                '1sd_sigma': -0.7003,
                 'pp_sigma': 4.1068,
                 'pp_pi': -1.5934,
                 'pd_sigma': -2.1073,
@@ -32,7 +32,7 @@ PARAMS_SI_SI = {'ss_sigma': -1.9413,
 
 #  NN - Si-H
 PARAMS_H_SI = {'ss_sigma': -3.9997,
-               'cs_sigma': -1.6977,
+               's1s_sigma': -1.6977,
                'sp_sigma': 4.2518,
                'sd_sigma': -2.1055}
 
@@ -78,14 +78,16 @@ def me_diatomic(bond, n, l_min, l_max, m, which_neighbour):
     :rtype:        float
     """
 
-    if n == '00':
-        label = ORBITAL_QN[l_min] + ORBITAL_QN[l_max] + '_' + M_QN[m]
-    elif n == '01':
-        label = 'c' + ORBITAL_QN[l_max] + '_' + M_QN[m]
-    elif n == '11':
-        label = 'cc' + '_' + M_QN[m]
-    else:
-        raise ValueError('Wrong value of the value variable')
+    label = n[0] + ORBITAL_QN[l_min] + n[1] + ORBITAL_QN[l_max] + '_' + M_QN[m]
+
+    # if n == '00':
+    #     label = ORBITAL_QN[l_min] + ORBITAL_QN[l_max] + '_' + M_QN[m]
+    # elif n == '01':
+    #     label = 'c' + ORBITAL_QN[l_max] + '_' + M_QN[m]
+    # elif n == '11':
+    #     label = 'cc' + '_' + M_QN[m]
+    # else:
+    #     raise ValueError('Wrong value of the value variable')
 
     try:
         if which_neighbour == 0:
@@ -165,6 +167,32 @@ def t_me(N, l, m1, m2, gamma):
 
 
 def me(atom1, ll1, atom2, ll2, coords, which_neighbour=0):
+    """
+    Computes the non-diagonal matrix element of the tight-binding Hamiltonian -
+    coupling between two sites, both are described by LCAO basis sets.
+    This function is evoked in the member function _get_me() of the Hamiltonian object.
+
+    Parameters
+    ----------
+    atom1 : tb.Orbitals
+        basis set associated with the first site
+    ll1 : int
+        index specifying a particular orbital in the basis set for the first site
+    atom2 : tb.Orbitals
+        basis set associated with the first site
+    ll2 : int
+        index specifying a particular orbital in the basis set for the second site
+    coords : array
+        coordinates of radius vector pointing from one site to another
+    which_neighbour : int
+        Order of a nearest neighbour (first-, second-, third- etc)
+
+    Returns
+    -------
+    ans : float
+        Inter-atomic matrix element
+
+    """
 
     # determine type of bonds
     atoms = sorted([item.upper() for item in [atom1.title, atom2.title]])
@@ -190,7 +218,18 @@ def me(atom1, ll1, atom2, ll2, coords, which_neighbour=0):
 
         gamma = math.atan2(L, M)
 
-        code = str(min(n1, n2)) + str(max(n1, n2))
+        if l1 > l2:
+            code = [n2, n1]
+        elif l1 == l2:
+            code = [min(n1, n2), max(n1, n2)]
+        else:
+            code = [n1, n2]
+
+        for j, item in enumerate(code):
+            if item == 0:
+                code[j] = ""
+            else:
+                code[j] = str(item)
 
         l_min = min(l1, l2)
         l_max = max(l1, l2)

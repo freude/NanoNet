@@ -14,7 +14,7 @@ def main():
 
         params = tb_script.yaml_parser(param_file)
         hamiltonian = tb_script.initializer(**params)
-        h_l, h_0, h_r = hamiltonian.get_coupling_hamiltonians()
+        h_l, h_0, h_r = hamiltonian.get_hamiltonians()
 
         sgf_l = []
         sgf_r = []

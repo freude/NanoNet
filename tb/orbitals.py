@@ -1,5 +1,7 @@
 """
-Module contains classes describing atoms with different number of basis functions
+Module contains the class `Orbitals` that allows to generate any user defined basis set based on
+the linear combination of atomic orbitals (LCAO). Also, the module contains a set of predefined basis sets
+`SiliconSP3D5S`, `HydrogenS`, `Bismuth`.
 """
 import sys
 from tb.aux_functions import print_table
@@ -8,8 +10,8 @@ from tb.aux_functions import print_table
 class Orbitals(object):
     """
     This is the parent class for all basis sets for all atoms. It also contains a factory function,
-    which generates objects of Atom from a list of labels and the dictionary `orbital_sets` making
-    a correspondence between an atom and its basis set
+    which generates objects of the class Orbitals from a list of labels and
+    the dictionary `orbital_sets` making a correspondence between an atom and its basis set
     """
 
     orbital_sets = {}
@@ -18,15 +20,16 @@ class Orbitals(object):
         self.title = title
         self.orbitals = []
         self.num_of_orbitals = 0
+        Orbitals.orbital_sets[self.title] = self
 
     def add_orbital(self, title, energy=0.0, principal=0, orbital=0, magnetic=0, spin=0):
         """
         Adds an orbital to the set of orbitals
 
         :param title:        a string representing an orbital label,
-                             it usually specifies its symmetry, e.g. 's', 'px', 'py' etc.
+                             it usually specifies its symmetry, e.g. `s`, `px`, `py` etc.
         :param energy:       energy of the orbital
-        :param principal:    principal quantum number `n`
+        :param principal:    principal quantum number `n-1`
         :param orbital:      orbital quantum number `l`
         :param magnetic:     magnetic quantum number `m`
         :param spin:         spin quantum number `s`
@@ -42,6 +45,8 @@ class Orbitals(object):
         self.orbitals.append(orbital)
         self.num_of_orbitals += 1
 
+        Orbitals.orbital_sets[self.title] = self
+
     def generate_info(self):
 
         return print_table(self.orbitals)
@@ -49,13 +54,13 @@ class Orbitals(object):
     @staticmethod
     def atoms_factory(labels):
         """
-        Taking a list of labels creates a dictionary of `Atom` objects
+        Taking a list of labels creates a dictionary of `Orbitals` objects
         from those labels. The set of orbitals for each atom and corresponding class is
         specified in the class variable `orbital_sets`
 
         :param labels:   list of labels
         :type labels:    list(str)
-        :return:         dictionary of `Atom` objects
+        :return:         dictionary of `Orbitals` objects
         """
 
         output = {}
@@ -102,17 +107,6 @@ class SiliconSP3D5S(Orbitals):
         self.add_orbital("dyz", energy=14.1836, orbital=2, magnetic=2, spin=0)
         self.add_orbital("dxy", energy=14.1836, orbital=2, magnetic=1, spin=0)
         self.add_orbital("dx2my2", energy=14.1836, orbital=2, magnetic=0, spin=0)
-
-        # self.add_orbital("s", energy=-2.0196, spin=1)
-        # self.add_orbital("c", energy=19.6748, principal=1, spin=1)
-        # self.add_orbital("px", energy=4.5448, orbital=1, magnetic=-1, spin=1)
-        # self.add_orbital("py", energy=4.5448, orbital=1, magnetic=1, spin=1)
-        # self.add_orbital("pz", energy=4.5448, orbital=1, magnetic=0, spin=1)
-        # self.add_orbital("dz2", energy=14.1836, orbital=2, magnetic=-1, spin=1)
-        # self.add_orbital("dxz", energy=14.1836, orbital=2, magnetic=-2, spin=1)
-        # self.add_orbital("dyz", energy=14.1836, orbital=2, magnetic=2, spin=1)
-        # self.add_orbital("dxy", energy=14.1836, orbital=2, magnetic=1, spin=1)
-        # self.add_orbital("dx2my2", energy=14.1836, orbital=2, magnetic=0, spin=1)
 
 
 class HydrogenS(Orbitals):

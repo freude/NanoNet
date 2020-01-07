@@ -3,9 +3,9 @@ python:
     - "3.6"
 # command to install dependencies
 install:
-    - sudo apt-get install mpich
+    - sudo apt-get install libopenmpi-dev
     - pip install python-coveralls
-    - pip install coverage
+    - pip install coverage==4.5.4
     - pip install -r requirements.txt
     - pip install .
 # command to run tests
@@ -13,6 +13,7 @@ script:
     - nosetests --with-coverage
 branches:
     only:
+        - master
         - develop
 after_success:
     - coveralls                     # upload reports to coveralls.io

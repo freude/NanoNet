@@ -108,10 +108,9 @@ def surface_greens_function_poles(E, h_l, h_0, h_r):
 
     alpha, betha, _, eigenvects, _, _ = linalg.lapack.cggev(main_matrix, overlap_matrix)
 
-    eigenvals = np.zeros(alpha.shape, dtype=np.complex128)
+    eigenvals = np.zeros(alpha.shape, dtype=np.complex)
 
     for j, item in enumerate(zip(alpha, betha)):
-
         if np.abs(item[1]) != 0.0:
             eigenvals[j] = item[0] / item[1]
         else:
@@ -286,8 +285,8 @@ def surface_greens_function(E, h_l, h_0, h_r):
     # sgf_l = u_right[h_0.shape[0]:, :] * np.linalg.pinv(u_right[:h_0.shape[0], :])
     # sgf_r = h_l * u_left * lambda_right * np.linalg.pinv(u_left)
 
-    return iterate_gf(E, h_0, h_l, h_r, sgf_l, 2), iterate_gf(E, h_0, h_r, h_l, sgf_r, 2), \
-           lambda_right, lambda_left, vals
+    return iterate_gf(E, h_0, h_l, h_r, sgf_l, 2), iterate_gf(E, h_0, h_r, h_l, sgf_r, 2)#, \
+           #lambda_right, lambda_left, vals
 
     # return h_r * u_right * lambda_right * np.linalg.pinv(u_right), \
     #        h_l * u_left * lambda_right * np.linalg.pinv(u_left), \
@@ -332,7 +331,7 @@ def main():
     h = tb.Hamiltonian(xyz=xyz_file, nn_distance=1.1)
     h.initialize()
     h.set_periodic_bc([[0, 0, 2.0]])
-    h_l, h_0, h_r = h.get_coupling_hamiltonians()
+    h_l, h_0, h_r = h.get_hamiltonians()
 
     energy = np.linspace(-3.0, 1.5, 700)
 
@@ -382,7 +381,7 @@ def main1():
     h = tb.Hamiltonian(xyz='/home/mk/NEGF_project/SiNW.xyz', nn_distance=2.4)
     h.initialize()
     h.set_periodic_bc([[0, 0, 5.50]])
-    h_l, h_0, h_r = h.get_coupling_hamiltonians()
+    h_l, h_0, h_r = h.get_hamiltonians()
 
     # energy = np.linspace(2.07, 2.3, 50)
     # energy = np.linspace(2.07, 2.3, 50) + 0.2
@@ -515,7 +514,7 @@ def inverse_bs_problem():
     h.initialize()
     h.set_periodic_bc([[0, 0, 5.50]])
 
-    h_l, h_0, h_r = h.get_coupling_hamiltonians()
+    h_l, h_0, h_r = h.get_hamiltonians()
 
     # energy = np.linspace(2.13, 2.15, 20)
     # energy = np.linspace(-2.1, 1.0, 50)
@@ -575,7 +574,7 @@ def main2():
     h = tb.Hamiltonian(xyz=xyz_file, nn_distance=2.1)
     h.initialize()
     h.set_periodic_bc([[0, 0, 1.0]])
-    h_l, h_0, h_r = h.get_coupling_hamiltonians()
+    h_l, h_0, h_r = h.get_hamiltonians()
 
     energy = np.concatenate(np.linspace(-3.0, 1.5, 150), np.linspace(2.05, 2.5, 150))
 
@@ -631,7 +630,7 @@ def main3():
     h = tb.Hamiltonian(xyz=xyz_file, nn_distance=2.1)
     h.initialize()
     h.set_periodic_bc([[0, 0, 1.0]])
-    h_l, h_0, h_r = h.get_coupling_hamiltonians()
+    h_l, h_0, h_r = h.get_hamiltonians()
 
     energy = np.linspace(-3.0, 1.5, 700)
 

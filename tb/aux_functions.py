@@ -4,6 +4,7 @@ The module contains a set of auxiliary functions facilitating the tight-binding 
 from __future__ import print_function
 from __future__ import absolute_import
 from itertools import product
+import math
 import numpy as np
 import yaml
 
@@ -310,171 +311,6 @@ def print_dict(dictionary):
     return out
 
 
-def bandwidth(mat):
-    j = 0
-
-    while np.count_nonzero((np.diag(mat, mat.shape[0] - j - 1))) == 0 and j < mat.shape[0]:
-        j += 1
-
-    return mat.shape[0] - j - 1
-
-
-# def blocksandborders(A):
-#     """This is a function designed to output the blocks from a block-tridiagonal
-#     matrix, A. This function assumes that bandwidth minimization has already
-#     occurred and that this is to be applied to some matrix. There exist many
-#     algorithms to reduce bandwidth, this is only to produce blocks. This
-#     problem has likely been solved before, but the author could not find any
-#     examples, likely due to insufficient knowledge of the literature.
-#
-#     Jesse Vaitkus, 2019
-#
-#     :param A:             input matrix
-#     :return:              array of diagonal block sizes
-#     """
-#
-#     # First get some statistics
-#     sza = A.shape[0]  # Get the dimension of the input matrix
-#     bandA = bandwidth(A)  # Bandwidth of matrix
-#
-#     row, col = np.where(A != 0.0)  # Output rows and columns of all non-zero elements.
-#
-#     # Clever use of accumarray:
-#     outeredge = accum(row, col, np.max)
-#     # accumarray takes _unordered_ data and bins it, by using a function like
-#     # @max it then applies that function to the binned data. This tells us the
-#     # largest index that is nonzero, AND even tells us which rows have zero
-#     # non-zero elements.
-#
-#     # Fringe case, we make sure that the first element is always at least 1.
-#     outeredge[0] = max(0, outeredge[0])
-#
-#     # Now we loop over all the outer indices, if an outer index is smaller than
-#     # the previous, we increase it, this gives us an effective "outer edge" of
-#     # our matrix, which is useful for my block detection method.
-#
-#     outeredge = np.maximum.accumulate(outeredge)  # following commented code is the same as cummax
-#
-#     # Now that we have our outer edges we can work out the blocks. We do not
-#     # have a good guess as to what the first block should be a priori. What we
-#     # do know is that no block will ever be larger than the bandwidth. This is
-#     # our upper bound. In the ideal case the matrix is tridiagonal (not block
-#     # tridiagonal) and so our lower bound is 1.
-#
-#     testindices = np.arange(0, bandA)
-#
-#     # Now we don't know how many blocks there will be, so we overallocate in
-#     # preparation and trim afterwards. This doesn't cost anything meaningful,
-#     # and saves time from the possible matrix size increase.
-#     blocks = gen_blocks(outeredge, sza)
-#     blocks = np.array(blocks).T
-#     # The optimal block choice is the one that minimizes the sum of cubes. As
-#     # this is the scaling of the recursive Green's function algorithm.
-#     best = np.argmin(np.sum(blocks ** 3, 0))
-#     blocks = blocks[:, best]
-#     blocks = [item for item in blocks if item != 0]
-#
-#     # This last step is mainly a bookkeeping one, we add indices for the rows
-#     # that the edges correspond to, this makes plotting them easier.
-#     outeredge = [np.arange(0, sza), outeredge]
-#
-#     return blocks, outeredge
-#
-#
-# def blocksandborders_constrained(A):
-#     """A version of blocksandborders with constraints - periodic boundary conditions.
-#
-#     :param A:             input matrix
-#     :return:              array of diagonal block sizes
-#     """
-#
-#     outeredge = compute_edge(A)
-#
-#     blocks = []
-#     unique_edges, index = np.unique(outeredge, return_inverse=True)
-#     outeredges = []
-#     outeredges.append(outeredge)
-#
-#     for j1 in range(1, 5):
-#         for j in range(len(unique_edges[unique_edges < 3 * A.shape[0] / 4]) - j1):
-#             temp_edge = np.copy(unique_edges)
-#             temp_edge[j] = temp_edge[j + j1]
-#             temp_edge = np.maximum.accumulate(temp_edge)
-#             outeredges.append(temp_edge[index])
-#
-#     sza = A.shape[0]  # Get the dimension of the input matrix
-#
-#     for outeredge in outeredges:
-#         blocks += gen_blocks(outeredge, sza)
-#
-#     blocks = np.array(blocks).T
-#     indicies = []
-#
-#     for j in range(blocks.shape[1]):
-#         cumsum = np.cumsum(blocks[:, j])
-#         if A.shape[0] // 2 not in cumsum:
-#             blocks[:, j] = 0
-#             indicies.append(j)
-#         else:
-#             inds = np.where(cumsum == A.shape[0] // 2)[0]
-#
-#             for ind in inds:
-#                 if blocks[0, j] != blocks[ind + 1, j]:
-#                     blocks[:, j] = 0
-#                     indicies.append(j)
-#
-#     blocks = np.delete(blocks, indicies, 1)
-#     if blocks.tolist():
-#         best = np.argmin(np.sum(blocks ** 3, 0))
-#         blocks = blocks[:, best]
-#         blocks = [item for item in blocks if item != 0]
-#         outeredge = [np.arange(0, sza), outeredge]
-#
-#     return blocks, outeredge
-
-
-def split_matrix(h_0):
-
-    edge, edge1 = compute_edge(h_0)
-
-    x = np.arange(1, np.max(edge - np.linspace(0, len(edge), len(edge), dtype=np.int)))
-    y = np.arange(1, np.max(edge1 - np.linspace(0, len(edge), len(edge), dtype=np.int)))
-    # X, Y = np.meshgrid(x, y)
-    # init_blocks = np.vstack((X.flatten(), Y.flatten())).T
-    blocks = []
-    metric = []
-    metrics = np.zeros((len(x), len(y)))
-
-    for j1, item1 in enumerate(x):
-        for j2, item2 in enumerate(y):
-            block = blocksandborders_constrained(item1, item2, edge, edge1)
-            blocks.append(block)
-            metric.append(np.sum(np.array(block) ** 3))
-            # metric.append(np.sum(np.array(block)))
-
-            # metrics[j1, j2] = np.sum(np.array(block) ** 3)
-            metrics[j1, j2] = np.sum(np.array(block))
-
-    j1 = 0
-    h_0_s = []
-    h_l_s = []
-    h_r_s = []
-
-    best = np.argmin(metric)
-    blocks = blocks[best]
-    blocks = [item for item in blocks if item != 0]
-    # blocks = blocks[100]
-
-    for j, block in enumerate(blocks):
-        h_0_s.append(h_0[j1:block + j1, j1:block + j1])
-        if j < len(blocks) - 1:
-            h_l_s.append(h_0[block + j1:block + j1 + blocks[j + 1], j1:block + j1])
-            h_r_s.append(h_0[j1:block + j1, j1 + block:j1 + block + blocks[j + 1]])
-        j1 += block
-
-    return h_0_s, h_l_s, h_r_s, blocks
-
-
 def split_into_subblocks(h_0, h_l, h_r):
     """
     Split Hamiltonian matrix and coupling matrices into subblocks
@@ -543,15 +379,20 @@ def split_into_subblocks(h_0, h_l, h_r):
     left_block = max(h_l_h, h_r_v)
     right_block = max(h_r_h, h_l_v)
 
-    blocks = blocksandborders_constrained(left_block, right_block, edge, edge1)
-    j1 = 0
+    from tb.sorting_algorithms import split_matrix_0, cut_in_blocks, split_matrix
 
-    for j, block in enumerate(blocks):
-        h_0_s.append(h_0[j1:block + j1, j1:block + j1])
-        if j < len(blocks) - 1:
-            h_l_s.append(h_0[block + j1:block + j1 + blocks[j + 1], j1:block + j1])
-            h_r_s.append(h_0[j1:block + j1, j1 + block:j1 + block + blocks[j + 1]])
-        j1 += block
+    blocks = split_matrix_0(h_0, left=left_block, right=right_block)
+    h_0_s, h_l_s, h_r_s = cut_in_blocks(h_0, blocks)
+
+    # blocks = compute_blocks(left_block, right_block, edge, edge1)
+    # j1 = 0
+    #
+    # for j, block in enumerate(blocks):
+    #     h_0_s.append(h_0[j1:block + j1, j1:block + j1])
+    #     if j < len(blocks) - 1:
+    #         h_l_s.append(h_0[block + j1:block + j1 + blocks[j + 1], j1:block + j1])
+    #         h_r_s.append(h_0[j1:block + j1, j1 + block:j1 + block + blocks[j + 1]])
+    #     j1 += block
 
     return h_0_s, h_l_s, h_r_s, blocks
 
@@ -618,34 +459,73 @@ def blocksandborders_constrained(left_block, right_block, edge, edge1):
         return [size]
 
 
-# def gen_blocks(outeredge, sza):
-#     """
-#     Computes decomposition of matrix into blocks
-#
-#     :param outeredge:       the upper edge of the sparsity pattern
-#     :param sza:             maximal allowed size of the first block
-#
-#     :return:                array of diagonal block sizes
-#     """
-#
-#     blocks = []
-#     u_outeredge = np.where(np.abs(np.diff(outeredge)) > 1)[0] + 1
-#
-#     for edge_num in range(len(u_outeredge) // 2):
-#
-#         block = np.zeros(sza, dtype=np.int)
-#
-#         block[0] = u_outeredge[edge_num]
-#         ii = 0
-#         nn = block[0]
-#
-#         while nn < sza and ii < sza - 1:
-#             ii += 1
-#             tempblock = max(outeredge[nn] - nn, 1)  # Added max to prevent zero blocks
-#             block[ii] = tempblock
-#             nn = nn + tempblock
-#
-#         blocks.append(block)
-#
-#     return blocks
+def argsort(seq):
+    # http://stackoverflow.com/questions/3071415/efficient-method-to-calculate-the-rank-vector-of-a-list-in-python
+    return sorted(range(len(seq)), key=seq.__getitem__)
 
+
+def shift(mat):
+
+    ans = np.zeros(mat.shape, dtype=np.int)
+
+    cut = mat.shape[0] // 2
+
+    ans[:cut] = mat[cut:]
+    ans[cut:] = mat[:cut]
+
+    return ans
+
+
+def bandwidth1(mat):
+
+    j = 0
+
+    while np.count_nonzero((np.diag(mat, mat.shape[0] - j - 1))) == 0 and j < mat.shape[0]:
+        j += 1
+
+    return mat.shape[0] - j - 1
+
+
+def bandwidth(mat):
+
+    ans = 0
+
+    for j in range(1, mat.shape[0]):
+        if np.count_nonzero((np.diag(mat, j))) > 0:
+            ans = j
+
+    return ans
+
+
+# Helper function to store the inroder traversal of a tree
+def storeInorder(root, inorder):
+    # Base Case
+    if root is None:
+        return
+
+        # First store the left subtree
+    storeInorder(root.left, inorder)
+
+    # Copy the root's data
+    inorder.append(root.data)
+
+    # Finally store the right subtree
+    storeInorder(root.right, inorder)
+
+
+# A helper funtion to count nodes in a binary tree
+def countNodes(root):
+    if root is None:
+        return 0
+
+    return countNodes(root.lesser) + countNodes(root.greater) + 1
+
+
+def is_in_coords(coord, coords):
+
+    ans = False
+
+    for xyz in list(coords):
+        ans += (np.linalg.norm(coord - xyz) < 0.01)
+
+    return ans

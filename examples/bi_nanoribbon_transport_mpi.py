@@ -44,7 +44,7 @@ def main(energy):
     h.initialize(radial_dep)
     period = data_bi_nanoribbon.lattice_constant * np.array([1.0, 0.0, 0.0])
     h.set_periodic_bc([period])
-    h_l, h_0, h_r = h.get_coupling_hamiltonians()
+    h_l, h_0, h_r = h.get_hamiltonians()
 
     tr = np.zeros((energy.shape[0]))
 

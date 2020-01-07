@@ -1,4 +1,5 @@
 import numpy as np
+import tb
 import matplotlib.pyplot as plt
 from tb import Hamiltonian, HamiltonianSp
 from tb import Orbitals
@@ -35,7 +36,15 @@ def main():
     # path = "tb/third_party/si_slab.xyz"
 
     # hamiltonian = Hamiltonian(xyz=path, nn_distance=1.1, lead_l=[[0, 0, 1]], lead_r=[[0, 4, 3]], so_coupling=0.06)
-    hamiltonian = Hamiltonian(xyz=path, nn_distance=2.4, so_coupling=0.06, vec=[0, 0, 1])
+
+    left_lead = [0, 33, 35, 17, 16, 51, 25,  9, 53, 68,  1,  8, 24]
+    right_lead = [40, 66, 58, 47, 48, 71, 72, 73, 74, 65]
+
+    def sorting(coords, **kwargs):
+        return np.argsort(coords[:, 2])
+
+    hamiltonian = Hamiltonian(xyz=path, nn_distance=2.4,
+                              sort_func=sorting, left_lead=left_lead, right_lead=right_lead)
     hamiltonian.initialize()
 
     # if True:
@@ -44,7 +53,7 @@ def main():
     #     plt.savefig('hamiltonian.pdf')
     #     plt.show()
 
-    from tb.aux_functions import split_into_subblocks
+    # from tb.aux_functions import split_into_subblocks
     # a, b = blocksandborders(hamiltonian.h_matrix)
 
     # bandwidth(hamiltonian.h_matrix)
@@ -62,9 +71,8 @@ def main():
     PRIMITIVE_CELL = [[0, 0, a_si]]
     hamiltonian.set_periodic_bc(PRIMITIVE_CELL)
 
-    hl, h0, hr = hamiltonian.get_coupling_hamiltonians()
-
-    h0, hl, hr, _ = split_into_subblocks(h0, h_l=hl, h_r=hr)
+    hl, h0, hr = hamiltonian.get_hamiltonians()
+    h0, hl, hr, _ = hamiltonian.get_hamiltonians_block_tridiagonal()
 
     num_points = 20
     kk = np.linspace(0, 0.57, num_points, endpoint=True)
@@ -95,4 +103,3 @@ def main():
 if __name__ == '__main__':
 
     main()
-

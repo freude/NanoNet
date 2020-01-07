@@ -25,7 +25,7 @@ def mat_mul(list_of_matrices):
     return unity
 
 
-def recursive_gf(energy, mat_l_list, mat_d_list, mat_u_list, s_in=0, s_out=0):
+def recursive_gf(energy, mat_l_list, mat_d_list, mat_u_list, s_in=0, s_out=0, damp=0.000001j):
     """
     The recursive Green's function algorithm is taken from
     M. P. Anantram, M. S. Lundstrom and D. E. Nikonov, Proceedings of the IEEE, 96, 1511 - 1550 (2008)
@@ -36,22 +36,25 @@ def recursive_gf(energy, mat_l_list, mat_d_list, mat_u_list, s_in=0, s_out=0):
 
 
     :param energy:                     energy
+    :type energy:                      numpy array
     :param mat_d_list:                 list of diagonal blocks
+    :type mat_d_list:                  list of numpy arrays
     :param mat_u_list:                 list of upper-diagonal blocks
+    :type mat_u_list:                  list of numpy arrays
     :param mat_l_list:                 list of lower-diagonal blocks
+    :type mat_l_list:                  list of numpy arrays
 
     :return grd, grl, gru, gr_left:    retarded Green's
                                        function: block-diagonal,
                                                  lower block-diagonal,
                                                  upper block-diagonal,
                                                  left-connected
+    :rtype grd, grl, gru, gr_left:     list of numpy arrays
     """
     # -------------------------------------------------------------------
     # ---------- convert input arrays to the matrix data type -----------
     # ----------------- in case they are not matrices -------------------
     # -------------------------------------------------------------------
-
-    damp = 0.5e-13
 
     for jj, item in enumerate(mat_d_list):
         mat_d_list[jj] = np.asmatrix(item)

@@ -22,7 +22,7 @@ def main(energy, ef1, tempr):
         kb = 8.61733e-5  # Boltzmann constant in eV
         return 1.0 / (1.0 + np.exp((energy - ef) / (kb * temp)))
 
-    path_to_xyz_file = 'input_samples/bi_nanoribbon_090.xyz'
+    path_to_xyz_file = 'input_samples/bi_nanoribbon_014.xyz'
 
     bi = tb.Orbitals('Bi')
     bi.add_orbital("s", energy=-10.906, principal=0, orbital=0, magnetic= 0, spin=0)
@@ -44,10 +44,12 @@ def main(energy, ef1, tempr):
     h.initialize(radial_dep)
     period = data_bi_nanoribbon.lattice_constant * np.array([1.0, 0.0, 0.0])
     h.set_periodic_bc([period])
-    h_l, h_0, h_r = h.get_coupling_hamiltonians()
+    h_l, h_0, h_r = h.get_hamiltonians()
 
     tr = np.zeros((energy.shape[0]))
     dens = np.zeros((energy.shape[0], h.num_of_nodes))
+
+    diags = np.zeros((energy.shape[0], h.num_of_nodes))
 
     for j, E in enumerate(energy):
         L, R = tb.surface_greens_function(E, h_l, h_0, h_r, iterate=5)
@@ -64,6 +66,10 @@ def main(energy, ef1, tempr):
         gamma_r = 1j * (np.matrix(R) - np.matrix(R).H)
         tr[j] = np.real(np.trace(gamma_l * g_trans * gamma_r * g_trans.H))
 
+        gn_diag = np.diag(grd[0])
+        gn_diag = np.reshape(gn_diag, (h.num_of_nodes, -1))
+        diags[j, :] = 2 * np.sum(gn_diag, axis=1)
+
         print("{} of {}: energy is {}".format(j + 1, energy.shape[0], E))
 
         tr = np.array(tr)
@@ -71,9 +77,9 @@ def main(energy, ef1, tempr):
 
         ind = np.argsort(np.array(h._coords)[:, 1])
         # gn_diag = np.concatenate((np.diag(gnd[0])[ind], np.diag(gnd[1])[ind], np.diag(gnd[2])[ind]))
-        gn_diag = np.diag(gnd[0])
-        gn_diag = np.reshape(gn_diag, (h._orbitals_dict['Bi'].num_of_orbitals, -1))
-        dens[j, :] = 2 * np.sum(gn_diag, axis=0)
+        gn_diag = np.diag(np.imag(grd[0]))
+        gn_diag = np.reshape(gn_diag, (h.num_of_nodes, -1))
+        dens[j, :] = 2 * np.sum(gn_diag, axis=1)
 
     return tr, dens
 
@@ -97,5 +103,13 @@ if __name__ == '__main__':
     ax.set_xlabel(r'Energy (eV)')
     plt.show()
 
+    plt.figure(figsize=[5, 10])
+    ax = plt.axes()
+    ax.contourf(np.arange(14), energy, dens, 200, cmap='terrain')
+    ax.set_ylabel(r'Energy (eV)')
+    ax.set_xlabel(r'Site number')
+    plt.show()
+
     data_to_write = np.c_[energy[:, None], tr]
     np.savetxt(path_to_dat_file, np.c_[data_to_write])
+

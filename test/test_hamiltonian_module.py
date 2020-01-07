@@ -9,7 +9,6 @@ def test_simple_atomic_chain():
 
     a = tb.Orbitals('A')
     a.add_orbital(title='s', energy=-1, )
-    tb.Orbitals.orbital_sets = {'A': a}
 
     xyz_file = """1
     H cell
@@ -18,8 +17,6 @@ def test_simple_atomic_chain():
     tb.set_tb_params(PARAMS_A_A={'ss_sigma': -1.0})
     h = tb.Hamiltonian(xyz=xyz_file, nn_distance=1.1)
     h.initialize()
-
-    assert (h.is_hermitian(), True)
 
     PRIMITIVE_CELL = [[0, 0, l_const]]
     h.set_periodic_bc(PRIMITIVE_CELL)
@@ -50,8 +47,6 @@ def test_atomic_chain_two_kinds_of_atoms():
     b = tb.Orbitals('B')
     b.add_orbital(title='s', energy=site_energy2, )
 
-    tb.Orbitals.orbital_sets = {'A': a, 'B': b}
-
     xyz_file = """2
     H cell
     A       0.0000000000    0.0000000000    0.0000000000
@@ -60,8 +55,6 @@ def test_atomic_chain_two_kinds_of_atoms():
     tb.set_tb_params(PARAMS_A_B={'ss_sigma': coupling})
     h = tb.Hamiltonian(xyz=xyz_file, nn_distance=1.1)
     h.initialize()
-
-    assert(h.is_hermitian(), True)
 
     PRIMITIVE_CELL = [[0, 0, l_const]]
     h.set_periodic_bc(PRIMITIVE_CELL)
@@ -368,5 +361,5 @@ def expected_bulk_silicon_band_structure():
 
 if __name__ == '__main__':
     # test_simple_atomic_chain()
-    # test_atomic_chain_two_kinds_of_atoms()
-    test_bulk_silicon()
+    test_atomic_chain_two_kinds_of_atoms()
+    # test_bulk_silicon()
