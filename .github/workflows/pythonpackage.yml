@@ -20,10 +20,12 @@ jobs:
       run: |
         sudo apt-get install libopenmpi-dev
         python -m pip install --upgrade pip
+        pip install python-coveralls
+        pip install coverage==4.5.4
         pip install -r requirements.txt
-    - name: Lint with flake8
+    - name: Install Nanonet
       run: |
         pip install .
     - name: Test with nose
       run: |
-        nosetests
+        nosetests .
