@@ -28,4 +28,5 @@ jobs:
         pip install .
     - name: Test with nose
       run: |
+        touch __init__.py
         nosetests .
