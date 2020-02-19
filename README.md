@@ -38,7 +38,7 @@ pip install -r requirements.txt
 
 ### Installing
 
-In order to install the package `tb` just invoke
+In order to install the package `Nanonet` just invoke
 the following line in the bash from within the source directory:
 
 ```
