@@ -20,7 +20,7 @@ All computations can be governed by means of the python application programming 
 
 ## Getting Started
 
-### Prerequisites
+### Requirements
 
 The source distribution can be obtained from GitHub:
 
@@ -29,7 +29,7 @@ git clone https://github.com/freude/NanoNet.git
 cd NanoNet
 ```
 
-All dependencies can be installed at once by invoking the following command
+`Nanonet` requires `openmpi` to be installed in the system. All other dependencies can be installed at once by invoking the following command
  from within the source directory:
 
 ```bash
