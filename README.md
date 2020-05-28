@@ -74,7 +74,7 @@ in the directory `jupyter_notebooks` inside the source directory.
 If the package is properly installed, the work starts with the import of all necessary modules:
 
 ```python
-import tb
+import nanonet.tb as tb
 ```
 
 Below we demonstrate band structure computation for bulk silicon using empirical tight-binding method.
