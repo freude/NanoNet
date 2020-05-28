@@ -1,6 +1,6 @@
 import unittest
-import tb.tb_script as tb_script
-import tb.tbmpi_script as tbmpi_script
+import nanonet.tb.tb_script as tb_script
+import nanonet.tb.tbmpi_script as tbmpi_script
 
 
 class Test(unittest.TestCase):

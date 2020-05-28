@@ -1,10 +1,9 @@
 import sys
-import matplotlib.pyplot as plt
 import numpy as np
-import tb
-import negf
-from negf.hamiltonian_chain import HamiltonianChain
-from negf.recursive_greens_functions import recursive_gf
+import nanonet.tb as tb
+import nanonet.negf as negf
+from nanonet.negf.hamiltonian_chain import HamiltonianChain
+from nanonet.negf.recursive_greens_functions import recursive_gf
 
 np.warnings.filterwarnings('ignore')
 
@@ -682,7 +681,7 @@ def expected_dens_of_complex_chain():
 
 
 def test_double_barrier_density_recursive(single_period_test=complex_chain, periods=20):
-    from negf.field import Field1D
+    from nanonet.negf.field import Field1D
 
     def qw(coord, coords_of_steps, jumps, width=1):
         ans = 0

@@ -9,8 +9,8 @@ from collections import OrderedDict
 import logging
 import numpy as np
 import scipy.spatial
-from tb.abstract_interfaces import AbstractStructureDesigner
-from tb.aux_functions import xyz2np, count_species, is_in_coords, print_dict
+from nanonet.tb.abstract_interfaces import AbstractStructureDesigner
+from nanonet.tb.aux_functions import xyz2np, count_species, is_in_coords, print_dict
 
 
 class StructDesignerXYZ(AbstractStructureDesigner):

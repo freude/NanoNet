@@ -5,7 +5,7 @@ from __future__ import print_function, division
 import pickle
 import os.path
 import numpy as np
-from negf.greens_functions import surface_greens_function_poles
+from nanonet.negf.greens_functions import surface_greens_function_poles
 
 
 # def object_function(vec, energy, initial_basis, extended_basis, h_0, h_0_reduced):

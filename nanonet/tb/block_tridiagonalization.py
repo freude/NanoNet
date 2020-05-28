@@ -111,7 +111,7 @@ def cut_in_blocks(h_0, blocks):
     Examples
     --------
     >>> import numpy as np
-    >>> from tb.block_tridiagonalization import cut_in_blocks
+    >>> from nanonet.tb.block_tridiagonalization import cut_in_blocks
     >>> a = np.array([[1, 1, 0, 0], [1, 1, 1, 0], [0, 1, 1, 1], [0, 0, 1, 1]])
     >>> a
     array([[1, 1, 0, 0],
@@ -466,7 +466,7 @@ def compute_edge(mat):
     Examples
     --------
     >>> import numpy as np
-    >>> from tb.block_tridiagonalization import compute_edge
+    >>> from nanonet.tb.block_tridiagonalization import compute_edge
     >>> input_matrix = np.array([[1, 1, 0, 0], [1, 1, 1, 0], [0, 1, 1, 1], [0, 0, 1, 1]])
     >>> input_matrix
     array([[1, 1, 0, 0],
@@ -533,7 +533,7 @@ def compute_blocks(left_block, right_block, edge, edge1):
     Examples
     --------
     >>> import numpy as np
-    >>> from tb.block_tridiagonalization import compute_edge
+    >>> from nanonet.tb.block_tridiagonalization import compute_edge
     >>> input_matrix = np.array([[1, 1, 0, 0], [1, 1, 1, 0], [0, 1, 1, 1], [0, 0, 1, 1]])
     >>> input_matrix
     array([[1, 1, 0, 0],

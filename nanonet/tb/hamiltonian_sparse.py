@@ -7,8 +7,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import scipy.sparse.linalg as splin
 import scipy.sparse as sp
-from tb.orbitals import Orbitals
-from tb.hamiltonian import Hamiltonian
+from nanonet.tb.orbitals import Orbitals
+from nanonet.tb.hamiltonian import Hamiltonian
 
 
 class HamiltonianSp(Hamiltonian):

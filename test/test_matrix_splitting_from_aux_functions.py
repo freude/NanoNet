@@ -1,6 +1,6 @@
 import unittest
 import numpy as np
-from tb.aux_functions import compute_edge, blocksandborders_constrained
+from nanonet.tb.aux_functions import compute_edge, blocksandborders_constrained
 
 
 class Test(unittest.TestCase):

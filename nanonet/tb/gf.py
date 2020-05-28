@@ -4,7 +4,7 @@ import argparse
 import pickle
 import matplotlib.pyplot as plt
 import numpy as np
-import tb
+import nanonet.tb as tb
 
 
 def main():

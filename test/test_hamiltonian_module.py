@@ -1,5 +1,5 @@
 import numpy as np
-import tb
+import nanonet.tb as tb
 
 
 def test_simple_atomic_chain():

@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_namespace_packages
 
 
 setup(name='nanonet',
@@ -7,7 +7,7 @@ setup(name='nanonet',
       author='M. V. Klymenko, J. A. Vaitkus, J. S. Smith, J. H. Cole',
       author_email='mike.klymenko@rmit.edu.au',
       license='MIT',
-      packages=['tb', 'negf', 'verbosity'],
+      packages=find_namespace_packages(include=['nanonet.*']),
       entry_points={
         'console_scripts': ['tb = tb.tb_script:main', 'tbmpi = tb.tbmpi_script:main', 'gf = tb.gf_script:main'],
       },

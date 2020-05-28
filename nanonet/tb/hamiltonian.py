@@ -9,13 +9,13 @@ import logging
 import inspect
 from operator import mul
 import numpy as np
-from tb.abstract_interfaces import AbstractBasis
-from tb.structure_designer import StructDesignerXYZ, CyclicTopology
-from tb.diatomic_matrix_element import me
-from tb.orbitals import Orbitals
-from tb.aux_functions import dict2xyz
-from tb.block_tridiagonalization import split_into_subblocks_optimized, cut_in_blocks
-import verbosity
+from nanonet.tb.abstract_interfaces import AbstractBasis
+from nanonet.tb.structure_designer import StructDesignerXYZ, CyclicTopology
+from nanonet.tb.diatomic_matrix_element import me
+from nanonet.tb.orbitals import Orbitals
+from nanonet.tb.aux_functions import dict2xyz
+from nanonet.tb.block_tridiagonalization import split_into_subblocks_optimized, cut_in_blocks
+import nanonet.verbosity as verbosity
 
 
 unique_distances = set()

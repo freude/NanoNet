@@ -4,7 +4,6 @@ The module contains a set of auxiliary functions facilitating the tight-binding 
 from __future__ import print_function
 from __future__ import absolute_import
 from itertools import product
-import math
 import numpy as np
 import yaml
 
@@ -183,7 +182,7 @@ def get_k_coords(special_points, num_of_points, label):
     :rtype:                  numpy.ndarray
     """
 
-    from tb.special_points import SPECIAL_K_POINTS_BI, SPECIAL_K_POINTS_SI
+    from nanonet.tb.special_points import SPECIAL_K_POINTS_BI, SPECIAL_K_POINTS_SI
 
     if isinstance(label, str):
         if label == 'Bi':
@@ -379,7 +378,7 @@ def split_into_subblocks(h_0, h_l, h_r):
     left_block = max(h_l_h, h_r_v)
     right_block = max(h_r_h, h_l_v)
 
-    from tb.sorting_algorithms import split_matrix_0, cut_in_blocks, split_matrix
+    from nanonet.tb.sorting_algorithms import split_matrix_0, cut_in_blocks, split_matrix
 
     blocks = split_matrix_0(h_0, left=left_block, right=right_block)
     h_0_s, h_l_s, h_r_s = cut_in_blocks(h_0, blocks)

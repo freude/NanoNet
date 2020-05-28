@@ -1,5 +1,5 @@
 import unittest
-from tb.aux_functions import xyz2np
+from nanonet.tb.aux_functions import xyz2np
 
 
 class Test(unittest.TestCase):

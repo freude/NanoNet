@@ -4,7 +4,7 @@ the linear combination of atomic orbitals (LCAO). Also, the module contains a se
 `SiliconSP3D5S`, `HydrogenS`, `Bismuth`.
 """
 import sys
-from tb.aux_functions import print_table
+from nanonet.tb.aux_functions import print_table
 
 
 class Orbitals(object):

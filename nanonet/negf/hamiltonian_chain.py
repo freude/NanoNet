@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.linalg import block_diag
-from tb.aux_functions import yaml_parser
-from negf.field import Field
+from nanonet.tb.aux_functions import yaml_parser
+from nanonet.negf.field import Field
 
 
 def fd(energy, ef, temp):

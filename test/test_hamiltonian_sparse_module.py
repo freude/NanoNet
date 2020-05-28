@@ -1,5 +1,5 @@
 import numpy as np
-import tb
+import nanonet.tb as tb
 from test.test_hamiltonian_module import expected_bulk_silicon_band_structure
 
 
