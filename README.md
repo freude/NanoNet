@@ -5,6 +5,7 @@
 [![Build Status](https://travis-ci.org/freude/NanoNet.svg)](https://travis-ci.org/freude)
 [![](https://github.com/freude/NanoNet/workflows/Nanonet%20tests/badge.svg)](https://github.com/freude/NanoNet/actions?query=workflow%3A%22Nanonet+tests%22)
 [![Coverage Status](https://coveralls.io/repos/github/freude/NanoNet/badge.svg?branch=master)](https://coveralls.io/github/freude/NanoNet?branch=master)
+[![codecov](https://codecov.io/gh/freude/NanoNet/branch/master/graph/badge.svg)](https://codecov.io/gh/freude/NanoNet)
 [![CodeFactor](https://www.codefactor.io/repository/github/freude/nanonet/badge/master)](https://www.codefactor.io/repository/github/freude/nanonet/overview/master)
 
 <img src="https://user-images.githubusercontent.com/4588093/65398380-1f684380-ddfa-11e9-9e87-5aab6cf417b8.png" width="200">
