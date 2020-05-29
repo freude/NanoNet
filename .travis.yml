@@ -4,6 +4,7 @@ python:
 # command to install dependencies
 install:
     - sudo apt-get install libopenmpi-dev
+    - pip install codecov
     - pip install python-coveralls
     - pip install coverage==4.5.4
     - pip install -r requirements.txt
@@ -17,4 +18,5 @@ branches:
         - develop
 after_success:
     - coveralls                     # upload reports to coveralls.io
+    - codecov
 
