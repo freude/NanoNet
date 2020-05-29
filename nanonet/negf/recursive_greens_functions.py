@@ -17,7 +17,7 @@ def mat_mul(list_of_matrices):
     unity = np.eye(list_of_matrices[num_of_mat - 1].shape[0])
 
     for j, item in enumerate(list_of_matrices):
-        list_of_matrices[j] = np.matrix(item)
+        list_of_matrices[j] = item
 
     for j in range(9, -1, -1):
         unity = list_of_matrices[j] * unity

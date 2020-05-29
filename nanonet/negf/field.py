@@ -106,17 +106,17 @@ class Field(object):
         :return:
         """
         if axis == 'x':
-            rot_mat = np.matrix([[1.0, 0.0, 0.0],
-                                 [0.0, np.cos(theta), -np.sin(theta)],
-                                 [0.0, np.sin(theta), np.cos(theta)]])
+            rot_mat = np.array([[1.0, 0.0, 0.0],
+                                [0.0, np.cos(theta), -np.sin(theta)],
+                                [0.0, np.sin(theta), np.cos(theta)]])
         elif axis == 'y':
-            rot_mat = np.matrix([[np.cos(theta), 0.0, np.sin(theta)],
-                                 [0.0, 1.0, 0.0],
-                                 [-np.sin(theta), 0.0, np.cos(theta)]])
+            rot_mat = np.array([[np.cos(theta), 0.0, np.sin(theta)],
+                                [0.0, 1.0, 0.0],
+                                [-np.sin(theta), 0.0, np.cos(theta)]])
         elif axis == 'z':
-            rot_mat = np.matrix([[np.cos(theta), -np.sin(theta), 0.0],
-                                 [np.sin(theta), np.cos(theta), 0.0],
-                                 [0.0, 0.0, 1.0]])
+            rot_mat = np.array([[np.cos(theta), -np.sin(theta), 0.0],
+                                [np.sin(theta), np.cos(theta), 0.0],
+                                [0.0, 0.0, 1.0]])
         else:
             raise ValueError('Wrong axis')
 
@@ -144,7 +144,7 @@ class Field(object):
 
             if len(self._rot_mat) > 0:
                 for item in self._rot_mat:
-                    coords[j] = np.array(np.matrix(item) * np.matrix(coords[j]).T).T[0]
+                    coords[j] = np.dot(item * coords[j].T).T[0]
 
         return coords
 
@@ -159,7 +159,7 @@ class Field(object):
 
             if len(self._rot_mat) > 0:
                 for item in reversed(self._rot_mat):
-                    coords[j] = np.array(np.linalg.inv(np.matrix(item)) * np.matrix(coords[j]).T).T[0]
+                    coords[j] = np.dot(np.linalg.inv(item), coords[j].T).T[0]
 
             if isinstance(translate, np.ndarray):
                 coords[j] = coords[j] + np.squeeze(translate)
@@ -208,9 +208,9 @@ class Field(object):
         vec[eps[0]] = 1.0
         vec = np.array(vec)
 
-        rot_mat = np.matrix(np.identity(3))
+        rot_mat = np.identity(3)
         # rot_mat[:2, :2] = np.matrix(np.sqrt(1.0 - self._rot_mat[0][1:, 1:]**2))
-        rot_mat[:2, :2] = np.matrix(self._rot_mat[0][1:, 1:])
+        rot_mat[:2, :2] = self._rot_mat[0][1:, 1:]
         rot_mat[0, 1] = -rot_mat[0, 1]
         rot_mat[1, 0] = -rot_mat[1, 0]
         # rot_mat = np.linalg.inv(rot_mat)
@@ -219,7 +219,7 @@ class Field(object):
         # rot_mat[0, 0] = -rot_mat[0, 0]
         # rot_mat[1, 1] = -rot_mat[1, 1]
 
-        vec = np.array(rot_mat * np.matrix(vec).T).T[0]
+        vec = np.dot(rot_mat, vec.T).T[0]
 
         dist = X[0] * vec[0] + X[1] * vec[1] + X[2] * vec[2] + eps[1] + \
                0.5 * mol_y_length * (1.0 - np.sin(1.13446)) + \

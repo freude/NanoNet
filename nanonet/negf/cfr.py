@@ -49,11 +49,10 @@ class CFR(object):
         self.cutoff = cutoff
 
         b_mat = [1 / (2.0 * np.sqrt((2 * (j + 1) - 1) * (2 * (j + 1) + 1))) for j in range(0, cutoff - 1)]
-        b_mat = np.matrix(np.diag(b_mat, -1)) + np.matrix(np.diag(b_mat, 1))
+        b_mat = np.diag(b_mat, -1) + np.diag(b_mat, 1)
 
         poles, residues = eig(b_mat)
 
-        residues = np.array(np.matrix(residues))
         residues = 0.25 * np.array([np.abs(residues[0, j]) ** 2 / (poles[j] ** 2) for j in range(residues.shape[0])])
 
         self.fd_poles_coords = poles

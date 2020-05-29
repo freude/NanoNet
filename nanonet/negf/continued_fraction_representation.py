@@ -34,11 +34,10 @@ def approximant_diff(energy, poles, residues):
 def poles_and_residues(cutoff=2):
 
     b_mat = [1 / (2.0 * np.sqrt((2*(j+1) - 1)*(2*(j+1) + 1))) for j in range(0, cutoff-1)]
-    b_mat = np.matrix(np.diag(b_mat, -1)) + np.matrix(np.diag(b_mat, 1))
+    b_mat = np.diag(b_mat, -1) + np.diag(b_mat, 1)
 
     poles, residues = eig(b_mat)
 
-    residues = np.array(np.matrix(residues))
     # arg = np.argmax(np.abs(residues), axis=0)
 
     residues = 0.25 * np.array([np.abs(residues[0, j])**2 / (poles[j] ** 2) for j in range(residues.shape[0])])
