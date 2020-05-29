@@ -40,11 +40,11 @@ class HamiltonianChain(object):
 
         for jjj in range(len(self.h_0)):
             if jjj == 0:
-                sgf[jjj] = -2.0 * np.matrix(np.imag(self.sgf_r) * fd(self.energy, self.ef1, self.tempr))
+                sgf[jjj] = -2.0 * np.imag(self.sgf_r) * fd(self.energy, self.ef1, self.tempr)
             elif jjj == len(self.h_0) - 1:
-                sgf[jjj] = -2.0 * np.matrix(np.imag(self.sgf_l) * fd(self.energy, self.ef2, self.tempr))
+                sgf[jjj] = -2.0 * np.imag(self.sgf_l) * fd(self.energy, self.ef2, self.tempr)
             else:
-                sgf[jjj] = np.matrix(np.zeros(self.h_0[jjj].shape))
+                sgf[jjj] = np.zeros(self.h_0[jjj].shape)
 
         return sgf
 

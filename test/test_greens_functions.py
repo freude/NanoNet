@@ -69,11 +69,10 @@ def single_atom_chain():
         sgf_l.append(se_l)
         sgf_r.append(se_r)
         gf = np.linalg.pinv(E * np.identity(num_sites) - h_0 - se_l - se_r)
-        gf = np.matrix(gf)
-        gamma_l = 1j * (np.matrix(se_l) - np.matrix(se_l).H)
-        gamma_r = 1j * (np.matrix(se_r) - np.matrix(se_r).H)
-        tr[j] = np.real(np.trace(gamma_l * gf * gamma_r * gf.H))
-        dos[j] = np.real(np.trace(1j * (gf - gf.H)))
+        gamma_l = 1j * (se_l - se_l.conj().T)
+        gamma_r = 1j * (se_r - se_r.conj().T)
+        tr[j] = np.real(np.trace(gamma_l.dot(gf).dot(gamma_r).dot(gf.conj().T)))
+        dos[j] = np.real(np.trace(1j * (gf - gf.conj().T)))
 
     sgf_l = np.array(sgf_l)
     sgf_r = np.array(sgf_r)
@@ -130,11 +129,11 @@ def complex_chain():
     dos = np.zeros((energy.shape[0]))
 
     for j, E in enumerate(energy):
-        gf0 = np.matrix(gf[j, :, :])
-        gamma_l = 1j * (np.matrix(sgf_l[j, :, :]) - np.matrix(sgf_l[j, :, :]).H)
-        gamma_r = 1j * (np.matrix(sgf_r[j, :, :]) - np.matrix(sgf_r[j, :, :]).H)
-        tr[j] = np.real(np.trace(gamma_l * gf0 * gamma_r * gf0.H))
-        dos[j] = np.real(np.trace(1j * (gf0 - gf0.H)))
+        gf0 = gf[j, :, :]
+        gamma_l = 1j * (sgf_l[j, :, :] - sgf_l[j, :, :].conj().T)
+        gamma_r = 1j * (sgf_r[j, :, :] - sgf_r[j, :, :].conj().T)
+        tr[j] = np.real(np.trace(gamma_l.dot(gf0).dot(gamma_r).dot(gf0.conj().T)))
+        dos[j] = np.real(np.trace(1j * (gf0 - gf0.conj().T)))
 
     return energy, dos, tr, h, sgf_l, sgf_r
 
@@ -175,13 +174,12 @@ def run_for_periods(single_period_test, periods):
         h_chain.add_self_energies(sgf_l[j, :, :], sgf_r[j, :, :])
         gf = np.linalg.pinv(E * np.identity(num_sites1) - h_chain.get_matrix())
         h_chain.remove_self_energies()
-        gf = np.matrix(gf)
         se_l, se_r = h_chain.translate_self_energies(sgf_l[j, :, :], sgf_r[j, :, :])
 
-        gamma_l = 1j * (np.matrix(se_l) - np.matrix(se_l).H)
-        gamma_r = 1j * (np.matrix(se_r) - np.matrix(se_r).H)
-        tr1[j] = np.real(np.trace(gamma_l * gf * gamma_r * gf.H))
-        dos1[j] = np.real(np.trace(1j * (gf - gf.H))) / num_periods
+        gamma_l = 1j * (se_l - se_l.conj().T)
+        gamma_r = 1j * (se_r - se_r.conj().T)
+        tr1[j] = np.real(np.trace(gamma_l.dot(gf).dot(gamma_r).dot(gf.conj().T)))
+        dos1[j] = np.real(np.trace(1j * (gf - gf.conj().T))) / num_periods
 
     print('hi')
     np.testing.assert_allclose(dos, dos1, atol=15)
@@ -207,7 +205,7 @@ def run_for_periods_recursive(single_period_test, periods):
         h_chain.remove_self_energies()
 
         for jj in range(len(grd)):
-            dos1[j] = dos1[j] + np.real(np.trace(1j * (grd[jj] - grd[jj].H))) / num_periods
+            dos1[j] = dos1[j] + np.real(np.trace(1j * (grd[jj] - grd[jj].conj().T))) / num_periods
 
     # dos1[dos1 > 100] = 0
     np.testing.assert_allclose(dos, dos1, atol=25)
@@ -726,7 +724,7 @@ def test_double_barrier_density_recursive(single_period_test=complex_chain, peri
         h_chain.remove_self_energies()
 
         for jj in range(num_periods):
-            dos1[j] = dos1[j] + np.real(np.trace(1j * (grd[jj] - grd[jj].H))) / num_periods
+            dos1[j] = dos1[j] + np.real(np.trace(1j * (grd[jj] - grd[jj].conj().T))) / num_periods
             dens[j, jj] = 2 * np.trace(gnd[jj])
 
     np.testing.assert_allclose(np.sum(dens, axis=1)[::2], expected_dens_of_complex_chain(), rtol=1e-2)

@@ -77,20 +77,20 @@ def recursive_gf(energy, mat_l_list, mat_d_list, mat_u_list, s_in=0, s_out=0, da
     gr_left[0] = mat_left_div(-mat_d_list[0], np.eye(mat_shapes[0][0]))  # Initialising the retarded left connected.
 
     for q in range(num_of_matrices - 1):  # Recursive algorithm (B2)
-        gr_left[q + 1] = mat_left_div((-mat_d_list[q + 1] - mat_l_list[q] * gr_left[q] * mat_u_list[q]),
+        gr_left[q + 1] = mat_left_div((-mat_d_list[q + 1] - mat_l_list[q].dot(gr_left[q]).dot(mat_u_list[q])),
                                       np.eye(mat_shapes[q + 1][0]))      # The left connected recursion.
     # -------------------------------------------------------------------
 
     grl = [None for _ in range(num_of_matrices-1)]
     gru = [None for _ in range(num_of_matrices-1)]
-    grd = copy.copy(gr_left)                                       # Our glorious benefactor.
+    grd = copy.copy(gr_left)                                             # Our glorious benefactor.
     g_trans = copy.copy(gr_left[len(gr_left)-1])
 
-    for q in range(num_of_matrices - 2, -1, -1):                   # Recursive algorithm
-        grl[q] = grd[q + 1] * mat_l_list[q] * gr_left[q]           # (B5) We get the off-diagonal blocks for free.
-        gru[q] = gr_left[q] * mat_u_list[q] * grd[q + 1]           # (B6) because we need .Tthem.T for the next calc:
-        grd[q] = gr_left[q] + gr_left[q] * mat_u_list[q] * grl[q]  # (B4) I suppose I could also use the lower.
-        g_trans = gr_left[q] * mat_u_list[q] * g_trans
+    for q in range(num_of_matrices - 2, -1, -1):                         # Recursive algorithm
+        grl[q] = grd[q + 1].dot(mat_l_list[q]).dot(gr_left[q])           # (B5) We get the off-diagonal blocks for free.
+        gru[q] = gr_left[q].dot(mat_u_list[q]).dot(grd[q + 1])           # (B6) because we need .Tthem.T for the next calc:
+        grd[q] = gr_left[q] + gr_left[q].dot(mat_u_list[q]).dot(grl[q])  # (B4) I suppose I could also use the lower.
+        g_trans = gr_left[q].dot(mat_u_list[q]).dot(g_trans)
 
     # -------------------------------------------------------------------
     # ------ compute the electron correlation function if needed --------
@@ -99,12 +99,12 @@ def recursive_gf(energy, mat_l_list, mat_d_list, mat_u_list, s_in=0, s_out=0, da
     if isinstance(s_in, list):
 
         gin_left = [None for _ in range(num_of_matrices)]
-        gin_left[0] = gr_left[0] * s_in[0] * np.conj(gr_left[0])
+        gin_left[0] = gr_left[0].dot(s_in[0]).dot(np.conj(gr_left[0]))
 
         for q in range(num_of_matrices - 1):
-            sla2 = mat_l_list[q] * gin_left[q] * np.conj(mat_u_list[q])
+            sla2 = mat_l_list[q].dot(gin_left[q]).dot(np.conj(mat_u_list[q]))
             prom = s_in[q + 1] + sla2
-            gin_left[q + 1] = np.real(gr_left[q + 1] * prom * np.conj(gr_left[q + 1]))
+            gin_left[q + 1] = np.real(gr_left[q + 1].dot(prom).dot(np.conj(gr_left[q + 1])))
 
         # ---------------------------------------------------------------
 
@@ -113,10 +113,11 @@ def recursive_gf(energy, mat_l_list, mat_d_list, mat_u_list, s_in=0, s_out=0, da
         gnd = copy.copy(gin_left)
 
         for q in range(num_of_matrices - 2, -1, -1):               # Recursive algorithm
-            gnl[q] = grd[q + 1] * mat_l_list[q] * gin_left[q] + gnd[q + 1] * np.conj(mat_l_list[q]) * np.conj(gr_left[q])
+            gnl[q] = grd[q + 1].dot(mat_l_list[q]).dot(gin_left[q]) +\
+                     gnd[q + 1].dot(np.conj(mat_l_list[q])).dot(np.conj(gr_left[q]))
             gnd[q] = np.real(gin_left[q] +
-                             gr_left[q] * mat_u_list[q] * gnd[q + 1] * np.conj(mat_l_list[q]) * np.conj(gr_left[q]) +
-                             (gin_left[q] * np.conj(mat_u_list[q]) * np.conj(grl[q]) + gru[q] * mat_l_list[q] * gin_left[q]))
+                             gr_left[q].dot(mat_u_list[q]).dot(gnd[q + 1]).dot(np.conj(mat_l_list[q])).dot(np.conj(gr_left[q])) +
+                             (gin_left[q].dot(np.conj(mat_u_list[q])).dot(np.conj(grl[q])) + gru[q].dot(mat_l_list[q]).dot(gin_left[q])))
 
             gnu[q] = np.conj(gnl[q])
 
@@ -126,12 +127,12 @@ def recursive_gf(energy, mat_l_list, mat_d_list, mat_u_list, s_in=0, s_out=0, da
     if isinstance(s_out, list):
 
         gip_left = [None for _ in range(num_of_matrices)]
-        gip_left[0] = gr_left[0] * s_out[0] * np.conj(gr_left[0])
+        gip_left[0] = gr_left[0].dot(s_out[0]).dot(np.conj(gr_left[0]))
 
         for q in range(num_of_matrices - 1):
-            sla2 = mat_l_list[q] * gip_left[q] * np.conj(mat_u_list[q])
+            sla2 = mat_l_list[q].dot(gip_left[q]).dot(np.conj(mat_u_list[q]))
             prom = s_out[q + 1] + sla2
-            gip_left[q + 1] = np.real(gr_left[q + 1] * prom * np.conj(gr_left[q + 1]))
+            gip_left[q + 1] = np.real(gr_left[q + 1].dot(prom).dot(np.conj(gr_left[q + 1])))
 
         # ---------------------------------------------------------------
 
@@ -140,12 +141,12 @@ def recursive_gf(energy, mat_l_list, mat_d_list, mat_u_list, s_in=0, s_out=0, da
         gpd = copy.copy(gip_left)
 
         for q in range(num_of_matrices - 2, -1, -1):               # Recursive algorithm
-            gpl[q] = grd[q + 1] * mat_l_list[q] * gip_left[q] + gpd[q + 1] * np.conj(mat_l_list[q]) * np.conj(gr_left[q])
+            gpl[q] = grd[q + 1].dot(mat_l_list[q]).dot(gip_left[q]) + gpd[q + 1].dot(np.conj(mat_l_list[q])).dot(np.conj(gr_left[q]))
             gpd[q] = np.real(gip_left[q] +
-                             gr_left[q] * mat_u_list[q] * gpd[q + 1] * np.conj(mat_l_list[q]) * np.conj(gr_left[q]) +
-                             (gip_left[q] * np.conj(mat_u_list[q]) * np.conj(grl[q]) + gru[q] * mat_l_list[q] * gip_left[q]))
+                             gr_left[q].dot(mat_u_list[q]).dot(gpd[q + 1]).dot(np.conj(mat_l_list[q])).dot(np.conj(gr_left[q])) +
+                             gip_left[q].dot(np.conj(mat_u_list[q])).dot(np.conj(grl[q])) + gru[q].dot(mat_l_list[q]).dot(gip_left[q]))
 
-            gpu[0] = gpl[0].H
+            gpu[0] = gpl[0].conj().T
 
     # -------------------------------------------------------------------
     # -- remove energy from the main diagonal of th Hamiltonian matrix --

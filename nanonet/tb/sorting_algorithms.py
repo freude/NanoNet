@@ -85,10 +85,9 @@ def sort_capacitance(coords, mat, left_lead, right_lead, **kwargs):
 
     mat = (mat != 0.0).astype(np.float)
     mat = 10 * (mat - np.diag(np.diag(mat)))
-    mat = np.matrix(mat - np.diag(np.sum(mat, axis=1)) + 0.001 * np.identity(mat.shape[0]))
+    mat = mat - np.diag(np.sum(mat, axis=1)) + 0.001 * np.identity(mat.shape[0])
 
-    aaa = np.matrix(charge)
-    col, info = lgmres(mat, aaa.T, x0=1.0 / np.diag(mat), tol=1e-5, maxiter=15)
+    col, info = lgmres(mat, charge.T, x0=1.0 / np.diag(mat), tol=1e-5, maxiter=15)
     col = col / np.max(col)
 
     indices = np.argsort(col, kind='heapsort')

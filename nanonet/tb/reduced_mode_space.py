@@ -36,36 +36,34 @@ from nanonet.negf.greens_functions import surface_greens_function_poles
 #     return fff
 def object_function1(vec, energy, init_basis, extended_basis, h_l, h_0, h_r, num_of_states):
 
-    vec = np.matrix(vec)
-    extended_basis1 = np.array(1.0 / np.sqrt(vec * vec.H)) * np.array(extended_basis * vec.T)
+    extended_basis1 = np.array(1.0 / np.sqrt(np.dot(vec, vec.conj().T))) * np.array(extended_basis * vec.T)
     extended_basis1 = np.hstack((init_basis, extended_basis1))
 
-    h_l_reduced = extended_basis1.H * h_l * extended_basis1
-    h_0_reduced = extended_basis1.H * h_0 * extended_basis1
-    h_r_reduced = extended_basis1.H * h_r * extended_basis1
+    h_l_reduced = np.dot(np.dot(extended_basis1.conj().T, h_l), extended_basis1)
+    h_0_reduced = np.dot(np.dot(extended_basis1.conj().T, h_0), extended_basis1)
+    h_r_reduced = np.dot(np.dot(extended_basis1.conj().T, h_r), extended_basis1)
 
     _, _, num_of_states1 = bs_vs_e(energy, h_l_reduced, h_0_reduced, h_r_reduced)
 
     print(num_of_states1 - num_of_states, ' : ', vec)
 
-    return num_of_states1 - num_of_states + (vec * vec.H - 1.0) ** 2
+    return num_of_states1 - num_of_states + (np.dot(vec * vec.conj().T) - 1.0) ** 2
 
 
 def object_function(vec, energy, init_basis, extended_basis, h_l, h_0, h_r, num_of_states):
 
-    vec = np.matrix(vec)
-    extended_basis1 = np.array(1.0 / np.sqrt(vec * vec.H)) * np.array(extended_basis * vec.T)
+    extended_basis1 = np.array(1.0 / np.sqrt(np.dot(vec, vec.conj().T))) * np.array(extended_basis * vec.T)
     extended_basis1 = np.hstack((init_basis, extended_basis1))
 
-    h_l_reduced = extended_basis1.H * h_l * extended_basis1
-    h_0_reduced = extended_basis1.H * h_0 * extended_basis1
-    h_r_reduced = extended_basis1.H * h_r * extended_basis1
+    h_l_reduced = np.dot(np.dot(extended_basis1.conj().T, h_l), extended_basis1)
+    h_0_reduced = np.dot(np.dot(extended_basis1.conj().T, h_0), extended_basis1)
+    h_r_reduced = np.dot(np.dot(extended_basis1.conj().T, h_r), extended_basis1)
 
     _, _, num_of_states1 = bs_vs_e(energy, h_l_reduced, h_0_reduced, h_r_reduced)
 
     print(num_of_states1 - num_of_states, ' : ', vec)
 
-    return num_of_states1 - num_of_states + (vec * vec.H - 1.0) ** 2
+    return num_of_states1 - num_of_states + (np.dot(vec, vec.conj().T) - 1.0) ** 2
 
 
 def bs(E, h_l, h_0, h_r):
@@ -104,7 +102,7 @@ def bs_vs_e(energy, h_l, h_0, h_r):
     num_of_states = vals_for_plot[::4, :].size - np.count_nonzero(np.isnan(vals_for_plot[::4, :]))
 
     if len(init_basis) > 0:
-        init_basis = np.matrix(np.hstack(tuple(init_basis)))
+        init_basis = np.hstack(tuple(init_basis))
 
     return init_basis, vals_for_plot, num_of_states
 
@@ -138,14 +136,15 @@ def reduce_mode_space(energy, h_l, h_0, h_r, thr, input_file=""):
 
     # orthogonalize initial basis
 
-    eee, vvv = np.linalg.eig(init_basis.H * init_basis)
-    init_basis = init_basis * vvv * np.matrix(np.diag(1.0/np.sqrt(eee)))
+    eee, vvv = np.linalg.eig(np.dot(init_basis.conj().T, init_basis))
+    init_basis = init_basis.dot(vvv).dot(np.diag(1.0/np.sqrt(eee)))
     init_basis = init_basis[:, np.where(eee > thr)[0]]
 
     # test reduced mode space
-    h_l_reduced = init_basis.H * h_l * init_basis
-    h_0_reduced = init_basis.H * h_0 * init_basis
-    h_r_reduced = init_basis.H * h_r * init_basis
+
+    h_l_reduced = np.dot(np.dot(init_basis.conj().T, h_l), init_basis)
+    h_0_reduced = np.dot(np.dot(init_basis.conj().T, h_0), init_basis)
+    h_r_reduced = np.dot(np.dot(init_basis.conj().T, h_r), init_basis)
 
     _, vals_for_plot_1, num_of_states1 = bs_vs_e(energy, h_l_reduced, h_0_reduced, h_r_reduced)
 

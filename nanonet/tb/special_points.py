@@ -2,8 +2,8 @@ import numpy as np
 
 
 def get_high_symmetry_point_in_cartesian_space(reciprocal_lattice_vectors, coordinate_of_high_symmetry_point):
-    cartesian_coordinate_in_reciprocal_space = np.squeeze(np.asarray(np.matrix(coordinate_of_high_symmetry_point) *
-                                                                     reciprocal_lattice_vectors)).tolist()
+    cartesian_coordinate_in_reciprocal_space = np.squeeze(np.dot(coordinate_of_high_symmetry_point,
+                                                                 reciprocal_lattice_vectors)).tolist()
     return cartesian_coordinate_in_reciprocal_space
 
 
@@ -26,7 +26,7 @@ SPECIAL_K_POINTS_SI = {
 }
 
 
-reciprocal_lattice_vectors_bi = g_bi * np.matrix([[-1.0, (-np.sqrt(3.0) / 3.0), (a_bi / c_bi)],
+reciprocal_lattice_vectors_bi = g_bi * np.array([[-1.0, (-np.sqrt(3.0) / 3.0), (a_bi / c_bi)],
                                                   [1.0, (-np.sqrt(3.0) / 3.0), (a_bi / c_bi)],
                                                   [0.0, (2.0 * np.sqrt(3.0) / 3.0), (a_bi / c_bi)]])
 

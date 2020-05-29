@@ -31,18 +31,18 @@ c_bi = 11.7967
 b_bi = a_bi / c_bi
 gamma_bi = 0.2303
 
-recip_lat_basis = np.matrix([[-1, -np.sqrt(3.0)/3.0, b_bi],
+recip_lat_basis = np.array([[-1, -np.sqrt(3.0)/3.0, b_bi],
                              [1, -np.sqrt(3.0)/3.0, b_bi],
                              [0, 2*np.sqrt(3.0)/3.0, b_bi]]) * 2 * PI / a_bi
 
 SPECIAL_K_POINTS_BI = {
-    'GAMMA': (recip_lat_basis * np.matrix([0, 0, 0]).T).tolist(),
-    'X': (recip_lat_basis * np.matrix([0.5, 0.5, 0.0]).T).tolist(),
-    'T': (recip_lat_basis * np.matrix([0.5, 0.5, 0.5]).T).tolist(),
-    'L': (recip_lat_basis * np.matrix([0.0, 0.5, 0.0]).T).tolist(),
-    'W': (recip_lat_basis * np.matrix([gamma_bi, 1.0-gamma_bi, 0.5]).T).tolist(),
-    'K': (recip_lat_basis * np.matrix([1.0/4+0.5*gamma_bi, 3.0/4-0.5*gamma_bi, 0.0]).T).tolist(),
-    'U': (recip_lat_basis * np.matrix([0.5*gamma_bi+0.25, 1.0-gamma_bi, 0.5*gamma_bi+0.25]).T).tolist()
+    'GAMMA': (recip_lat_basis * np.array([0, 0, 0]).T).tolist(),
+    'X': (recip_lat_basis * np.array([0.5, 0.5, 0.0]).T).tolist(),
+    'T': (recip_lat_basis * np.array([0.5, 0.5, 0.5]).T).tolist(),
+    'L': (recip_lat_basis * np.array([0.0, 0.5, 0.0]).T).tolist(),
+    'W': (recip_lat_basis * np.array([gamma_bi, 1.0-gamma_bi, 0.5]).T).tolist(),
+    'K': (recip_lat_basis * np.array([1.0/4+0.5*gamma_bi, 3.0/4-0.5*gamma_bi, 0.0]).T).tolist(),
+    'U': (recip_lat_basis * np.array([0.5*gamma_bi+0.25, 1.0-gamma_bi, 0.5*gamma_bi+0.25]).T).tolist()
 }
 
 # aaa = 3.289
@@ -50,9 +50,9 @@ SPECIAL_K_POINTS_BI = {
 # SPECIAL_K_POINTS_BI = {
 #     'GAMMA': [0, 0, 0],
 #     'X': [0.5 * PI/aaa, 0.5 * PI/aaa, 0.5 * PI/aaa],
-#     'T': (recip_lat_basis * np.matrix([0.5, 0.5, 0.5]).T).tolist(),
-#     'L': (recip_lat_basis * np.matrix([0.0, 0.5, 0.0]).T).tolist(),
-#     'W': (recip_lat_basis * np.matrix([gamma_bi, 1.0-gamma_bi, 0.5]).T).tolist(),
-#     'K': (recip_lat_basis * np.matrix([1.0/4+0.5*gamma_bi, 3.0/4-0.5*gamma_bi, 0.0]).T).tolist(),
-#     'U': (recip_lat_basis * np.matrix([0.5*gamma_bi+0.25, 1.0-gamma_bi, 0.5*gamma_bi+0.25]).T).tolist()
+#     'T': (recip_lat_basis * np.array([0.5, 0.5, 0.5]).T).tolist(),
+#     'L': (recip_lat_basis * np.array([0.0, 0.5, 0.0]).T).tolist(),
+#     'W': (recip_lat_basis * np.array([gamma_bi, 1.0-gamma_bi, 0.5]).T).tolist(),
+#     'K': (recip_lat_basis * np.array([1.0/4+0.5*gamma_bi, 3.0/4-0.5*gamma_bi, 0.0]).T).tolist(),
+#     'U': (recip_lat_basis * np.array([0.5*gamma_bi+0.25, 1.0-gamma_bi, 0.5*gamma_bi+0.25]).T).tolist()
 # }

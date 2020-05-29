@@ -35,11 +35,11 @@ def main():
         tr = np.zeros((energy.shape[0]), dtype=np.complex)
 
         for j, E in enumerate(energy):
-            gf0 = np.matrix(gf[j, :, :])
-            gamma_l = 1j * (np.matrix(sgf_l[j, :, :]) - np.matrix(sgf_l[j, :, :]).H)
-            gamma_r = 1j * (np.matrix(sgf_r[j, :, :]) - np.matrix(sgf_r[j, :, :]).H)
-            tr[j] = np.real(np.trace(gamma_l * gf0 * gamma_r * gf0.H))
-            dos[j] = np.real(np.trace(1j * (gf0 - gf0.H)))
+            gf0 = np.array(gf[j, :, :])
+            gamma_l = 1j * (np.array(sgf_l[j, :, :]) - np.array(sgf_l[j, :, :]).conj().T)
+            gamma_r = 1j * (np.array(sgf_r[j, :, :]) - np.array(sgf_r[j, :, :]).conj().T)
+            tr[j] = np.real(np.trace(gamma_l * gf0 * gamma_r * gf0.conj().T))
+            dos[j] = np.real(np.trace(1j * (gf0 - gf0.conj().T)))
 
         if show:
             axes = plt.axes()

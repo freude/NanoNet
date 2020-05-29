@@ -72,8 +72,7 @@ def surface_greens_function_poles(h_list):
     eigenvects = eigenvects[:, ind]
 
     eigenvects = eigenvects[matix_size :, :]
-    eigenvals = np.matrix(np.diag(eigenvals))
-    eigenvects = np.matrix(eigenvects)
+    eigenvals = np.diag(eigenvals)
 
     # norms = linalg.norm(eigenvects, axis=0)
     # norms = np.array([1e30 if np.abs(norm) < 0.000001 else norm for norm in norms])
@@ -96,7 +95,7 @@ def group_velocity(eigenvector, eigenvalue, h_r):
                               an eigenvector and an eigenvalue
     """
 
-    return np.imag(eigenvector.H * h_r * eigenvalue * eigenvector)
+    return np.imag(np.dot(np.dot(np.vdot(eigenvector, h_r), eigenvalue), eigenvector))
 
 
 def iterate_gf(E, h_0, h_l, h_r, gf, num_iter):
@@ -138,10 +137,10 @@ def surface_greens_function(E, h_l, h_0, h_r, iterate=False):
     vals, vects = surface_greens_function_poles(h_list)
     vals = np.diag(vals)
 
-    u_right = np.matrix(np.zeros(h_0.shape, dtype=np.complex))
-    u_left = np.matrix(np.zeros(h_0.shape, dtype=np.complex))
-    lambda_right = np.matrix(np.zeros(h_0.shape, dtype=np.complex))
-    lambda_left = np.matrix(np.zeros(h_0.shape, dtype=np.complex))
+    u_right = np.zeros(h_0.shape, dtype=np.complex)
+    u_left = np.zeros(h_0.shape, dtype=np.complex)
+    lambda_right = np.zeros(h_0.shape, dtype=np.complex)
+    lambda_left = np.zeros(h_0.shape, dtype=np.complex)
 
     alpha = 0.001
 
@@ -180,8 +179,8 @@ def surface_greens_function(E, h_l, h_0, h_r, iterate=False):
                 lambda_left[j, j] = vals[-j + 2*h_0.shape[0]-1]
                 u_left[:, j] = vects[:, -j + 2*h_0.shape[0]-1]
 
-    sgf_l = h_r * u_right * lambda_right * np.linalg.pinv(u_right)
-    sgf_r = h_l * u_left * lambda_right * np.linalg.pinv(u_left)
+    sgf_l = h_r.dot(u_right).dot(lambda_right).dot(np.linalg.pinv(u_right))
+    sgf_r = h_l.dot(u_left).dot(lambda_right).dot(np.linalg.pinv(u_left))
 
     if iterate:
         return iterate_gf(E, h_0, h_l, h_r, sgf_l, 102), iterate_gf(E, h_0, h_r, h_l, sgf_r, 102)

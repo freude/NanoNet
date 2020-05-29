@@ -44,13 +44,13 @@ def sort_eigs(alpha, betha, Z, h_l, h_r, flag):
     inds_deg = [i for i in inds_deg if len(i) > 1]
 
     for item in inds_deg:
-        phi = np.matrix(Z[h_r.shape[0]:, item])
-        oper = 1j * np.matrix(h_r * eigenvals[item[0]] - h_l * np.conj(eigenvals[item[0]]))
-        _, vects = np.linalg.eig(phi.H * oper * phi)
+        phi = Z[h_r.shape[0]:, item]
+        oper = 1j * np.dot(h_r, eigenvals[item[0]]) - np.dot(h_l, eigenvals[item[0]].conj())
+        _, vects = np.linalg.eig(np.dot(np.dot(phi.conj().T, oper), phi))
         print(vects)
-        Z[h_r.shape[0]:, item] = phi * np.matrix(vects)
+        Z[h_r.shape[0]:, item] = np.dot(phi, vects)
 
-    phi = np.matrix(Z)
+    phi = Z
 
     for j, item in enumerate(zip(alpha, betha)):
 
@@ -64,7 +64,7 @@ def sort_eigs(alpha, betha, Z, h_l, h_r, flag):
         elif np.abs(eigenval) < 1.0 - margin:
             ans.append(True)
         else:
-            gv = np.imag(2 * phi[h_r.shape[0]:, j].H * np.matrix(h_r) * phi[h_r.shape[0]:, j])
+            gv = np.imag(2 * np.dot(np.dot(phi[h_r.shape[0]:, j].conj().T, h_r), phi[h_r.shape[0]:, j]))
             # gv = group_velocity(phi[h_r.shape[0]:, j], eigenval, h_r)
 
             if flag:
@@ -146,8 +146,7 @@ def surface_greens_function_poles(E, h_l, h_0, h_r):
     eigenvects = eigenvects[:, ind]
 
     eigenvects = eigenvects[h_0.shape[0]:, :]
-    eigenvals = np.matrix(np.diag(eigenvals))
-    eigenvects = np.matrix(eigenvects)
+    eigenvals = np.diag(eigenvals)
 
     norms = linalg.norm(eigenvects, axis=0)
     norms = np.array([1e30 if np.abs(norm) < 0.000001 else norm for norm in norms])
@@ -193,11 +192,8 @@ def surface_greens_function_poles_Shur(E, h_l, h_0, h_r):
                                                                      output='complex',
                                                                      sort=sort1)
 
-    eigv_left = np.matrix(eigv_left)
-    eigv_left1 = np.matrix(eigv_left1)
-
-    return h_r * eigv_left[h_0.shape[0]:, :h_0.shape[0]] * np.linalg.pinv(eigv_left[:h_0.shape[0], :h_0.shape[0]]), \
-           h_l * eigv_left1[h_0.shape[0]:, :h_0.shape[0]] * np.linalg.pinv(eigv_left1[:h_0.shape[0], :h_0.shape[0]])
+    return h_r.dot(eigv_left[h_0.shape[0]:, :h_0.shape[0]]).dot(np.linalg.pinv(eigv_left[:h_0.shape[0], :h_0.shape[0]])), \
+           h_l.dot(eigv_left1[h_0.shape[0]:, :h_0.shape[0]]).dot(np.linalg.pinv(eigv_left1[:h_0.shape[0], :h_0.shape[0]]))
 
 
 def group_velocity(eigenvector, eigenvalue, h_r):
@@ -210,7 +206,7 @@ def group_velocity(eigenvector, eigenvalue, h_r):
     :return:
     """
 
-    return np.imag(eigenvector.H * h_r * eigenvalue * eigenvector)
+    return np.imag(np.dot(np.dot(np.dot(eigenvector.conj().T, h_r), eigenvalue), eigenvector))
 
 
 def surface_greens_function(E, h_l, h_0, h_r):
@@ -229,10 +225,10 @@ def surface_greens_function(E, h_l, h_0, h_r):
     vals, vects = surface_greens_function_poles(E, h_l, h_0, h_r)
     vals = np.diag(vals)
 
-    u_right = np.matrix(np.zeros(h_0.shape, dtype=np.complex))
-    u_left = np.matrix(np.zeros(h_0.shape, dtype=np.complex))
-    lambda_right = np.matrix(np.zeros(h_0.shape, dtype=np.complex))
-    lambda_left = np.matrix(np.zeros(h_0.shape, dtype=np.complex))
+    u_right = np.zeros(h_0.shape, dtype=np.complex)
+    u_left = np.zeros(h_0.shape, dtype=np.complex)
+    lambda_right = np.zeros(h_0.shape, dtype=np.complex)
+    lambda_left = np.zeros(h_0.shape, dtype=np.complex)
 
     alpha = 0.001
 
@@ -279,8 +275,8 @@ def surface_greens_function(E, h_l, h_0, h_r):
             # lambda_left[j, j] = vals[-j + 2 * h_0.shape[0] - 1]
             # u_left[:, j] = vects[:, -j + 2 * h_0.shape[0] - 1]
 
-    sgf_l = h_r * u_right * lambda_right * np.linalg.pinv(u_right)
-    sgf_r = h_l * u_left * lambda_right * np.linalg.pinv(u_left)
+    sgf_l = h_r.dot(u_right).dot(lambda_right).dot(np.linalg.pinv(u_right))
+    sgf_r = h_l.dot(u_left).dot(lambda_right).dot(np.linalg.pinv(u_left))
 
     # sgf_l = u_right[h_0.shape[0]:, :] * np.linalg.pinv(u_right[:h_0.shape[0], :])
     # sgf_r = h_l * u_left * lambda_right * np.linalg.pinv(u_left)
@@ -298,7 +294,7 @@ def surface_greens_function(E, h_l, h_0, h_r):
 def main():
     import sys
     sys.path.insert(0, '/home/mk/TB_project/tb')
-    import tb
+    import nanonet.tb as tb
 
     a = tb.Atom('A')
     a.add_orbital('s', -0.7)
@@ -364,18 +360,18 @@ def main():
     tr = np.zeros((energy.shape[0]), dtype=np.complex)
 
     for j, E in enumerate(energy):
-        gf0 = np.matrix(gf[j, :, :])
-        gamma_l = 1j * (np.matrix(sgf_l[j, :, :]) - np.matrix(sgf_l[j, :, :]).H)
-        gamma_r = 1j * (np.matrix(sgf_r[j, :, :]) - np.matrix(sgf_r[j, :, :]).H)
-        tr[j] = np.real(np.trace(gamma_l * gf0 * gamma_r * gf0.H))
-        dos[j] = np.real(np.trace(1j * (gf0 - gf0.H)))
+        gf0 = gf[j, :, :]
+        gamma_l = 1j * (sgf_l[j, :, :] - sgf_l[j, :, :].conj().T)
+        gamma_r = 1j * (sgf_r[j, :, :] - sgf_r[j, :, :].conj().T)
+        tr[j] = np.real(np.trace(gamma_l.dot(gf0).dot(gamma_r).dot(gf0.conj().T)))
+        dos[j] = np.real(np.trace(1j * (gf0 - gf0.conj().T)))
     print(sgf_l.shape)
 
 
 def main1():
     import sys
     sys.path.insert(0, '/home/mk/TB_project/tb')
-    import tb
+    import nanonet.tb as tb
 
     tb.Atom.orbital_sets = {'Si': 'SiliconSP3D5S', 'H': 'HydrogenS'}
     h = tb.Hamiltonian(xyz='/home/mk/NEGF_project/SiNW.xyz', nn_distance=2.4)
@@ -434,11 +430,11 @@ def main1():
     dos = np.zeros((energy.shape[0]), dtype=np.complex)
 
     for j, E in enumerate(energy):
-        gf0 = np.matrix(gf[j, :, :])
-        gamma_l = 1j * (np.matrix(sgf_l[j, :, :]) - np.matrix(sgf_l[j, :, :]).H)
-        gamma_r = 1j * (np.matrix(sgf_r[j, :, :]) - np.matrix(sgf_r[j, :, :]).H)
-        dos[j] = np.real(np.trace(1j * (gf0 - gf0.H)))
-        tr[j] = np.real(np.trace(gamma_l * gf0 * gamma_r * gf0.H))
+        gf0 = gf[j, :, :]
+        gamma_l = 1j * (sgf_l[j, :, :] - sgf_l[j, :, :].conj().T)
+        gamma_r = 1j * (sgf_r[j, :, :] - sgf_r[j, :, :].conj().T)
+        dos[j] = np.real(np.trace(1j * (gf0 - gf0.conj().T)))
+        tr[j] = np.real(np.trace(gamma_l.dot(gf0).dot(gamma_r).dot(gf0.conj().T)))
 
     ax = plt.axes()
     ax.set_xlabel('Energy (eV)')
@@ -477,7 +473,7 @@ def regularize_gf(gf):
 def inverse_bs_problem():
     import sys
     sys.path.insert(0, '/home/mk/TB_project/tb')
-    import tb
+    import nanonet.tb as tb
 
     # a = tb.Atom('A')
     # a.add_orbital('s', -0.7)
@@ -553,7 +549,7 @@ def inverse_bs_problem():
 def main2():
     import sys
     sys.path.insert(0, '/home/mk/TB_project/tb')
-    import tb
+    import nanonet.tb as tb
 
     a = tb.Atom('A')
     a.add_orbital('s', -0.7)
@@ -598,18 +594,18 @@ def main2():
     tr = np.zeros((energy.shape[0]), dtype=np.complex)
 
     for j, E in enumerate(energy):
-        gf0 = np.matrix(gf[j, :, :])
-        gamma_l = 1j * (np.matrix(sgf_l[j, :, :]) - np.matrix(sgf_l[j, :, :]).H)
-        gamma_r = 1j * (np.matrix(sgf_r[j, :, :]) - np.matrix(sgf_r[j, :, :]).H)
-        tr[j] = np.real(np.trace(gamma_l * gf0 * gamma_r * gf0.H))
-        dos[j] = np.real(np.trace(1j * (gf0 - gf0.H)))
+        gf0 = gf[j, :, :]
+        gamma_l = 1j * (sgf_l[j, :, :] - sgf_l[j, :, :].conj().T)
+        gamma_r = 1j * (sgf_r[j, :, :] - sgf_r[j, :, :].conj().T)
+        tr[j] = np.real(np.trace(gamma_l.dot(gf0).dot(gamma_r).dot(gf0.conj().T)))
+        dos[j] = np.real(np.trace(1j * (gf0 - gf0.conj().T)))
     print(sgf_l.shape)
 
 
 def main3():
     import sys
     sys.path.insert(0, '/home/mk/TB_project/tb')
-    import tb
+    import nanonet.tb as tb
 
     a = tb.Atom('A')
     a.add_orbital('s', -0.7)
@@ -654,11 +650,11 @@ def main3():
     tr = np.zeros((energy.shape[0]), dtype=np.complex)
 
     for j, E in enumerate(energy):
-        gf0 = np.matrix(gf[j, :, :])
-        gamma_l = 1j * (np.matrix(sgf_l[j, :, :]) - np.matrix(sgf_l[j, :, :]).H)
-        gamma_r = 1j * (np.matrix(sgf_r[j, :, :]) - np.matrix(sgf_r[j, :, :]).H)
-        tr[j] = np.real(np.trace(gamma_l * gf0 * gamma_r * gf0.H))
-        dos[j] = np.real(np.trace(1j * (gf0 - gf0.H)))
+        gf0 = gf[j, :, :]
+        gamma_l = 1j * (sgf_l[j, :, :] - sgf_l[j, :, :].conj().T)
+        gamma_r = 1j * (sgf_r[j, :, :] - sgf_r[j, :, :].conj().T)
+        tr[j] = np.real(np.trace(gamma_l.dot(gf0).dot(gamma_r).dot(gf0.conj().T)))
+        dos[j] = np.real(np.trace(1j * (gf0 - gf0.conj().T)))
 
     print(sgf_l.shape)
 
