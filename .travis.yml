@@ -21,11 +21,11 @@ jobs:
     
 # command to install dependencies
 install:
-    - pip install --user codecov
-    - pip install --user python-coveralls
-    - pip install --user coverage==4.5.4
-    - pip install --user -r requirements.txt
-    - pip install --user .
+    - pip install codecov
+    - pip install python-coveralls
+    - pip install coverage==4.5.4
+    - pip install -r requirements.txt
+    - pip install .
 # command to run tests
 script:
     - nosetests --with-coverage
