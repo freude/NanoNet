@@ -1,12 +1,12 @@
 # NanoNet
 
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/5186e15b951d4df6b4f20c2365870b7c)](https://app.codacy.com/app/freude/NanoNet?utm_source=github.com&utm_medium=referral&utm_content=freude/NanoNet&utm_campaign=Badge_Grade_Dashboard)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Build Status](https://travis-ci.org/freude/NanoNet.svg)](https://travis-ci.org/freude)
 [![](https://github.com/freude/NanoNet/workflows/Nanonet%20tests/badge.svg)](https://github.com/freude/NanoNet/actions?query=workflow%3A%22Nanonet+tests%22)
 [![Coverage Status](https://coveralls.io/repos/github/freude/NanoNet/badge.svg?branch=master)](https://coveralls.io/github/freude/NanoNet?branch=master)
 [![codecov](https://codecov.io/gh/freude/NanoNet/branch/master/graph/badge.svg)](https://codecov.io/gh/freude/NanoNet)
 [![CodeFactor](https://www.codefactor.io/repository/github/freude/nanonet/badge/master)](https://www.codefactor.io/repository/github/freude/nanonet/overview/master)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/5186e15b951d4df6b4f20c2365870b7c)](https://app.codacy.com/app/freude/NanoNet?utm_source=github.com&utm_medium=referral&utm_content=freude/NanoNet&utm_campaign=Badge_Grade_Dashboard)
 
 <img src="https://user-images.githubusercontent.com/4588093/65398380-1f684380-ddfa-11e9-9e87-5aab6cf417b8.png" width="200">
 
@@ -30,9 +30,14 @@ git clone https://github.com/freude/NanoNet.git
 cd NanoNet
 ```
 
-`Nanonet` requires `openmpi` to be installed in the system.
+`Nanonet` requires `openmpi` to be installed in the system:
+Ubuntu
  ```bash
  sudo apt-get install libopenmpi-dev
+ ```
+ MacOS
+ ```bash
+ brew install open-mpi
  ```
  All other dependencies can be installed at once by invoking the following command
  from within the source directory:
