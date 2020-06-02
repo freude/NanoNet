@@ -6,10 +6,10 @@ jobs:
   include:
     - os: linux
       dist: trusty
-      env: TOXENV=py33
+      env: TOXENV=py37
     - os: osx
       osx_image: xcode7.2
-      env: TOXENV=py33
+      env: TOXENV=py37
       
 cache:
   directories:
