@@ -88,7 +88,7 @@ import nanonet.tb as tb
 
 Below we demonstrate band structure computation for an infinite atomic chain with two 
 atoms A and B per unit cell [--A---B--].
-1. First, one needs to specify atomic species and corresponding basis sets. We assume that each atom posses one s-type atomic orbital with energies -1 eV and -0.7 eV respectively. It is possible to use predefined basis sets as
+1. First, one needs to specify atomic species and corresponding basis sets. We assume that each atom has one s-type atomic orbital with energies -1 eV and -0.7 eV respectively. It is also possible to use predefined basis sets as
  is shown in examples in the ipython notebooks.
  
     ```python
