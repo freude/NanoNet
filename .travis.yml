@@ -16,6 +16,7 @@ jobs:
       before_install:
         - brew update
         - brew install open-mpi
+        - sudo easy_install pip
     
 # command to install dependencies
 install:
