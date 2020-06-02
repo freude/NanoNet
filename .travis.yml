@@ -16,6 +16,8 @@ jobs:
       before_install:
         - brew update
         - brew install open-mpi
+        - python3 -m venv env
+        - source env/bin/activate
     
 # command to install dependencies
 install:
