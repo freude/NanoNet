@@ -81,16 +81,21 @@ in the directory `jupyter_notebooks` inside the source directory.
 If the package is properly installed, the work starts with the import of all necessary modules:
 
 ```python
+import numpy as np
+import matplotlib.pyplot as plt
 import nanonet.tb as tb
 ```
 
-Below we demonstrate band structure computation for bulk silicon using empirical tight-binding method.
-
-1. First, one needs to specify atomic species and corresponding basis sets. It is possible to use custom basis set as
- is shown in examples in the ipython notebooks. Here we use predefined basis sets.
-    
+Below we demonstrate band structure computation for an infinite atomic chain with two 
+atoms A and B per unit cell [--A---B--].
+1. First, one needs to specify atomic species and corresponding basis sets. We assume that each atom posses one s-type atomic orbital with energies -1 eV and -0.7 eV respectively. It is possible to use predefined basis sets as
+ is shown in examples in the ipython notebooks.
+ 
     ```python
-    tb.Orbitals.orbital_sets = {'Si': 'SiliconSP3D5S'}
+    a = tb.Orbitals('A')
+    a.add_orbital(title='s', energy=-1)
+    b = tb.Orbitals('B')
+    b.add_orbital(title='s', energy=-0.7)
     ```
 
 2. Specify geometry of the system - determine position of atoms
@@ -99,12 +104,12 @@ the class Hamiltonian with proper arguments.
  
     ```python
     xyz_file = """2
-    Si cell
-    Si1       0.0000000000    0.0000000000    0.0000000000
-    Si2       1.3750000000    1.3750000000    1.3750000000
+    Atomic Chain
+    A       0.0    0.0    0.0
+    B       0.0    0.0    1.0
     """
     
-    h = tb.Hamiltonian(xyz=xyz_file, nn_distance=2.0)
+    h = tb.Hamiltonian(xyz=xyz_file, nn_distance=1.1)
     ```
 
 2. Initialize the Hamiltonian - compute Hamiltonian matrix elements
@@ -117,34 +122,39 @@ the class Hamiltonian with proper arguments.
 3. Specify periodic boundary conditions:
         
     ```python
-    a_si = 5.50
-    PRIMITIVE_CELL = [[0, 0.5 * a_si, 0.5 * a_si],
-                     [0.5 * a_si, 0, 0.5 * a_si],
-                     [0.5 * a_si, 0.5 * a_si, 0]]
-    h.set_periodic_bc(PRIMITIVE_CELL)
+    lattice_constant = 2.0
+    h.set_periodic_bc([[0, 0, lattice_constant]])
     ```
 5. Specify wave vectors:
     
     ```python
-    sym_points = ['L', 'GAMMA', 'X', 'W', 'K', 'L', 'W', 'X', 'K', 'GAMMA']
-    num_points = [15, 20, 15, 10, 15, 15, 15, 15, 20]
-    k = tb.get_k_coords(sym_points, num_points)
+    num_points = 20
+    kk = np.linspace(0, np.pi/lattice_constant, num_points, endpoint=True)
     ```
 
 6. Find the eigenvalues and eigenstates of the Hamiltonian for each wave vector.
     
     ```python
-    vals = np.zeros((sum(num_points), h.h_matrix.shape[0]), dtype=np.complex)
+    band_sructure = []
+
+    for jj in range(num_points):
+        vals, _ = h.diagonalize_periodic_bc([0.0, 0.0, kk[jj]])
+        band_sructure.append(vals)
     
-    for jj, i in enumerate(k):
-        vals[jj, :], _ = h.diagonalize_periodic_bc(list(i))
-   
-    import matplotlib.pyplot as plt 
-    plt.plot(np.sort(np.real(vals)))
+    band_sructure = np.array(band_sructure)
+    
+    ax = plt.axes()
+    ax.set_title('Band structure of the atomic chain')
+    ax.set_xlabel(r'Wave vector ($\frac{\pi}{a}$)', fontsize=14)
+    ax.set_ylabel(r'Energy (eV)', fontsize=14)
+    ax.plot(kk * lattice_constant / np.pi, np.sort(np.real(band_sructure)), 'k')
     plt.show()
     ```
 
-7. Done.
+7. Done. The result will appear on the screen.
+
+<img src="https://user-images.githubusercontent.com/4588093/83520984-e86a3600-a521-11ea-920e-9f53dac680fc.png" width="350">
+
 
 ### Command line interface
 
