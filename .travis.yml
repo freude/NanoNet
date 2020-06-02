@@ -1,9 +1,18 @@
 language: python
 python:
     - "3.6"
+    
+os:
+    - linux
+    - osx
+    
+before_install:
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew update          ; fi
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew openmpi          ; fi
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then brew install libopenmpi-dev; fi
+    
 # command to install dependencies
 install:
-    - sudo apt-get install libopenmpi-dev
     - pip install codecov
     - pip install python-coveralls
     - pip install coverage==4.5.4
