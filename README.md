@@ -31,6 +31,7 @@ cd NanoNet
 ```
 
 `Nanonet` requires `openmpi` to be installed in the system:
+
 Ubuntu
  ```bash
  sudo apt-get install libopenmpi-dev
