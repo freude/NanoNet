@@ -48,19 +48,3 @@ SPECIAL_K_POINTS_BI = {
 }
 
 
-# Tight binding parameters for first, second, and third nearest neighbours
-
-PARAMS_BI_BI1 = {'ss_sigma': -0.608,
-                 'sp_sigma':  1.320,
-                 'pp_sigma':  1.854,
-                 'pp_np.pi': -0.600}
-
-PARAMS_BI_BI2 = {'ss_sigma': -0.384,
-                 'sp_sigma':  0.433,
-                 'pp_sigma':  1.396,
-                 'pp_np.pi': -0.344}
-
-PARAMS_BI_BI3 = {'ss_sigma': 0.000,
-                 'sp_sigma': 0.000,
-                 'pp_sigma': 0.156,
-                 'pp_np.pi': 0.000}

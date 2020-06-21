@@ -30,8 +30,8 @@ class BasisTB(AbstractBasis, StructDesignerXYZ):
     
     Examples
     --------
-    >>> from verbosity import set_verbosity
-    >>> import tb
+    >>> from nanonet.verbosity import set_verbosity
+    >>> import nanonet.tb as tb
     >>> set_verbosity(0)
     >>> orb = tb.Orbitals('A')
     >>> orb.add_orbital(title='s', energy=-1)
@@ -53,7 +53,7 @@ class BasisTB(AbstractBasis, StructDesignerXYZ):
     >>> print(basis.qn2ind({'atoms': 1, 'l': 0}))
     2
     >>> print(type(basis.orbitals_dict['A']))
-    <class 'tb.orbitals.Orbitals'>
+    <class 'nanonet.tb.orbitals.Orbitals'>
     """
 
     def __init__(self, **kwargs):
@@ -141,8 +141,8 @@ class Hamiltonian(BasisTB):
 
     Examples
     --------
-    >>> from verbosity import set_verbosity
-    >>> import tb
+    >>> from nanonet.verbosity import set_verbosity
+    >>> import nanonet.tb as tb
     >>> set_verbosity(0)
     >>> tb.Orbitals('A').add_orbital(title='s', energy=-1)
     >>> tb.Orbitals('B').add_orbital(title='s', energy=-2)

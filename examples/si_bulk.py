@@ -1,53 +1,54 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from tb import Hamiltonian
-from tb import Orbitals
-from examples import data_si_bulk
-from tb import get_k_coords
+from nanonet.tb import Hamiltonian
+from nanonet.tb import Orbitals
+from nanonet.tb import get_k_coords
 
 
+# Crystal structure parameters
 
-def radial_dep(coords):
+a = 5.50
 
-    norm_of_coords = np.linalg.norm(coords)
-    print(norm_of_coords)
-    if norm_of_coords < 3.3:
-        return 1
-    elif 3.7 > norm_of_coords > 3.3:
-        return 2
-    elif 5.0 > norm_of_coords > 3.7:
-        return 3
-    else:
-        return 100
+
+# Primitive cell
+
+primitive_cell = a * np.array([[0.0, 0.5, 0.5],
+                               [0.5, 0.0, 0.5],
+                               [0.5, 0.5, 0.0]])
+
+
+# High symmetry points
+
+SPECIAL_K_POINTS_SI = {
+    'GAMMA': [0, 0, 0],
+    'X': [0, 2 * np.pi / a, 0],
+    'L': [np.pi / a,  np.pi / a,  np.pi / a],
+    'W': [np.pi / a,  2 * np.pi / a,  0],
+    'U': [np.pi / (2 * a), 2 * np.pi / a, np.pi/ (2 * a)],
+    'K': [3 * np.pi / (2 * a), 3 * np.pi / (2 * a), 0]
+}
 
 
 def main():
 
     path_to_xyz_file = 'input_samples/bulk_silicon.xyz'
-
-    path_to_dat_file = 'examples/data/si_bulk_bands.dat'
-
     Orbitals.orbital_sets = {'Si': 'SiliconSP3D5S'}
 
     sym_points = ['L', 'GAMMA', 'X']
     num_points = [20, 20]
 
-    k_points = get_k_coords(sym_points, num_points, data_si_bulk.SPECIAL_K_POINTS_SI)
+    h = Hamiltonian(xyz=path_to_xyz_file)
+    h.initialize()
+    h.set_periodic_bc(primitive_cell)
+
+    k_points = get_k_coords(sym_points, num_points, SPECIAL_K_POINTS_SI)
 
     band_structure = []
     for ii, item in enumerate(k_points):
-        h = Hamiltonian(xyz=path_to_xyz_file)
-        h.initialize()
-        h.set_periodic_bc(data_si_bulk.primitive_cell)
-        [eigenvalues, _] = h.diagonalize_periodic_bc(k_points[ii])
+        eigenvalues, _ = h.diagonalize_periodic_bc(k_points[ii])
         band_structure.append(eigenvalues)
 
     band_structure = np.array(band_structure)
-
-    k_index = np.linspace(0, 1, np.size(k_points, axis=0))
-    band_structure_data = np.c_[k_index[:, None], band_structure]
-    np.savetxt(path_to_dat_file, np.c_[band_structure_data])
-
     ax = plt.axes()
     ax.plot(band_structure)
     plt.ylim((-15, 15))

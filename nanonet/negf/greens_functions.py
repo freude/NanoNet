@@ -15,10 +15,10 @@ def surface_greens_function_poles(h_list):
     The eigenvalues correspond to the wave vectors as `exp(ik)`.
 
     :param h_list:   list of the Hamiltonian blocks - blocks describes coupling
-                     with left-side neighbours, Hamiltonian of the side and
+                     with left-side neighbours, Hamiltonian of the device and
                      coupling with right-side neighbours
     :return:         eigenvalues, k, and eigenvectors, U,
-    :rtype:          numpy.matrix, numpy.matrix
+    :rtype:          numpy.array, numpy.array
     """
 
     # linearize polynomial eigenvalue problem
@@ -61,8 +61,8 @@ def surface_greens_function_poles(h_list):
     eigenvects = eigenvects[:, ind]
 
     vals = np.copy(eigenvals)
-    mask1 = np.abs(vals) < 0.999
-    mask2 = np.abs(vals) > 1.001
+    mask1 = np.abs(vals) < 0.9999
+    mask2 = np.abs(vals) > 1.0001
     vals = np.angle(vals)
 
     vals[mask1] = -5

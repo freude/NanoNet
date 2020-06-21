@@ -3,8 +3,6 @@ import numpy as np
 
 
 def mat_left_div(mat_a, mat_b):
-    mat_a = np.asmatrix(mat_a)
-    mat_b = np.asmatrix(mat_b)
 
     ans, resid, rank, s = np.linalg.lstsq(mat_a, mat_b, rcond=-1)
 
@@ -57,12 +55,8 @@ def recursive_gf(energy, mat_l_list, mat_d_list, mat_u_list, s_in=0, s_out=0, da
     # -------------------------------------------------------------------
 
     for jj, item in enumerate(mat_d_list):
-        mat_d_list[jj] = np.asmatrix(item)
+        mat_d_list[jj] = item
         mat_d_list[jj] = mat_d_list[jj] - np.diag(energy * np.ones(mat_d_list[jj].shape[0]) + 1j*damp)
-
-        if jj < len(mat_d_list) - 1:
-            mat_u_list[jj] = np.asmatrix(mat_u_list[jj])
-            mat_l_list[jj] = np.asmatrix(mat_l_list[jj])
 
     # computes matrix sizes
     num_of_matrices = len(mat_d_list)  # Number of diagonal blocks.

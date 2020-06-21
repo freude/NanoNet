@@ -65,7 +65,7 @@ def plot_bs_split(kk, vba, cba):
     ax[0].set_xlabel(r'Wave vector ($\frac{\pi}{a}$)')
     ax[0].set_ylabel(r'Energy (eV)')
     ax[0].set_title('Valence band')
-    plt.savefig('bs_vb.pdf')
+    # plt.savefig('bs_vb.pdf')
 
     ax[1].set_ylim(2.0, 2.7)
     ax[1].plot(kk, np.sort(np.real(cba)))
@@ -73,7 +73,7 @@ def plot_bs_split(kk, vba, cba):
     ax[1].set_ylabel(r'Energy (eV)')
     ax[1].set_title('Conduction band')
     fig.tight_layout()
-    plt.savefig('bs_cb.pdf')
+    # plt.savefig('bs_cb.pdf')
     plt.show()
 
 

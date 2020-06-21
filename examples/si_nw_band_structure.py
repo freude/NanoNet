@@ -1,9 +1,7 @@
 import numpy as np
-import tb
-import matplotlib.pyplot as plt
-from tb import Hamiltonian, HamiltonianSp
-from tb import Orbitals
-from tb.plotting import plot_bs_split, plot_atom_positions
+from nanonet.tb import HamiltonianSp
+from nanonet.tb import Orbitals
+from nanonet.tb.plotting import plot_bs_split, plot_atom_positions
 
 
 def radial_dep(coords):
@@ -37,13 +35,15 @@ def main():
 
     # hamiltonian = Hamiltonian(xyz=path, nn_distance=1.1, lead_l=[[0, 0, 1]], lead_r=[[0, 4, 3]], so_coupling=0.06)
 
-    left_lead = [0, 33, 35, 17, 16, 51, 25,  9, 53, 68,  1,  8, 24]
-    right_lead = [40, 66, 58, 47, 48, 71, 72, 73, 74, 65]
+    right_lead = [0, 33, 35, 17, 16, 51, 25,  9, 53, 68,  1,  8, 24]
+    left_lead = [40, 66, 58, 47, 48, 71, 72, 73, 74, 65]
 
     def sorting(coords, **kwargs):
         return np.argsort(coords[:, 2])
 
-    hamiltonian = Hamiltonian(xyz=path, nn_distance=2.4,
+    from nanonet.tb.sorting_algorithms import sort_projection as sorting
+
+    hamiltonian = HamiltonianSp(xyz=path, nn_distance=2.4,
                               sort_func=sorting, left_lead=left_lead, right_lead=right_lead)
     hamiltonian.initialize()
 
@@ -72,7 +72,7 @@ def main():
     hamiltonian.set_periodic_bc(PRIMITIVE_CELL)
 
     hl, h0, hr = hamiltonian.get_hamiltonians()
-    h0, hl, hr, _ = hamiltonian.get_hamiltonians_block_tridiagonal()
+    hl, h0, hr, _ = hamiltonian.get_hamiltonians_block_tridiagonal()
 
     num_points = 20
     kk = np.linspace(0, 0.57, num_points, endpoint=True)

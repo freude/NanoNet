@@ -711,6 +711,7 @@ def test_double_barrier_density_recursive(single_period_test=complex_chain, peri
     num_periods = 2 * periods + 1
 
     dos1 = np.zeros((energy.shape[0]))
+    tr = np.zeros((energy.shape[0]))
     dens = np.zeros((energy.shape[0], num_periods))
 
     for j, E in enumerate(energy):
@@ -722,6 +723,11 @@ def test_double_barrier_density_recursive(single_period_test=complex_chain, peri
                                                                                h_chain.h_r,
                                                                                s_in=h_chain.sgf)
         h_chain.remove_self_energies()
+
+        gamma_l = 1j * (sgf_l[j, :, :] - sgf_l[j, :, :].conj().T)
+        gamma_r = 1j * (sgf_r[j, :, :] - sgf_r[j, :, :].conj().T)
+
+        tr[j] = np.real(np.trace(gamma_l.dot(g_trans).dot(gamma_r).dot(g_trans.conj().T)))
 
         for jj in range(num_periods):
             dos1[j] = dos1[j] + np.real(np.trace(1j * (grd[jj] - grd[jj].conj().T))) / num_periods
