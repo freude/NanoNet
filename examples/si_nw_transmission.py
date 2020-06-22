@@ -5,7 +5,7 @@ import nanonet.negf as negf
 import matplotlib.pyplot as plt
 from nanonet.tb import Hamiltonian, HamiltonianSp
 from nanonet.tb import Orbitals
-from nanonet.tb.plotting import plot_bs_split, plot_atom_positions
+from nanonet.tb.sorting_algorithms import sort_projection
 
 
 def radial_dep(coords):
@@ -22,26 +22,13 @@ def radial_dep(coords):
 
 
 def main():
-    """
-    This function computes the band gap / band structure for Silicon Nanowire
-    :param path: directory path to where xyz input files are stored
-    :param flag: boolean statements
-    :return: band gap / band structure
-    """
     # define orbitals sets
     Orbitals.orbital_sets = {'Si': 'SiliconSP3D5S', 'H': 'HydrogenS'}
 
     path = "input_samples/SiNW2.xyz"
 
-    # hamiltonian = Hamiltonian(xyz=path, nn_distance=1.1, lead_l=[[0, 0, 1]], lead_r=[[0, 4, 3]], so_coupling=0.06)
-
     right_lead = [0, 33, 35, 17, 16, 51, 25,  9, 53, 68,  1,  8, 24]
     left_lead = [40, 66, 58, 47, 48, 71, 72, 73, 74, 65]
-
-    def sorting(coords, **kwargs):
-        return np.argsort(coords[:, 2])
-
-    from nanonet.tb.sorting_algorithms import sort_projection
 
     start = time.time()
     hamiltonian = Hamiltonian(xyz=path, nn_distance=2.4, sort_func=sort_projection, left_lead=left_lead, right_lead=right_lead)
