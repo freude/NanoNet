@@ -30,7 +30,7 @@ install:
 # command to run tests
 script:
     - nosetests --with-coverage
-    - pylint --errors-only --generated-members=coolwarm,accumulate,multiply --ignored-modules=numpy,scipy --ignored-classes=numpy,spipy --extension-pkg-whitelist=numpy,scipy  nanonet/
+    - pylint --errors-only --disable=E1136 --generated-members=coolwarm,accumulate,multiply --ignored-modules=numpy,scipy --ignored-classes=numpy,spipy --extension-pkg-whitelist=numpy,scipy  nanonet/
 branches:
     only:
         - master
