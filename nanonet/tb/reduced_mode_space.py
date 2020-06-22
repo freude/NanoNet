@@ -47,7 +47,7 @@ def object_function1(vec, energy, init_basis, extended_basis, h_l, h_0, h_r, num
 
     print(num_of_states1 - num_of_states, ' : ', vec)
 
-    return num_of_states1 - num_of_states + (np.dot(vec * vec.conj().T) - 1.0) ** 2
+    return num_of_states1 - num_of_states + (np.dot(vec, vec.conj().T) - 1.0) ** 2
 
 
 def object_function(vec, energy, init_basis, extended_basis, h_l, h_0, h_r, num_of_states):

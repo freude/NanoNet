@@ -144,7 +144,7 @@ class Field(object):
 
             if len(self._rot_mat) > 0:
                 for item in self._rot_mat:
-                    coords[j] = np.dot(item * coords[j].T).T[0]
+                    coords[j] = np.dot(item, coords[j].T).T[0]
 
         return coords
 
