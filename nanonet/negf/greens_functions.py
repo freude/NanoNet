@@ -7,6 +7,7 @@ from scipy.optimize import minimize
 import os.path
 import numpy as np
 import scipy.linalg as linalg
+from scipy.sparse import csr_matrix
 
 
 def surface_greens_function_poles(h_list):

@@ -1,3 +1,6 @@
+"""
+This example script computes band structure of the bulk silicon.
+"""
 import numpy as np
 import matplotlib.pyplot as plt
 from nanonet.tb import Hamiltonian
@@ -6,19 +9,14 @@ from nanonet.tb import get_k_coords
 
 
 # Crystal structure parameters
-
 a = 5.50
 
-
 # Primitive cell
-
 primitive_cell = a * np.array([[0.0, 0.5, 0.5],
                                [0.5, 0.0, 0.5],
                                [0.5, 0.5, 0.0]])
 
-
 # High symmetry points
-
 SPECIAL_K_POINTS_SI = {
     'GAMMA': [0, 0, 0],
     'X': [0, 2 * np.pi / a, 0],
@@ -30,24 +28,34 @@ SPECIAL_K_POINTS_SI = {
 
 
 def main():
+    # specify atomic coordinates in xyz format
+    path_to_xyz_file = """2
+                          Bulk Si cell
+                          Si1       0.000    0.000    0.000
+                          Si2       1.375    1.375    1.375"""
 
-    path_to_xyz_file = 'input_samples/bulk_silicon.xyz'
+    # specify basis set
     Orbitals.orbital_sets = {'Si': 'SiliconSP3D5S'}
 
-    sym_points = ['L', 'GAMMA', 'X']
-    num_points = [20, 20]
-
+    # create a Hamiltonian object storing the Hamiltonian matrices
     h = Hamiltonian(xyz=path_to_xyz_file)
     h.initialize()
+
+    # set periodic boundary conditions
     h.set_periodic_bc(primitive_cell)
 
+    # define wave vector coordinates
+    sym_points = ['L', 'GAMMA', 'X']
+    num_points = [20, 20]
     k_points = get_k_coords(sym_points, num_points, SPECIAL_K_POINTS_SI)
 
+    # compute band structure
     band_structure = []
     for ii, item in enumerate(k_points):
         eigenvalues, _ = h.diagonalize_periodic_bc(k_points[ii])
         band_structure.append(eigenvalues)
 
+    # visualize
     band_structure = np.array(band_structure)
     ax = plt.axes()
     ax.plot(band_structure)

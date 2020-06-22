@@ -1,6 +1,6 @@
 """
-This script computes DOS and transmission function for the four-atom-width nanostrip
-using the recursive Green's function algorithm
+This example script computes DOS and transmission function for the four-atom-width nanostrip
+using the recursive Green's function algorithm.
 """
 import numpy as np
 import nanonet.tb as tb
@@ -9,7 +9,6 @@ from nanonet.negf.greens_functions import surface_greens_function
 
 
 def main(energy):
-
     # define the basis set - one s-type orbital
     orb = tb.Orbitals('A')
     orb.add_orbital('s', energy=-1.0)

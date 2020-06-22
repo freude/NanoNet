@@ -1,5 +1,7 @@
 """
-This script computes band structure of the crystalline bismuth
+This example script computes band structure of the crystalline bismuth.
+It uses the third-nearest neighbor approximation with a step-wise distance distance
+associating distances with sets of TB parameters.
 """
 import numpy as np
 import matplotlib.pyplot as plt
@@ -13,7 +15,6 @@ def radial_dep(coords):
     """
         Step-wise radial dependence function
     """
-
     norm_of_coords = np.linalg.norm(coords)
     if norm_of_coords < 3.3:
         return 1

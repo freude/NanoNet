@@ -15,7 +15,7 @@ def main():
     # specify atomic coordinates file in xyz format
     path = "input_samples/SiNW2.xyz"
 
-    # define Hamiltonian object in the sparse format
+    # create a Hamiltonian object in the sparse format
     hamiltonian = HamiltonianSp(xyz=path, nn_distance=2.4,)
     hamiltonian.initialize()
 
