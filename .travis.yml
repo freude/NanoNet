@@ -30,7 +30,7 @@ install:
 # command to run tests
 script:
     - nosetests --with-coverage
-    - pylint nanonet
+    - pylint --errors-only nanonet
 branches:
     only:
         - master
