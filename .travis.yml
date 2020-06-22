@@ -22,6 +22,7 @@ jobs:
 # command to install dependencies
 install:
     - pip install codecov
+    - pip install pylint
     - pip install python-coveralls
     - pip install coverage==4.5.4
     - pip install -r requirements.txt
@@ -29,6 +30,7 @@ install:
 # command to run tests
 script:
     - nosetests --with-coverage
+    - pylint nanonet
 branches:
     only:
         - master
