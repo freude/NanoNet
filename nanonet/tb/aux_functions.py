@@ -310,90 +310,90 @@ def print_dict(dictionary):
     return out
 
 
-def split_into_subblocks(h_0, h_l, h_r):
-    """
-    Split Hamiltonian matrix and coupling matrices into subblocks
-
-    :param h_0:                     Hamiltonian matrix
-    :param h_l:                     left inter-cell coupling matrices
-    :param h_r:                     right inter-cell coupling matrices
-    :return h_0_s, h_l_s, h_r_s:    lists of subblocks
-    """
-
-    def find_nonzero_lines(mat, order):
-
-        if order == 'top':
-            line = mat.shape[0]
-            while line > 0:
-                if np.count_nonzero(mat[line - 1, :]) == 0:
-                    line -= 1
-                else:
-                    break
-        elif order == 'bottom':
-            line = -1
-            while line < mat.shape[0] - 1:
-                if np.count_nonzero(mat[line + 1, :]) == 0:
-                    line += 1
-                else:
-                    line = mat.shape[0] - (line + 1)
-                    break
-        elif order == 'left':
-            line = mat.shape[1]
-            while line > 0:
-                if np.count_nonzero(mat[:, line - 1]) == 0:
-                    line -= 1
-                else:
-                    break
-        elif order == 'right':
-            line = -1
-            while line < mat.shape[1] - 1:
-                if np.count_nonzero(mat[:, line + 1]) == 0:
-                    line += 1
-                else:
-                    line = mat.shape[1] - (line + 1)
-                    break
-        else:
-            raise ValueError('Wrong value of the parameter order')
-
-        return line
-
-    h_0_s = []
-    h_l_s = []
-    h_r_s = []
-
-    if isinstance(h_l, np.ndarray) and isinstance(h_r, np.ndarray):
-        h_r_h = find_nonzero_lines(h_r, 'bottom')
-        h_r_v = find_nonzero_lines(h_r[-h_r_h:, :], 'left')
-        h_l_h = find_nonzero_lines(h_l, 'top')
-        h_l_v = find_nonzero_lines(h_l[:h_l_h, :], 'right')
-
-    if isinstance(h_l, int) and isinstance(h_r, int):
-        h_l_h = h_l
-        h_r_v = h_l
-        h_r_h = h_r
-        h_l_v = h_r
-
-    edge, edge1 = compute_edge(h_0)
-
-    left_block = max(h_l_h, h_r_v)
-    right_block = max(h_r_h, h_l_v)
-
-    from nanonet.tb.sorting_algorithms import split_matrix_0, cut_in_blocks, split_matrix
-
-    blocks = split_matrix_0(h_0, left=left_block, right=right_block)
-    h_0_s, h_l_s, h_r_s = cut_in_blocks(h_0, blocks)
-
-    # blocks = compute_blocks(left_block, right_block, edge, edge1)
-    # j1 = 0
-    #
-    # for j, block in enumerate(blocks):
-    #     h_0_s.append(h_0[j1:block + j1, j1:block + j1])
-    #     if j < len(blocks) - 1:
-    #         h_l_s.append(h_0[block + j1:block + j1 + blocks[j + 1], j1:block + j1])
-    #         h_r_s.append(h_0[j1:block + j1, j1 + block:j1 + block + blocks[j + 1]])
-    #     j1 += block
-
-    return h_0_s, h_l_s, h_r_s, blocks
+# def split_into_subblocks(h_0, h_l, h_r):
+#     """
+#     Split Hamiltonian matrix and coupling matrices into subblocks
+#
+#     :param h_0:                     Hamiltonian matrix
+#     :param h_l:                     left inter-cell coupling matrices
+#     :param h_r:                     right inter-cell coupling matrices
+#     :return h_0_s, h_l_s, h_r_s:    lists of subblocks
+#     """
+#
+#     def find_nonzero_lines(mat, order):
+#
+#         if order == 'top':
+#             line = mat.shape[0]
+#             while line > 0:
+#                 if np.count_nonzero(mat[line - 1, :]) == 0:
+#                     line -= 1
+#                 else:
+#                     break
+#         elif order == 'bottom':
+#             line = -1
+#             while line < mat.shape[0] - 1:
+#                 if np.count_nonzero(mat[line + 1, :]) == 0:
+#                     line += 1
+#                 else:
+#                     line = mat.shape[0] - (line + 1)
+#                     break
+#         elif order == 'left':
+#             line = mat.shape[1]
+#             while line > 0:
+#                 if np.count_nonzero(mat[:, line - 1]) == 0:
+#                     line -= 1
+#                 else:
+#                     break
+#         elif order == 'right':
+#             line = -1
+#             while line < mat.shape[1] - 1:
+#                 if np.count_nonzero(mat[:, line + 1]) == 0:
+#                     line += 1
+#                 else:
+#                     line = mat.shape[1] - (line + 1)
+#                     break
+#         else:
+#             raise ValueError('Wrong value of the parameter order')
+#
+#         return line
+#
+#     h_0_s = []
+#     h_l_s = []
+#     h_r_s = []
+#
+#     if isinstance(h_l, np.ndarray) and isinstance(h_r, np.ndarray):
+#         h_r_h = find_nonzero_lines(h_r, 'bottom')
+#         h_r_v = find_nonzero_lines(h_r[-h_r_h:, :], 'left')
+#         h_l_h = find_nonzero_lines(h_l, 'top')
+#         h_l_v = find_nonzero_lines(h_l[:h_l_h, :], 'right')
+#
+#     if isinstance(h_l, int) and isinstance(h_r, int):
+#         h_l_h = h_l
+#         h_r_v = h_l
+#         h_r_h = h_r
+#         h_l_v = h_r
+#
+#     edge, edge1 = compute_edge(h_0)
+#
+#     left_block = max(h_l_h, h_r_v)
+#     right_block = max(h_r_h, h_l_v)
+#
+#     from nanonet.tb.sorting_algorithms import split_matrix_0, cut_in_blocks, split_matrix
+#
+#     blocks = split_matrix_0(h_0, left=left_block, right=right_block)
+#     h_0_s, h_l_s, h_r_s = cut_in_blocks(h_0, blocks)
+#
+#     # blocks = compute_blocks(left_block, right_block, edge, edge1)
+#     # j1 = 0
+#     #
+#     # for j, block in enumerate(blocks):
+#     #     h_0_s.append(h_0[j1:block + j1, j1:block + j1])
+#     #     if j < len(blocks) - 1:
+#     #         h_l_s.append(h_0[block + j1:block + j1 + blocks[j + 1], j1:block + j1])
+#     #         h_r_s.append(h_0[j1:block + j1, j1 + block:j1 + block + blocks[j + 1]])
+#     #     j1 += block
+#
+#     return h_0_s, h_l_s, h_r_s, blocks
 
 
 def compute_edge(mat):

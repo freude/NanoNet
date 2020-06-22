@@ -296,14 +296,14 @@ def main():
     sys.path.insert(0, '/home/mk/TB_project/tb')
     import nanonet.tb as tb
 
-    a = tb.Atom('A')
+    a = tb.Orbitals('A')
     a.add_orbital('s', -0.7)
-    b = tb.Atom('B')
+    b = tb.Orbitals('B')
     b.add_orbital('s', -0.5)
-    c = tb.Atom('C')
+    c = tb.Orbitals('C')
     c.add_orbital('s', -0.3)
 
-    tb.Atom.orbital_sets = {'A': a, 'B': b, 'C': c}
+    tb.Orbitals.orbital_sets = {'A': a, 'B': b, 'C': c}
 
     tb.set_tb_params(PARAMS_A_A={'ss_sigma': -0.5},
                      PARAMS_B_B={'ss_sigma': -0.5},
@@ -338,7 +338,7 @@ def main():
 
     for E in energy:
         print("============Eigenval decompositions============")
-        L, R, _, _, _ = surface_greens_function(E, h_l, h_0, h_r)
+        L, R = surface_greens_function(E, h_l, h_0, h_r)
         print("==============Schur decomposition==============")
         L1, R1 = surface_greens_function_poles_Shur(E, h_l, h_0, h_r)
         sgf_l.append(L)
@@ -373,7 +373,7 @@ def main1():
     sys.path.insert(0, '/home/mk/TB_project/tb')
     import nanonet.tb as tb
 
-    tb.Atom.orbital_sets = {'Si': 'SiliconSP3D5S', 'H': 'HydrogenS'}
+    tb.Orbitals.orbital_sets = {'Si': 'SiliconSP3D5S', 'H': 'HydrogenS'}
     h = tb.Hamiltonian(xyz='/home/mk/NEGF_project/SiNW.xyz', nn_distance=2.4)
     h.initialize()
     h.set_periodic_bc([[0, 0, 5.50]])
@@ -397,7 +397,7 @@ def main1():
 
     for j, E in enumerate(energy):
         # L, R = surface_greens_function_poles_Shur(j, E, h_l, h_0, h_r)
-        L, R, _, _, _ = surface_greens_function(E, h_l, h_0, h_r)
+        L, R = surface_greens_function(E, h_l, h_0, h_r)
 
         test_gf = E * np.identity(num_sites) - h_0 - L - R
 
@@ -505,7 +505,7 @@ def inverse_bs_problem():
     # h.initialize()
     # h.set_periodic_bc([[0, 0, 3.0]])
 
-    tb.Atom.orbital_sets = {'Si': 'SiliconSP3D5S', 'H': 'HydrogenS'}
+    tb.Orbitals.orbital_sets = {'Si': 'SiliconSP3D5S', 'H': 'HydrogenS'}
     h = tb.Hamiltonian(xyz='/home/mk/TB_project/input_samples/SiNW.xyz', nn_distance=2.4)
     h.initialize()
     h.set_periodic_bc([[0, 0, 5.50]])
@@ -551,10 +551,10 @@ def main2():
     sys.path.insert(0, '/home/mk/TB_project/tb')
     import nanonet.tb as tb
 
-    a = tb.Atom('A')
+    a = tb.Orbitals('A')
     a.add_orbital('s', -0.7)
 
-    tb.Atom.orbital_sets = {'A': a}
+    tb.Orbitals.orbital_sets = {'A': a}
 
     tb.set_tb_params(PARAMS_A_A={'ss_sigma': -0.5},
                      PARAMS_B_B={'ss_sigma': -0.5},
@@ -578,7 +578,7 @@ def main2():
     sgf_r = []
 
     for E in energy:
-        L, R, _, _, _ = surface_greens_function(E, h_l, h_0, h_r)
+        L, R = surface_greens_function(E, h_l, h_0, h_r)
         # L, R = surface_greens_function_poles_Shur(E, h_l, h_0, h_r)
         sgf_l.append(L)
         sgf_r.append(R)
@@ -607,10 +607,10 @@ def main3():
     sys.path.insert(0, '/home/mk/TB_project/tb')
     import nanonet.tb as tb
 
-    a = tb.Atom('A')
+    a = tb.Orbitals('A')
     a.add_orbital('s', -0.7)
 
-    tb.Atom.orbital_sets = {'A': a}
+    tb.Orbitals.orbital_sets = {'A': a}
 
     tb.set_tb_params(PARAMS_A_A={'ss_sigma': -0.5},
                      PARAMS_B_B={'ss_sigma': -0.5},
@@ -634,7 +634,7 @@ def main3():
     sgf_r = []
 
     for E in energy:
-        L, R, _, _, _ = surface_greens_function(E, h_l, h_0, h_r)
+        L, R = surface_greens_function(E, h_l, h_0, h_r)
         # L, R = surface_greens_function_poles_Shur(E, h_l, h_0, h_r)
         sgf_l.append(L)
         sgf_r.append(R)

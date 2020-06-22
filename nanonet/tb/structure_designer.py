@@ -231,13 +231,13 @@ class CyclicTopology(AbstractStructureDesigner):
                 for surf in np.where(distances2[j])[0]:
 
                     count = self._translate_atom_1st_order(item,
-                                                           -np.array(self.pcv[surf]),
+                                                           -1 * np.array(self.pcv[surf]),
                                                            "_" + str(j) + "_" + labels[j],
                                                            coords,
                                                            count)
 
                     count = self._translate_atom_2d_order(item,
-                                                          -np.array(self.pcv[surf]),
+                                                          -1 * np.array(self.pcv[surf]),
                                                           "_" + str(j) + "_" + labels[j],
                                                           coords,
                                                           count)
@@ -310,6 +310,6 @@ class CyclicTopology(AbstractStructureDesigner):
 if __name__ == '__main__':
 
     sd = StructDesignerXYZ(xyz='/home/mk/TB_project/input_samples/SiNW2.xyz')
-    sd.sort([np.argmin(np.array(list(sd.atom_list.values()))[:, 2])],
-            [np.argmax(np.array(list(sd.atom_list.values()))[:, 2])])
+    sd._sort([np.argmin(np.array(list(sd.atom_list.values()))[:, 2])],
+             [np.argmax(np.array(list(sd.atom_list.values()))[:, 2])])
     print("Done!")

@@ -1,7 +1,6 @@
 from __future__ import division
 import numpy as np
 from scipy.spatial import cKDTree as KDTree
-    # http://docs.scipy.org/doc/scipy/reference/spatial.html
 
 __date__ = "2010-11-09 Nov"  # weights, doc
 

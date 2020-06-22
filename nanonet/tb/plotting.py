@@ -131,22 +131,5 @@ def plot_atom_positions1(h, virtual_and_interfacial_atoms, radial_dep):
     ax.set_zlim(-6, 6)
     plt.show()
 
-    for ii in range(len(atom_list)):
-        for jj in range(len(virtual_and_interfacial_atoms)):
-            if radial_dep(coordinates_of_atoms_outside_of_unit_cell[jj] - coordinates_of_atoms_in_unit_cell[ii]) == 1:
-                ax.scatter(coordinates_of_atoms_outside_of_unit_cell[jj, 0],
-                           coordinates_of_atoms_outside_of_unit_cell[jj, 1],
-                           coordinates_of_atoms_outside_of_unit_cell[jj, 2],
-                           c='r', s=30, alpha=0.3)
-            elif radial_dep(coordinates_of_atoms_outside_of_unit_cell[jj] - coordinates_of_atoms_in_unit_cell[ii]) == 2:
-                ax.scatter(coordinates_of_atoms_outside_of_unit_cell[jj, 0],
-                           coordinates_of_atoms_outside_of_unit_cell[jj, 1],
-                           coordinates_of_atoms_outside_of_unit_cell[jj, 2],
-                           c='g', s=20, alpha=0.3)
-            elif radial_dep(coordinates_of_atoms_outside_of_unit_cell[jj] - coordinates_of_atoms_in_unit_cell[ii]) == 3:
-                ax.scatter(coordinates_of_atoms_outside_of_unit_cell[jj, 0],
-                           coordinates_of_atoms_outside_of_unit_cell[jj, 1],
-                           coordinates_of_atoms_outside_of_unit_cell[jj, 2],
-                           c='b', s=10, alpha=1.0)
 
 

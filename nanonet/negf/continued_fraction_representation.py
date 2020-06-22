@@ -1,6 +1,6 @@
 import numpy as np
 from scipy.linalg import eig
-from negf.hamiltonian_chain import fd
+from nanonet.negf.hamiltonian_chain import fd
 
 
 def t_order_frac(x):
