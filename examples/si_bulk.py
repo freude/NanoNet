@@ -8,7 +8,7 @@ from nanonet.tb import Orbitals
 from nanonet.tb import get_k_coords
 
 
-# Crystal structure parameters
+# Lattice constant
 a = 5.50
 
 # Primitive cell

@@ -62,8 +62,8 @@ def surface_greens_function_poles(h_list):
     eigenvects = eigenvects[:, ind]
 
     vals = np.copy(eigenvals)
-    mask1 = np.abs(vals) < 0.9999
-    mask2 = np.abs(vals) > 1.0001
+    mask1 = np.abs(vals) < 0.9999999
+    mask2 = np.abs(vals) > 1.0000001
     vals = np.angle(vals)
 
     vals[mask1] = -5

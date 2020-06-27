@@ -23,9 +23,10 @@ def main():
     left_lead = [40, 66, 58, 47, 48, 71, 72, 73, 74, 65]
 
     # create a Hamiltonian object storing the Hamiltonian matrices
-    hamiltonian = Hamiltonian(xyz=path, nn_distance=2.4,
-                              sort_func=sort_projection,
-                              left_lead=left_lead, right_lead=right_lead)
+    # hamiltonian = Hamiltonian(xyz=path, nn_distance=2.4,
+    #                           sort_func=sort_projection,
+    #                           left_lead=left_lead, right_lead=right_lead)
+    hamiltonian = Hamiltonian(xyz=path, nn_distance=2.4)
     hamiltonian.initialize()
 
     # set periodic boundary conditions
@@ -39,10 +40,10 @@ def main():
     hl1, h01, hr1, subblocks = hamiltonian.get_hamiltonians_block_tridiagonal()
 
     # specify energy array
-    energy = np.linspace(2.1, 2.3, 30)
+    energy = np.linspace(2.0, 2.45, 50)
 
     # specify dephasing constant
-    damp = 0.0005j
+    damp = 0.001j
 
     # initialize output arrays by zeros
     tr = np.zeros(energy.shape)
@@ -60,16 +61,16 @@ def main():
         s11, s12 = h01[-1].shape
 
         # apply self-energies
-        h01[0] = h01[0] + L[:s01, :s02]
-        h01[-1] = h01[-1] + R[-s11:, -s12:]
+        # h01[0] = h01[0] + L[:s01, :s02]
+        # h01[-1] = h01[-1] + R[-s11:, -s12:]
 
         # compute Green's functions using the recursive Green's function algorithm
-        # g_trans, grd, grl, gru, gr_left = negf.recursive_gf(E, [hl, hl], [h0+L, h0, h0+R], [hr, hr], damp=damp)
-        g_trans, grd, grl, gru, gr_left = negf.recursive_gf(E, hl1, h01, hr1, damp=damp)
+        g_trans, grd, grl, gru, gr_left = negf.recursive_gf(E, [hl, hl], [h0+L, h0, h0+R], [hr, hr], damp=damp)
+        # g_trans, grd, grl, gru, gr_left = negf.recursive_gf(E, hl1, h01, hr1, damp=damp)
 
         # detach self-energies
-        h01[0] = h01[0] - L[:s01, :s02]
-        h01[-1] = h01[-1] - R[-s11:, -s12:]
+        # h01[0] = h01[0] - L[:s01, :s02]
+        # h01[-1] = h01[-1] - R[-s11:, -s12:]
 
         # number of subblocks
         num_periods = len(grd)
@@ -78,8 +79,10 @@ def main():
         for jj in range(num_periods):
             dos[j] = dos[j] + np.real(np.trace(1j * (grd[jj] - grd[jj].conj().T))) / num_periods
 
-        gamma_l = 1j * (L[:s01, :s02] - L[:s01, :s02].conj().T)
-        gamma_r = 1j * (R[-s11:, -s12:] - R[-s11:, -s12:].conj().T)
+        # gamma_l = 1j * (L[:s01, :s02] - L[:s01, :s02].conj().T)
+        # gamma_r = 1j * (R[-s11:, -s12:] - R[-s11:, -s12:].conj().T)
+        gamma_l = 1j * (L - L.conj().T)
+        gamma_r = 1j * (R - R.conj().T)
 
         # compute transmission spectrum
         tr[j] = np.real(np.trace(gamma_l.dot(g_trans).dot(gamma_r).dot(g_trans.conj().T)))
