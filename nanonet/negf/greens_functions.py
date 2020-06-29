@@ -2,15 +2,10 @@
 The module contains functions that computes Green's functions and their poles
 """
 from __future__ import print_function, division
-import pickle
-from scipy.optimize import minimize
-import os.path
 import numpy as np
 import scipy.linalg as linalg
-from scipy.sparse import csr_matrix
 
 
-@profile
 def surface_greens_function_poles(h_list):
     """
     Computes eigenvalues and eigenvectors for the complex band structure problem.
@@ -107,7 +102,7 @@ def iterate_gf(E, h_0, h_l, h_r, gf, num_iter):
 
     return gf
 
-@profile
+
 def surface_greens_function(E, h_l, h_0, h_r, iterate=True, damp=0.0001j):
     """
     Computes surface self-energies using the eigenvalue decomposition.
