@@ -55,7 +55,7 @@ def main():
         logging.info("{} Energy: {} eV".format(j, E))
 
         # compute self-energies describing boundary conditions at the leads contacts
-        R, L = negf.surface_greens_function(E, hl, h0, hr, iterate=True, damp=damp)
+        R, L = negf.surface_greens_function(E, hl, h0, hr, iterate=False, damp=damp)
 
         s01, s02 = h01[0].shape
         s11, s12 = h01[-1].shape
@@ -77,7 +77,8 @@ def main():
 
         # compute DOS
         for jj in range(num_periods):
-            dos[j] = dos[j] + np.real(np.trace(1j * (grd[jj] - grd[jj].conj().T))) / num_periods
+            # dos[j] = dos[j] + np.real(np.trace(1j * (grd[jj] - grd[jj].conj().T))) / num_periods
+            dos[j] = dos[j] + np.real(np.trace(np.imag(grd[jj]))) / num_periods
 
         # gamma_l = 1j * (L[:s01, :s02] - L[:s01, :s02].conj().T)
         # gamma_r = 1j * (R[-s11:, -s12:] - R[-s11:, -s12:].conj().T)

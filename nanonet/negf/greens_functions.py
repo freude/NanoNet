@@ -10,6 +10,7 @@ import scipy.linalg as linalg
 from scipy.sparse import csr_matrix
 
 
+@profile
 def surface_greens_function_poles(h_list):
     """
     Computes eigenvalues and eigenvectors for the complex band structure problem.
@@ -50,7 +51,6 @@ def surface_greens_function_poles(h_list):
     eigenvals = np.zeros(alpha.shape, dtype=np.complex)
 
     for j, item in enumerate(zip(alpha, betha)):
-
         if np.abs(item[1]) != 0.0:
             eigenvals[j] = item[0] / item[1]
         else:
@@ -107,7 +107,7 @@ def iterate_gf(E, h_0, h_l, h_r, gf, num_iter):
 
     return gf
 
-
+@profile
 def surface_greens_function(E, h_l, h_0, h_r, iterate=True, damp=0.0001j):
     """
     Computes surface self-energies using the eigenvalue decomposition.

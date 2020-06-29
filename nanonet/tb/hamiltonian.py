@@ -14,7 +14,7 @@ from nanonet.tb.structure_designer import StructDesignerXYZ, CyclicTopology
 from nanonet.tb.diatomic_matrix_element import me
 from nanonet.tb.orbitals import Orbitals
 from nanonet.tb.aux_functions import dict2xyz
-from nanonet.tb.block_tridiagonalization import split_into_subblocks_optimized, cut_in_blocks
+from nanonet.tb.block_tridiagonalization import split_into_subblocks_optimized, cut_in_blocks, split_into_subblocks
 import nanonet.verbosity as verbosity
 
 
@@ -535,7 +535,7 @@ class Hamiltonian(BasisTB):
 
         return np.array(self._coords)
 
-    def get_hamiltonians_block_tridiagonal(self, left=None, right=None):
+    def get_hamiltonians_block_tridiagonal(self, left=None, right=None, optimized=True):
 
         if left is None and right is None:
             hl, h0, hr = self.get_hamiltonians()
@@ -544,7 +544,11 @@ class Hamiltonian(BasisTB):
             h0 = self.h_matrix
             hr = right
 
-        subblocks = split_into_subblocks_optimized(h0, hl, hr)
+        if optimized:
+            subblocks = split_into_subblocks_optimized(h0, hl, hr)
+        else:
+            subblocks = split_into_subblocks(h0, hl, hr)
+
         h01, hl1, hr1 = cut_in_blocks(h0, subblocks)
 
         return hl1, h01, hr1, subblocks

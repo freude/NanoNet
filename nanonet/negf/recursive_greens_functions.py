@@ -1,10 +1,12 @@
 import copy
 import numpy as np
+import scipy.linalg as linalg
 
 
 def mat_left_div(mat_a, mat_b):
 
-    ans, resid, rank, s = np.linalg.lstsq(mat_a, mat_b, rcond=-1)
+    # ans, resid, rank, s = linalg.lstsq(mat_a, mat_b, lapack_driver='gelsy')
+    ans, resid, rank, s = np.linalg.lstsq(mat_a, mat_b, rcond=None)
 
     return ans
 
