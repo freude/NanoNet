@@ -1,5 +1,4 @@
-# NanoNET 
-## Nanoscale Non-equilibrium Electron Transport
+# NanoNET
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Build Status](https://travis-ci.org/freude/NanoNet.svg)](https://travis-ci.org/freude)
@@ -13,7 +12,7 @@
 
 ## Introduction
 
-The project represents an extendable Python framework for 
+The project NanoNET (Nanoscale Non-equilibrium Electron Transport) represents an extendable Python framework for 
 the electronic structure computations based on 
 the tight-binding method. The code can deal with both finite
 and periodic systems translated in one, two or three dimensions.
