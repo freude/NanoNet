@@ -52,7 +52,7 @@ def sort_projection(coords=None, left_lead=None, right_lead=None, **kwargs):
     vec = np.mean(coords[left_lead], axis=0) - np.mean(coords[right_lead], axis=0)
     keys = np.dot(coords, vec) / np.linalg.norm(vec)
 
-    return np.argsort(keys)
+    return np.argsort(keys, kind='mergesort')
 
 
 def sort_capacitance(coords, mat, left_lead, right_lead, **kwargs):

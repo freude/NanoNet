@@ -20,7 +20,7 @@ def main():
 
     # define leads indices
     right_lead = [0, 33, 35, 17, 16, 51, 25,  9, 53, 68,  1,  8, 24]
-    left_lead = [40, 66, 58, 47, 48, 71, 72, 73, 74, 65]
+    left_lead = [40, 66, 58, 47, 48, 71, 72, 73, 74, 65, 6, 22, 7, 23, 14, 30, 15, 31]
 
     # create a Hamiltonian object storing the Hamiltonian matrices
     # hamiltonian = Hamiltonian(xyz=path, nn_distance=2.4,
@@ -78,7 +78,7 @@ def main():
         # compute DOS
         for jj in range(num_periods):
             # dos[j] = dos[j] + np.real(np.trace(1j * (grd[jj] - grd[jj].conj().T))) / num_periods
-            dos[j] = dos[j] + np.real(np.trace(np.imag(grd[jj]))) / num_periods
+            dos[j] = dos[j] - np.real(np.trace(np.imag(grd[jj]))) / num_periods
 
         # gamma_l = 1j * (L[:s01, :s02] - L[:s01, :s02].conj().T)
         # gamma_r = 1j * (R[-s11:, -s12:] - R[-s11:, -s12:].conj().T)

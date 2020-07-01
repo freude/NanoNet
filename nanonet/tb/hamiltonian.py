@@ -545,7 +545,7 @@ class Hamiltonian(BasisTB):
             hr = right
 
         if optimized:
-            subblocks = split_into_subblocks_optimized(h0, hl, hr)
+            subblocks = split_into_subblocks_optimized(h0, left=hl, right=hr)
         else:
             subblocks = split_into_subblocks(h0, hl, hr)
 
