@@ -103,9 +103,9 @@ class StructDesignerXYZ(AbstractStructureDesigner):
                                  mat=h_matrix)
 
         self.reorder = indices
-        if isinstance(self.left_lead, list) or isinstance(self.left_lead, np.ndarray) and len(self.left_lead) > 0:
+        if (isinstance(self.left_lead, list) or isinstance(self.left_lead, np.ndarray)) and len(self.left_lead) > 0:
             self.left_lead = np.squeeze(np.concatenate([np.where(indices == item) for item in self.left_lead]))
-        if isinstance(self.right_lead, list) or isinstance(self.right_lead, np.ndarray) and len(self.right_lead) > 0:
+        if (isinstance(self.right_lead, list) or isinstance(self.right_lead, np.ndarray)) and len(self.right_lead) > 0:
             self.right_lead = np.squeeze(np.concatenate([np.where(indices == item) for item in self.right_lead]))
         coords = coords[indices]
         labels = [labels[i] for i in indices]
