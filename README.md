@@ -112,11 +112,12 @@ the class Hamiltonian with proper arguments.
     h = tb.Hamiltonian(xyz=xyz_file, nn_distance=1.1)
     ```
 
-2. Initialize the Hamiltonian - compute Hamiltonian matrix elements
+2. Now one needs to specify the coupling parameters between pairs of atoms with a given diatomic symmetry and initialize the Hamiltonian - compute Hamiltonian matrix elements
 
     For isolated system:
         
     ```python
+    tb.set_tb_params(PARAMS_A_B={'ss_sigma': 0.3})
     h.initialize()
     ```
 3. Specify periodic boundary conditions:
