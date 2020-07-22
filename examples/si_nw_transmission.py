@@ -28,8 +28,6 @@ def main():
 
     # get Hamiltonian matrices
     hl, h0, hr = hamiltonian.get_hamiltonians()
-    # get Hamiltonian matrices in the block-diagonal form
-    hl1, h01, hr1, subblocks = hamiltonian.get_hamiltonians_block_tridiagonal()
 
     # specify energy array
     energy = np.linspace(2.1, 2.2, 50)
