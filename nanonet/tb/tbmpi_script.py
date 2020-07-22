@@ -12,6 +12,27 @@ size = comm.Get_size()
 
 
 def main1(param_file, k_points_file, xyz, show, save, code_name):
+    """
+
+    Parameters
+    ----------
+    param_file :
+        
+    k_points_file :
+        
+    xyz :
+        
+    show :
+        
+    save :
+        
+    code_name :
+        
+
+    Returns
+    -------
+
+    """
 
     params, wave_vector, code_name = preprocess_data(param_file, k_points_file, xyz, code_name)
 
@@ -38,6 +59,7 @@ def main1(param_file, k_points_file, xyz, show, save, code_name):
 
 
 def main():
+    """ """
 
     parser = create_parser()
     args = parser.parse_args()

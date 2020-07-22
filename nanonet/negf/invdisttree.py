@@ -6,9 +6,9 @@ __date__ = "2010-11-09 Nov"  # weights, doc
 
 #...............................................................................
 class Invdisttree:
-    """ inverse-distance-weighted interpolation using KDTree:
-invdisttree = Invdisttree( X, z )  -- data points, values
-interpol = invdisttree( q, nnear=3, eps=0, p=1, weights=None, stat=0 )
+    """inverse-distance-weighted interpolation using KDTree:
+    invdisttree = Invdisttree( X, z )  -- data points, values
+    interpol = invdisttree( q, nnear=3, eps=0, p=1, weights=None, stat=0 )
     interpolates z from the 3 points nearest each query point q;
     For example, interpol[ a query point q ]
     finds the 3 data points nearest q, at distances d1 d2 d3
@@ -21,12 +21,12 @@ interpol = invdisttree( q, nnear=3, eps=0, p=1, weights=None, stat=0 )
     p: use 1 / distance**p
     weights: optional multipliers for 1 / distance**p, of the same shape as q
     stat: accumulate wsum, wn for average weights
-How many nearest neighbors should one take ?
-a) start with 8 11 14 .. 28 in 2d 3d 4d .. 10d; see Wendel's formula
-b) make 3 runs with nnear= e.g. 6 8 10, and look at the results --
+    How many nearest neighbors should one take ?
+    a) start with 8 11 14 .. 28 in 2d 3d 4d .. 10d; see Wendel's formula
+    b) make 3 runs with nnear= e.g. 6 8 10, and look at the results --
     |interpol 6 - interpol 8| etc., or |f - interpol*| if you have f(q).
     I find that runtimes don't increase much at all with nnear -- ymmv.
-p=1, p=2 ?
+    p=1, p=2 ?
     p=2 weights nearer points more, farther points less.
     In 2d, the circles around query points have areas ~ distance**2,
     so p=2 is inverse-area weighting. For example,
@@ -34,19 +34,26 @@ p=1, p=2 ?
         / (1/area1 + 1/area2 + 1/area3)
         = .74 z1 + .18 z2 + .08 z3  for distances 1 2 3
     Similarly, in 3d, p=3 is inverse-volume weighting.
-Scaling:
+    Scaling:
     if different X coordinates measure different things, Euclidean distance
     can be way off.  For example, if X0 is in the range 0 to 1
     but X1 0 to 1000, the X1 distances will swamp X0;
     rescale the data, i.e. make X0.std() ~= X1.std() .
-A nice property of IDW is that it's scale-free around query points:
-if I have values z1 z2 z3 from 3 points at distances d1 d2 d3,
-the IDW average
+    A nice property of IDW is that it's scale-free around query points:
+    if I have values z1 z2 z3 from 3 points at distances d1 d2 d3,
+    the IDW average
     (z1/d1 + z2/d2 + z3/d3)
     / (1/d1 + 1/d2 + 1/d3)
-is the same for distances 1 2 3, or 10 20 30 -- only the ratios matter.
-In contrast, the commonly-used Gaussian kernel exp( - (distance/h)**2 )
-is exceedingly sensitive to distance and to h.
+    is the same for distances 1 2 3, or 10 20 30 -- only the ratios matter.
+    In contrast, the commonly-used Gaussian kernel exp( - (distance/h)**2 )
+    is exceedingly sensitive to distance and to h.
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+
     """
 # anykernel( dj / av dj ) is also scale-free
 # error analysis, |f(x) - idw(x)| ? todo: regular grid, nnear ndim+1, 2*ndim

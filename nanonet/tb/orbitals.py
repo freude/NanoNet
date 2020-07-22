@@ -8,10 +8,16 @@ from nanonet.tb.aux_functions import print_table
 
 
 class Orbitals(object):
-    """
-    This is the parent class for all basis sets for all atoms. It also contains a factory function,
+    """This is the parent class for all basis sets for all atoms. It also contains a factory function,
     which generates objects of the class Orbitals from a list of labels and
     the dictionary `orbital_sets` making a correspondence between an atom and its basis set
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+
     """
 
     orbital_sets = {}
@@ -23,16 +29,27 @@ class Orbitals(object):
         Orbitals.orbital_sets[self.title] = self
 
     def add_orbital(self, title, energy=0.0, principal=0, orbital=0, magnetic=0, spin=0):
-        """
-        Adds an orbital to the set of orbitals
+        """Adds an orbital to the set of orbitals
 
-        :param title:        a string representing an orbital label,
-                             it usually specifies its symmetry, e.g. `s`, `px`, `py` etc.
-        :param energy:       energy of the orbital
-        :param principal:    principal quantum number `n-1`
-        :param orbital:      orbital quantum number `l`
-        :param magnetic:     magnetic quantum number `m`
-        :param spin:         spin quantum number `s`
+        Parameters
+        ----------
+        title :
+            a string representing an orbital label,
+            it usually specifies its symmetry, e.g. `s`, `px`, `py` etc.
+        energy :
+            energy of the orbital (Default value = 0.0)
+        principal :
+            principal quantum number `n-1` (Default value = 0)
+        orbital :
+            orbital quantum number `l` (Default value = 0)
+        magnetic :
+            magnetic quantum number `m` (Default value = 0)
+        spin :
+            spin quantum number `s` (Default value = 0)
+
+        Returns
+        -------
+
         """
 
         orbital = {'title': title,
@@ -48,19 +65,26 @@ class Orbitals(object):
         Orbitals.orbital_sets[self.title] = self
 
     def generate_info(self):
+        """ """
 
         return print_table(self.orbitals)
 
     @staticmethod
     def atoms_factory(labels):
-        """
-        Taking a list of labels creates a dictionary of `Orbitals` objects
+        """Taking a list of labels creates a dictionary of `Orbitals` objects
         from those labels. The set of orbitals for each atom and corresponding class is
         specified in the class variable `orbital_sets`
 
-        :param labels:   list of labels
-        :type labels:    list(str)
-        :return:         dictionary of `Orbitals` objects
+        Parameters
+        ----------
+        labels : list(str)
+            list of labels
+
+        Returns
+        -------
+        type
+            dictionary of `Orbitals` objects
+
         """
 
         output = {}
@@ -89,9 +113,7 @@ class Orbitals(object):
 
 
 class SiliconSP3D5S(Orbitals):
-    """
-    Class defines the `sp3d5s*` basis set for the silicon atom
-    """
+    """Class defines the `sp3d5s*` basis set for the silicon atom"""
 
     def __init__(self):
 
@@ -110,9 +132,15 @@ class SiliconSP3D5S(Orbitals):
 
 
 class HydrogenS(Orbitals):
-    """
-    Class defines the simplest basis set for the hydrogen atom,
+    """Class defines the simplest basis set for the hydrogen atom,
     consisting of a single s-orbital
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+
     """
 
     def __init__(self):
@@ -124,9 +152,7 @@ class HydrogenS(Orbitals):
 
 
 class Bismuth(Orbitals):
-    """
-    Class defines the `sp3` basis set for the bismuth atom
-    """
+    """Class defines the `sp3` basis set for the bismuth atom"""
 
     def __init__(self):
 

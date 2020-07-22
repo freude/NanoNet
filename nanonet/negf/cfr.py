@@ -3,6 +3,7 @@ from scipy.linalg import eig
 
 
 class CFR(object):
+    """ """
 
     val_inf = 1.0e4
 
@@ -16,6 +17,17 @@ class CFR(object):
             self.gen_poles_and_residues(self.cutoff)
 
     def fd_approximant(self, energy):
+        """
+
+        Parameters
+        ----------
+        energy :
+            
+
+        Returns
+        -------
+
+        """
         arg = np.array(energy)
         ans = np.zeros(arg.shape) + 0.5
 
@@ -27,6 +39,17 @@ class CFR(object):
         return ans
 
     def fd_approximant_diff(self, energy):
+        """
+
+        Parameters
+        ----------
+        energy :
+            
+
+        Returns
+        -------
+
+        """
 
         arg = np.array(energy)
         ans = np.zeros(arg.shape) + 0.5 * 0
@@ -39,11 +62,16 @@ class CFR(object):
         return ans
 
     def gen_poles_and_residues(self, cutoff=50):
-        """
-        Compute positions of poles and their residuals for the Fermi-Dirac function
+        """Compute positions of poles and their residuals for the Fermi-Dirac function
 
-        :param cutoff:   cutoff energy
-        :return:
+        Parameters
+        ----------
+        cutoff :
+            cutoff energy (Default value = 50)
+
+        Returns
+        -------
+
         """
 
         self.cutoff = cutoff
@@ -60,16 +88,26 @@ class CFR(object):
         self.num_poles = len(self.fd_poles_coords)
 
     def get_poles_and_residues(self):
+        """ """
         return self.fd_poles_coords, self.fd_poles
 
     def integrate(self, gf, ef=0, tempr=300, zero_moment=-1):
         """
 
-        :param gf:
-        :param ef:
-        :param tempr:
-        :param zero_moment:
-        :return:
+        Parameters
+        ----------
+        gf :
+            param ef:
+        tempr :
+            param zero_moment: (Default value = 300)
+        ef :
+             (Default value = 0)
+        zero_moment :
+             (Default value = -1)
+
+        Returns
+        -------
+
         """
 
         if zero_moment == -1:
@@ -86,6 +124,19 @@ class CFR(object):
         return np.real(zero_moment + np.imag(ans))
 
     def genetate_integration_points(self, ef, tempr):
+        """
+
+        Parameters
+        ----------
+        ef :
+            
+        tempr :
+            
+
+        Returns
+        -------
+
+        """
         ans = []
         betha = 1.0 / (8.617333262145e-5 * tempr)
 
@@ -97,10 +148,18 @@ class CFR(object):
     def integrate1(self, gf_vals, tempr, zero_moment=0):
         """
 
-        :param gf_vals:
-        :param tempr:
-        :param zero_moment:
-        :return:
+        Parameters
+        ----------
+        gf_vals :
+            param tempr:
+        zero_moment :
+            return: (Default value = 0)
+        tempr :
+            
+
+        Returns
+        -------
+
         """
 
         assert len(gf_vals) == len(self.fd_poles_coords)

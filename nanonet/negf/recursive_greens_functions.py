@@ -4,6 +4,19 @@ import scipy.linalg as linalg
 
 
 def mat_left_div(mat_a, mat_b):
+    """
+
+    Parameters
+    ----------
+    mat_a :
+        
+    mat_b :
+        
+
+    Returns
+    -------
+
+    """
 
     # ans, resid, rank, s = linalg.lstsq(mat_a, mat_b, lapack_driver='gelsy')
     ans, resid, rank, s = np.linalg.lstsq(mat_a, mat_b, rcond=None)
@@ -12,6 +25,17 @@ def mat_left_div(mat_a, mat_b):
 
 
 def mat_mul(list_of_matrices):
+    """
+
+    Parameters
+    ----------
+    list_of_matrices :
+        
+
+    Returns
+    -------
+
+    """
     num_of_mat = len(list_of_matrices)
 
     unity = np.eye(list_of_matrices[num_of_mat - 1].shape[0])
@@ -26,30 +50,39 @@ def mat_mul(list_of_matrices):
 
 
 def recursive_gf(energy, mat_l_list, mat_d_list, mat_u_list, s_in=0, s_out=0, damp=0.000001j):
-    """
-    The recursive Green's function algorithm is taken from
+    """The recursive Green's function algorithm is taken from
     M. P. Anantram, M. S. Lundstrom and D. E. Nikonov, Proceedings of the IEEE, 96, 1511 - 1550 (2008)
     DOI: 10.1109/JPROC.2008.927355
-
+    
     In order to get the electron correlation function output, the parameters s_in has to be set.
     For the hole correlation function, the parameter s_out has to be set.
 
+    Parameters
+    ----------
+    energy : numpy array
+        energy
+    mat_d_list : list:                  list of numpy arrays
+        list of diagonal blocks
+    mat_u_list : list:                  list of numpy arrays
+        list of upper-diagonal blocks
+    mat_l_list : list:                  list of numpy arrays
 
-    :param energy:                     energy
-    :type energy:                      numpy array
-    :param mat_d_list:                 list of diagonal blocks
-    :type mat_d_list:                  list of numpy arrays
-    :param mat_u_list:                 list of upper-diagonal blocks
-    :type mat_u_list:                  list of numpy arrays
-    :param mat_l_list:                 list of lower-diagonal blocks
-    :type mat_l_list:                  list of numpy arrays
+:return grd, grl, gru, gr_left:    retarded Green's
+                                   function: block-diagonal,
+                                             lower block-diagonal,
+                                             upper block-diagonal,
+                                             left-connected
+        list of lower-diagonal blocks
+    s_in :
+         (Default value = 0)
+    s_out :
+         (Default value = 0)
+    damp :
+         (Default value = 0.000001j)
 
-    :return grd, grl, gru, gr_left:    retarded Green's
-                                       function: block-diagonal,
-                                                 lower block-diagonal,
-                                                 upper block-diagonal,
-                                                 left-connected
-    :rtype grd, grl, gru, gr_left:     list of numpy arrays
+    Returns
+    -------
+
     """
     # -------------------------------------------------------------------
     # ---------- convert input arrays to the matrix data type -----------

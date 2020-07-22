@@ -3,6 +3,7 @@ import nanonet.tb as tb
 
 
 def test_simple_atomic_chain():
+    """ """
     site_energy = -1.0
     coupling = -1.0
     l_const = 1.0
@@ -37,6 +38,7 @@ def test_simple_atomic_chain():
 
 
 def test_atomic_chain_two_kinds_of_atoms():
+    """ """
     site_energy1 = -1.0
     site_energy2 = -2.0
     coupling = -1.0
@@ -80,6 +82,7 @@ def test_atomic_chain_two_kinds_of_atoms():
 
 
 def test_bulk_silicon():
+    """ """
     a_si = 5.50
     PRIMITIVE_CELL = [[0, 0.5 * a_si, 0.5 * a_si],
                       [0.5 * a_si, 0, 0.5 * a_si],
@@ -112,6 +115,7 @@ def test_bulk_silicon():
 
 
 def expected_bulk_silicon_band_structure():
+    """ """
     return np.array([[-1.02206739e+01, -6.65655472e+00, -1.10180247e+00,
                       -1.10180247e+00, 2.14081014e+00, 4.39529148e+00,
                       4.39529148e+00, 8.97698100e+00, 8.97698100e+00,

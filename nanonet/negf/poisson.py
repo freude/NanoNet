@@ -64,6 +64,19 @@ import numpy as np
 
 
 def laplacian(input_mat, dx):
+    """
+
+    Parameters
+    ----------
+    input_mat :
+        
+    dx :
+        
+
+    Returns
+    -------
+
+    """
 
     top = input_mat[0:-2, 1:-1, 1:-1]
     left = input_mat[1:-1, 0:-2, 1:-1]
@@ -79,6 +92,29 @@ def laplacian(input_mat, dx):
 
 
 def gf(x, y, z, x0, y0, z0, sigma):
+    """
+
+    Parameters
+    ----------
+    x :
+        
+    y :
+        
+    z :
+        
+    x0 :
+        
+    y0 :
+        
+    z0 :
+        
+    sigma :
+        
+
+    Returns
+    -------
+
+    """
     return np.exp(-((x-x0)**2+(y-y0)**2+(z-z0)**2) / (2*sigma**2))
 
 

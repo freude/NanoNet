@@ -6,7 +6,7 @@ import logging
 import numpy as np
 import nanonet.negf as negf
 import matplotlib.pyplot as plt
-from nanonet.tb import Hamiltonian
+from nanonet.tb import Hamiltonian, HamiltonianSp
 from nanonet.tb import Orbitals
 from nanonet.tb.sorting_algorithms import sort_projection
 
@@ -40,7 +40,7 @@ def main():
     hl1, h01, hr1, subblocks = hamiltonian.get_hamiltonians_block_tridiagonal()
 
     # specify energy array
-    energy = np.linspace(2.0, 2.45, 50)
+    energy = np.linspace(2.1, 2.2, 50)
 
     # specify dephasing constant
     damp = 0.001j
@@ -56,6 +56,8 @@ def main():
 
         # compute self-energies describing boundary conditions at the leads contacts
         R, L = negf.surface_greens_function(E, hl, h0, hr, iterate=False, damp=damp)
+        # R, L = surface_greens_function_poles_Shur(E, hl, h0, hr)
+        # R, L = surface_greens_function(E, hl, h0, hr, iterate=False, damp=damp)
 
         s01, s02 = h01[0].shape
         s11, s12 = h01[-1].shape
@@ -90,6 +92,9 @@ def main():
 
     # visualize
     plt.plot(energy, dos)
+    plt.show()
+
+    plt.plot(dos)
     plt.show()
 
     plt.plot(energy, tr)

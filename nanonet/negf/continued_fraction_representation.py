@@ -4,10 +4,36 @@ from nanonet.negf.hamiltonian_chain import fd
 
 
 def t_order_frac(x):
+    """
+
+    Parameters
+    ----------
+    x :
+        
+
+    Returns
+    -------
+
+    """
     return 0.5 * (np.sign(x) + 1.0) / x
 
 
 def approximant(energy, poles, residues):
+    """
+
+    Parameters
+    ----------
+    energy :
+        
+    poles :
+        
+    residues :
+        
+
+    Returns
+    -------
+
+    """
 
     arg = np.array(energy)
     ans = np.zeros(arg.shape) + 0.5
@@ -20,6 +46,21 @@ def approximant(energy, poles, residues):
 
 
 def approximant_diff(energy, poles, residues):
+    """
+
+    Parameters
+    ----------
+    energy :
+        
+    poles :
+        
+    residues :
+        
+
+    Returns
+    -------
+
+    """
 
     arg = np.array(energy)
     ans = np.zeros(arg.shape) + 0.5 * 0
@@ -32,6 +73,17 @@ def approximant_diff(energy, poles, residues):
 
 
 def poles_and_residues(cutoff=2):
+    """
+
+    Parameters
+    ----------
+    cutoff :
+         (Default value = 2)
+
+    Returns
+    -------
+
+    """
 
     b_mat = [1 / (2.0 * np.sqrt((2*(j+1) - 1)*(2*(j+1) + 1))) for j in range(0, cutoff-1)]
     b_mat = np.diag(b_mat, -1) + np.diag(b_mat, 1)
@@ -46,6 +98,17 @@ def poles_and_residues(cutoff=2):
 
 
 def test_gf1(z):
+    """
+
+    Parameters
+    ----------
+    z :
+        
+
+    Returns
+    -------
+
+    """
     return t_order_frac(z + 10.0) + \
            t_order_frac(z + 5.0) + \
            t_order_frac(z + 2.0) + \
@@ -53,6 +116,17 @@ def test_gf1(z):
 
 
 def test_gf(z):
+    """
+
+    Parameters
+    ----------
+    z :
+        
+
+    Returns
+    -------
+
+    """
     return 1.0 / (z + 10.0) + \
            1.0 / (z + 5.0) + \
            1.0 / (z + 2.0) + \
@@ -60,6 +134,23 @@ def test_gf(z):
 
 
 def test_integration(Ef, tempr, cutoff=70, gf=test_gf):
+    """
+
+    Parameters
+    ----------
+    Ef :
+        
+    tempr :
+        
+    cutoff :
+         (Default value = 70)
+    gf :
+         (Default value = test_gf)
+
+    Returns
+    -------
+
+    """
 
     R = 1.0e10
 
@@ -81,6 +172,21 @@ def test_integration(Ef, tempr, cutoff=70, gf=test_gf):
 
 
 def bf_integration(Ef, tempr, gf=test_gf):
+    """
+
+    Parameters
+    ----------
+    Ef :
+        
+    tempr :
+        
+    gf :
+         (Default value = test_gf)
+
+    Returns
+    -------
+
+    """
 
     # temp = 100
     R = 2e2

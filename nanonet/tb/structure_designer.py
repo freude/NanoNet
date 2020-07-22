@@ -14,12 +14,17 @@ from nanonet.tb.aux_functions import xyz2np, count_species, is_in_coords, print_
 
 
 class StructDesignerXYZ(AbstractStructureDesigner):
-    """
-    The class builds an atomic structure from either
+    """The class builds an atomic structure from either
     the filename of a xyz-file or
     xyz data itself represented as a Python string.
     The class arrange atomic coordinates in kd-tree and
     sorts them if needed according to a specified sorting procedure.
+
+    Parameters
+    ----------
+
+    Returns
+    -------
 
     Attributes
     ----------
@@ -39,7 +44,6 @@ class StructDesignerXYZ(AbstractStructureDesigner):
         needed for sorting atomic coordinates (default [])
     sort_func : func
         function for sorting atomic coordinates (default None)
-
     """
 
     def __init__(self, **kwargs):
@@ -86,6 +90,19 @@ class StructDesignerXYZ(AbstractStructureDesigner):
             self._sort(labels, coords)
 
     def _sort(self, labels, coords):
+        """
+
+        Parameters
+        ----------
+        labels :
+            
+        coords :
+            
+
+        Returns
+        -------
+
+        """
 
         coords = np.array(coords)
         h_matrix = np.zeros((coords.shape[0], coords.shape[0]))
@@ -114,22 +131,49 @@ class StructDesignerXYZ(AbstractStructureDesigner):
         self._kd_tree = scipy.spatial.cKDTree(np.array(list(self._atom_list.values())), leafsize=1, balanced_tree=True)
 
     def add_leads(self, left_lead, right_lead):
+        """
+
+        Parameters
+        ----------
+        left_lead :
+            
+        right_lead :
+            
+
+        Returns
+        -------
+
+        """
         self.left_lead = left_lead
         self.right_lead = right_lead
 
     @property
     def atom_list(self):
+        """ """
         return self._atom_list
 
     @property
     def num_of_nodes(self):
+        """ """
         return self._num_of_nodes
 
     @property
     def num_of_species(self):
+        """ """
         return self._num_of_species
 
     def get_neighbours(self, query):
+        """
+
+        Parameters
+        ----------
+        query :
+            
+
+        Returns
+        -------
+
+        """
 
         ans = self._get_neighbours(query)
 
@@ -143,11 +187,17 @@ class StructDesignerXYZ(AbstractStructureDesigner):
 
 
 class CyclicTopology(AbstractStructureDesigner):
-    """
-    The class provides functionality for determining
+    """The class provides functionality for determining
     the periodic boundary conditions for a crystal cell.
     The object of the class is instantiated by
     a set of the primitive cell vectors.
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+
     """
 
     def __init__(self, primitive_cell_vectors, labels, coords, nn_distance):
@@ -174,14 +224,22 @@ class CyclicTopology(AbstractStructureDesigner):
 
     @property
     def atom_list(self):
+        """ """
         return self.virtual_and_interfacial_atoms
 
     def _generate_atom_list(self, labels, coords):
         """
 
-        :param labels:    labels of atoms
-        :param coords:    coordinates of atoms
-        :return:
+        Parameters
+        ----------
+        labels :
+            labels of atoms
+        coords :
+            coordinates of atoms
+
+        Returns
+        -------
+
         """
 
         # matrices of distances between atoms and interfaces
@@ -200,8 +258,8 @@ class CyclicTopology(AbstractStructureDesigner):
         distances1 = np.abs(distances1 - np.min(distances1)) < self._nn_distance * 0.25
         distances2 = np.abs(np.abs(distances2) - np.min(np.abs(distances2))) < self._nn_distance * 0.25
 
-        distances1 = np.ones(distances1.shape)
-        distances2 = np.ones(distances1.shape)
+        # distances1 = np.ones(distances1.shape)
+        # distances2 = np.ones(distances1.shape)
 
         # form new lists of atoms
         count = 0
@@ -246,6 +304,25 @@ class CyclicTopology(AbstractStructureDesigner):
         self.interfacial_atoms_ind = list(set(self.interfacial_atoms_ind))
 
     def _translate_atom_1st_order(self, atom_coords, cell_vector, label, penalty_coords, count):
+        """
+
+        Parameters
+        ----------
+        atom_coords :
+            
+        cell_vector :
+            
+        label :
+            
+        penalty_coords :
+            
+        count :
+            
+
+        Returns
+        -------
+
+        """
 
         try_coords = atom_coords + cell_vector
 
@@ -257,6 +334,25 @@ class CyclicTopology(AbstractStructureDesigner):
         return count
 
     def _translate_atom_2d_order(self, atom_coords, cell_vector, label, penalty_coords, count):
+        """
+
+        Parameters
+        ----------
+        atom_coords :
+            
+        cell_vector :
+            
+        label :
+            
+        penalty_coords :
+            
+        count :
+            
+
+        Returns
+        -------
+
+        """
 
         for vec in self.pcv:
 
@@ -279,6 +375,17 @@ class CyclicTopology(AbstractStructureDesigner):
         return count
 
     def get_neighbours(self, query):
+        """
+
+        Parameters
+        ----------
+        query :
+            
+
+        Returns
+        -------
+
+        """
 
         ans = self._get_neighbours(query)
 
@@ -293,6 +400,19 @@ class CyclicTopology(AbstractStructureDesigner):
 
     @staticmethod
     def atom_classifier(coords, leads):
+        """
+
+        Parameters
+        ----------
+        coords :
+            
+        leads :
+            
+
+        Returns
+        -------
+
+        """
 
         distance_to_surface1 = np.inner(coords, leads) / np.linalg.norm(leads)
         distance_to_surface2 = np.inner(coords - leads, leads) / np.linalg.norm(leads)

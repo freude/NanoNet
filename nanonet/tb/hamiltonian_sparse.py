@@ -12,9 +12,15 @@ from nanonet.tb.hamiltonian import Hamiltonian
 
 
 class HamiltonianSp(Hamiltonian):
-    """
-    Class defines a Hamiltonian matrix as well as a set of member-functions
+    """Class defines a Hamiltonian matrix as well as a set of member-functions
     allowing to build, diagonalize and visualize the matrix.
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+
     """
 
     def __init__(self, **kwargs):
@@ -28,9 +34,7 @@ class HamiltonianSp(Hamiltonian):
         self.num_eigs = num_eigs
 
     def initialize(self):
-        """
-        The function computes matrix elements of the Hamiltonian.
-        """
+        """The function computes matrix elements of the Hamiltonian."""
 
         # initialize Hamiltonian matrices
         self.h_matrix = sp.lil_matrix((self.basis_size, self.basis_size), dtype=np.complex)
@@ -64,9 +68,15 @@ class HamiltonianSp(Hamiltonian):
         return self
 
     def diagonalize(self):
-        """
-        Diagonalize the Hamiltonian matrix for the finite isolated system
+        """Diagonalize the Hamiltonian matrix for the finite isolated system
         :return:
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+
         """
 
         vals, vects = splin.eigsh(self.h_matrix, k=self.num_eigs, sigma=self.sigma)
@@ -75,12 +85,17 @@ class HamiltonianSp(Hamiltonian):
         return vals[ind], vects[:, ind]
 
     def diagonalize_periodic_bc(self, k_vector):
-        """
-        Diagonalize the Hamiltonian matrix with the periodic boundary conditions
+        """Diagonalize the Hamiltonian matrix with the periodic boundary conditions
         for a certain value of the wave vector k_vector
 
-        :param k_vector:   wave vector
-        :return:
+        Parameters
+        ----------
+        k_vector :
+            wave vector
+
+        Returns
+        -------
+
         """
 
         k_vector = list(k_vector)
@@ -106,9 +121,15 @@ class HamiltonianSp(Hamiltonian):
         return vals[ind], vects[:, ind]
 
     def _reset_periodic_bc(self):
-        """
-        Resets the matrices determining periodic boundary conditions to their default state
+        """Resets the matrices determining periodic boundary conditions to their default state
         :return:
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+
         """
 
         self.h_matrix_bc_add = sp.lil_matrix((self.basis_size, self.basis_size), dtype=np.complex)
@@ -117,6 +138,7 @@ class HamiltonianSp(Hamiltonian):
         self.k_vector = None
 
     def get_hamiltonians(self):
+        """ """
 
         self.k_vector = [0.0, 0.0, 0.0]
 
@@ -130,6 +152,7 @@ class HamiltonianSp(Hamiltonian):
 
 
 def main():
+    """ """
 
     a_si = 5.50
     PRIMITIVE_CELL = [[0, 0, a_si]]

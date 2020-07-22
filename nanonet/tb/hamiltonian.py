@@ -22,12 +22,17 @@ unique_distances = set()
 
 
 class BasisTB(AbstractBasis, StructDesignerXYZ):
-    """
-    The class contains information about sets of quantum numbers and
+    """The class contains information about sets of quantum numbers and
     dimensionality of the Hilbert space.
     It is also equipped with the member functions translating quantum numbers
     into a matrix index and vise versa using a set of index offsets.
-    
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+
     Examples
     --------
     >>> from nanonet.verbosity import set_verbosity
@@ -91,8 +96,7 @@ class BasisTB(AbstractBasis, StructDesignerXYZ):
         logging.info("---------------------------------\n")
 
     def qn2ind(self, qn):
-        """
-        Computes a matrix index of an element from the index of atom and the index of atomic orbital.
+        """Computes a matrix index of an element from the index of atom and the index of atomic orbital.
 
         Parameters
         ----------
@@ -102,8 +106,8 @@ class BasisTB(AbstractBasis, StructDesignerXYZ):
 
         Returns
         -------
-            ans : int
-                index of an element in the TB matrix
+
+        
         """
 
         qn = OrderedDict(qn)
@@ -115,18 +119,25 @@ class BasisTB(AbstractBasis, StructDesignerXYZ):
             raise IndexError("Wrong set of quantum numbers")
 
     def ind2qn(self, ind):
-        pass  # TODO
-
-    @property
-    def orbitals_dict(self):
         """
-        Returns the dictionary data structure of orbitals. In the dictionary
+
+        Parameters
+        ----------
+        ind :
+            
+
         Returns
         -------
 
         """
+        pass  # TODO
+
+    @property
+    def orbitals_dict(self):
+        """Returns the dictionary data structure of orbitals. In the dictionary"""
 
         class MyDict(dict):
+            """ """
             def __getitem__(self, key):
                 key = ''.join([i for i in key if not i.isdigit()])
                 return super(MyDict, self).__getitem__(key)
@@ -135,9 +146,14 @@ class BasisTB(AbstractBasis, StructDesignerXYZ):
 
 
 class Hamiltonian(BasisTB):
-    """
-    Class defines a Hamiltonian matrix as well as a set of member-functions
+    """Class defines a Hamiltonian matrix as well as a set of member-functions
     allowing to build, diagonalize and visualize the matrix.
+
+    Parameters
+    ----------
+
+    Returns
+    -------
 
     Examples
     --------
@@ -188,8 +204,18 @@ class Hamiltonian(BasisTB):
         self.so_coupling = kwargs.get('so_coupling', 0.0)
 
     def initialize(self, int_radial_dep=None, radial_dep=None):
-        """
-        Compute matrix elements of the Hamiltonian.
+        """Compute matrix elements of the Hamiltonian.
+
+        Parameters
+        ----------
+        int_radial_dep :
+             (Default value = None)
+        radial_dep :
+             (Default value = None)
+
+        Returns
+        -------
+
         """
 
         if radial_dep is None:
@@ -249,11 +275,17 @@ class Hamiltonian(BasisTB):
         return self
 
     def set_periodic_bc(self, primitive_cell):
-        """
-        Set periodic boundary conditions.
+        """Set periodic boundary conditions.
         The function creates an object of the class CyclicTopology.
 
-        :param primitive_cell: list of vectors defining a primitive cell
+        Parameters
+        ----------
+        primitive_cell :
+            list of vectors defining a primitive cell
+
+        Returns
+        -------
+
         """
         if list(primitive_cell):
             self.ct = CyclicTopology(primitive_cell,
@@ -264,9 +296,15 @@ class Hamiltonian(BasisTB):
             self.ct = None
 
     def diagonalize(self):
-        """
-        Diagonalize the Hamiltonian matrix for the finite isolated system
+        """Diagonalize the Hamiltonian matrix for the finite isolated system
         :return:
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+
         """
 
         vals, vects = np.linalg.eigh(self.h_matrix)
@@ -275,12 +313,17 @@ class Hamiltonian(BasisTB):
         return vals[ind], vects[:, ind]
 
     def diagonalize_periodic_bc(self, k_vector):
-        """
-        Diagonalize the Hamiltonian matrix with the periodic boundary conditions
+        """Diagonalize the Hamiltonian matrix with the periodic boundary conditions
         for a certain value of the wave vector k_vector
 
-        :param k_vector:   wave vector
-        :return:
+        Parameters
+        ----------
+        k_vector :
+            wave vector
+
+        Returns
+        -------
+
         """
 
         k_vector = list(k_vector)
@@ -299,23 +342,44 @@ class Hamiltonian(BasisTB):
         return vals[ind], vects[:, ind]
 
     def _ind2atom(self, ind):
+        """
+
+        Parameters
+        ----------
+        ind :
+            
+
+        Returns
+        -------
+
+        """
 
         return self.orbitals_dict[list(self.atom_list.keys())[ind]]
 
     def _get_me(self, atom1, atom2, l1, l2, coords=None):
-        """
-        Compute the matrix element <atom1, l1|H|l2, atom2>.
+        """Compute the matrix element <atom1, l1|H|l2, atom2>.
         The function is called in the member function initialize() and invokes the function
         me() from the module diatomic_matrix_element.
 
-        :param atom1:    atom index
-        :param atom2:    atom index
-        :param l1:       index of a localized basis function
-        :param l2:       index of a localized basis function
-        :param coords:   coordinates of radius vector pointing from one atom to another
-                         it may differ from the actual coordinates of atoms
-        :return:         matrix element
-        :rtype:          float
+        Parameters
+        ----------
+        atom1 :
+            atom index
+        atom2 :
+            atom index
+        l1 :
+            index of a localized basis function
+        l2 :
+            index of a localized basis function
+        coords :
+            coordinates of radius vector pointing from one atom to another
+            it may differ from the actual coordinates of atoms (Default value = None)
+
+        Returns
+        -------
+        float
+            matrix element
+
         """
 
         # on site (pick right table of parameters for a certain atom)
@@ -365,6 +429,21 @@ class Hamiltonian(BasisTB):
             return me(atom_kind1, l1, atom_kind2, l2, coords1, which_neighbour) * factor
 
     def _comp_so(self, atom, ind1, ind2):
+        """
+
+        Parameters
+        ----------
+        atom :
+            
+        ind1 :
+            
+        ind2 :
+            
+
+        Returns
+        -------
+
+        """
 
         type1 = atom.orbitals[ind1]['title']
         type2 = atom.orbitals[ind2]['title']
@@ -418,9 +497,15 @@ class Hamiltonian(BasisTB):
             return 0
 
     def _reset_periodic_bc(self):
-        """
-        Reset the matrices determining periodic boundary conditions to their default state
+        """Reset the matrices determining periodic boundary conditions to their default state
         :return:
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+
         """
 
         self.h_matrix_bc_add = np.zeros((self.basis_size, self.basis_size), dtype=np.complex)
@@ -428,9 +513,7 @@ class Hamiltonian(BasisTB):
         self.k_vector = None
 
     def _compute_h_matrix_bc_factor(self):
-        """
-        Compute the exponential Bloch factors needed when the periodic boundary conditions are applied.
-        """
+        """Compute the exponential Bloch factors needed when the periodic boundary conditions are applied."""
 
         for j1 in range(self.num_of_nodes):
 
@@ -451,8 +534,16 @@ class Hamiltonian(BasisTB):
                             # self.h_matrix[ind2, ind1] = self.h_matrix[ind1, ind2]
 
     def _compute_h_matrix_bc_add(self, split_the_leads=False):
-        """
-            Compute additive Bloch exponentials needed to specify pbc
+        """Compute additive Bloch exponentials needed to specify pbc
+
+        Parameters
+        ----------
+        split_the_leads :
+             (Default value = False)
+
+        Returns
+        -------
+
         """
 
         two_leads = False
@@ -505,14 +596,19 @@ class Hamiltonian(BasisTB):
                                                                     self._get_me(j1, ind, l1, l2, coords)
 
     def get_hamiltonians(self):
-        """
-        Return a list of Hamiltonian matrices. For 1D systems, the list is [Hl, Hc, Hr],
+        """Return a list of Hamiltonian matrices. For 1D systems, the list is [Hl, Hc, Hr],
         where Hc is the Hamiltonian describing interactions between atoms within a unit cell,
         Hl and Hr are Hamiltonians describing couplings between atoms in the unit cell
         and atoms in the left and right adjacent unit cells.
 
-        :return:         list of Hamiltonians
-        :rtype:          list
+        Parameters
+        ----------
+
+        Returns
+        -------
+        list
+            list of Hamiltonians
+
         """
 
         self.k_vector = [0.0, 0.0, 0.0]
@@ -526,16 +622,36 @@ class Hamiltonian(BasisTB):
         return self.h_matrix_left_lead.T, self.h_matrix, self.h_matrix_right_lead.T
 
     def get_site_coordinates(self):
-        """
-        Return coordinates of atoms.
+        """Return coordinates of atoms.
 
-        :return:         atomic coordinates
-        :rtype:          numpy.ndarray
+        Parameters
+        ----------
+
+        Returns
+        -------
+        numpy.ndarray
+            atomic coordinates
+
         """
 
         return np.array(self._coords)
 
     def get_hamiltonians_block_tridiagonal(self, left=None, right=None, optimized=True):
+        """
+
+        Parameters
+        ----------
+        left :
+             (Default value = None)
+        right :
+             (Default value = None)
+        optimized :
+             (Default value = True)
+
+        Returns
+        -------
+
+        """
 
         if left is None and right is None:
             hl, h0, hr = self.get_hamiltonians()

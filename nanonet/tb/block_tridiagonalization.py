@@ -10,8 +10,7 @@ import scipy
 
 
 def accum(accmap, input, func=None, size=None, fill_value=0, dtype=None):
-    """
-    An accumulation function similar to Matlab's `accumarray` function.
+    """An accumulation function similar to Matlab's `accumarray` function.
 
     Parameters
     ----------
@@ -31,25 +30,20 @@ def accum(accmap, input, func=None, size=None, fill_value=0, dtype=None):
     func : callable or None
         The accumulation function.  The function will be passed a list
         of values from `a` to be accumulated.
-        If None, numpy.sum is assumed.
+        If None, numpy.sum is assumed. (Default value = None)
     size : ndarray or None
         The size of the output array.  If None, the size will be determined
-        from `accmap`.
+        from `accmap`. (Default value = None)
     fill_value : scalar
         The default value for elements of the output array.
     dtype : numpy data type, or None
         The data type of the output array.  If None, the data type of
-        `a` is used.
+        `a` is used. (Default value = None)
 
     Returns
     -------
-    out : ndarray
-        The accumulated results.
 
-        The shape of `out` is `size` if `size` is given.  Otherwise the
-        shape is determined by the (lexicographically) largest indices of
-        the output found in `accmap`.
-
+    
     """
 
     # Check for bad arguments and handle the defaults.
@@ -87,8 +81,7 @@ def accum(accmap, input, func=None, size=None, fill_value=0, dtype=None):
 
 
 def cut_in_blocks(h_0, blocks):
-    """
-    Cut a matrix into diagonal, upper-diagonal and lower-diagonal blocks
+    """Cut a matrix into diagonal, upper-diagonal and lower-diagonal blocks
     if sizes of the diagonal blocks are specified.
 
     Parameters
@@ -104,7 +97,6 @@ def cut_in_blocks(h_0, blocks):
         List of diagonal matrices,
         list of lower-diagonal matrices and
         list of upper-diagonal matrices.
-
         Note that if the size of the list h_0_s is N,
         the sizes of h_l_s, h_r_s are N-1.
 
@@ -152,8 +144,7 @@ def cut_in_blocks(h_0, blocks):
 
 
 def find_optimal_cut(edge, edge1, left, right):
-    """
-    Computes the index corresponding to the optimal cut such that applying
+    """Computes the index corresponding to the optimal cut such that applying
     the function compute_blocks() to the sub-blocks defined by the cut reduces
     the cost function comparing to the case when the function compute_blocks() is
     applied to the whole matrix. If cutting point can not be find, the algorithm returns
@@ -172,18 +163,8 @@ def find_optimal_cut(edge, edge1, left, right):
 
     Returns
     -------
-    blocks : list
-        list of diagonal block sizes
 
-    sep : int
-        the index of the optimal cut
-
-    right_block : int
-        size of the rightmost sub-block of the left block (relative to the cutting point)
-
-    left_block : int
-        size of the leftmost sub-block of the right block (relative to the cutting point)
-
+    
     """
 
     unique_indices = np.arange(left, len(edge) - right + 1)
@@ -234,8 +215,7 @@ def find_optimal_cut(edge, edge1, left, right):
 
 
 def compute_blocks_optimized(edge, edge1, left=1, right=1):
-    """
-    Computes optimal sizes of diagonal blocks of a matrix whose
+    """Computes optimal sizes of diagonal blocks of a matrix whose
     sparsity pattern is defined by the sparsity pattern profiles edge and edge1.
     This function is based on the algorithm which uses defined above function
     find_optimal_cut() to subdivide the problem into sub-problems in a optimal way
@@ -248,15 +228,14 @@ def compute_blocks_optimized(edge, edge1, left=1, right=1):
     edge1 : ndarray
         conjugated sparsity pattern profile of the matrix
     left : int
-        size of the leftmost diagonal block (constrained)
+        size of the leftmost diagonal block (constrained) (Default value = 1)
     right : int
-        size of the rightmost diagonal block (constrained)
+        size of the rightmost diagonal block (constrained) (Default value = 1)
 
     Returns
     -------
-    blocks : list
-        list of optimal sizes of diagonal blocks
 
+    
     """
 
     blocks, sep, right_block, left_block = find_optimal_cut(edge, edge1, left=left, right=right)
@@ -305,6 +284,19 @@ def compute_blocks_optimized(edge, edge1, left=1, right=1):
 
 
 def find_nonzero_lines(mat, order):
+    """
+
+    Parameters
+    ----------
+    mat :
+        
+    order :
+        
+
+    Returns
+    -------
+
+    """
 
     if scipy.sparse.issparse(mat):
         lines = _find_nonzero_lines_sparse(mat, order)
@@ -320,6 +312,19 @@ def find_nonzero_lines(mat, order):
 
 
 def _find_nonzero_lines(mat, order):
+    """
+
+    Parameters
+    ----------
+    mat :
+        
+    order :
+        
+
+    Returns
+    -------
+
+    """
     if order == 'top':
         line = mat.shape[0]
         while line > 0:
@@ -357,6 +362,19 @@ def _find_nonzero_lines(mat, order):
 
 
 def _find_nonzero_lines_sparse(mat, order):
+    """
+
+    Parameters
+    ----------
+    mat :
+        
+    order :
+        
+
+    Returns
+    -------
+
+    """
     if order == 'top':
         line = mat.shape[0]
         while line > 0:
@@ -396,10 +414,18 @@ def _find_nonzero_lines_sparse(mat, order):
 def split_into_subblocks_optimized(h_0, left=1, right=1):
     """
 
-    :param h_0:
-    :param left:
-    :param right:
-    :return:
+    Parameters
+    ----------
+    h_0 :
+        param left:
+    right :
+        return: (Default value = 1)
+    left :
+         (Default value = 1)
+
+    Returns
+    -------
+
     """
 
     if not (isinstance(left, int) and isinstance(right, int)):
@@ -418,13 +444,21 @@ def split_into_subblocks_optimized(h_0, left=1, right=1):
 
 
 def split_into_subblocks(h_0, h_l, h_r):
-    """
-    Split Hamiltonian matrix and coupling matrices into subblocks
+    """Split Hamiltonian matrix and coupling matrices into subblocks
 
-    :param h_0:                     Hamiltonian matrix
-    :param h_l:                     left inter-cell coupling matrices
-    :param h_r:                     right inter-cell coupling matrices
-    :return h_0_s, h_l_s, h_r_s:    lists of subblocks
+    Parameters
+    ----------
+    h_0 :
+        Hamiltonian matrix
+    h_l :
+        left inter-cell coupling matrices
+    h_r :
+        right inter-cell coupling matrices
+        :return h_0_s, h_l_s, h_r_s:    lists of subblocks
+
+    Returns
+    -------
+
     """
 
     if isinstance(h_l, np.ndarray) and isinstance(h_r, np.ndarray):
@@ -448,8 +482,7 @@ def split_into_subblocks(h_0, h_l, h_r):
 
 
 def compute_edge(mat):
-    """
-    Computes edges of the sparsity pattern of a matrix.
+    """Computes edges of the sparsity pattern of a matrix.
 
     Parameters
     ----------
@@ -523,13 +556,14 @@ def compute_blocks(left_block, right_block, edge, edge1):
         a predefined size of the rightmost block
     edge : ndarray
         edge of sparsity pattern
-    edge1  : ndarray
+    edge1 : ndarray
         conjugate edge of sparsity pattern
 
     Returns
     -------
     ans : list
-        list of diagonal block sizes
+        
+
     Examples
     --------
     >>> import numpy as np
@@ -592,16 +626,20 @@ def compute_blocks(left_block, right_block, edge, edge1):
 
 
 def show_blocks(subblocks, input_mat):
-    """
-    This is a script for visualizing the sparsity pattern and
+    """This is a script for visualizing the sparsity pattern and
      a block-tridiagonal structure of a matrix.
 
     Parameters
     ----------
-    subblocks : list
-        list of sizes of the diagonal blocks
-    input_mat : ndarray
-        Hamiltonian matrix
+    subblocks :
+        
+    input_mat :
+        
+
+    Returns
+    -------
+
+    
     """
 
     cumsum = np.cumsum(np.array(subblocks))[:-1]

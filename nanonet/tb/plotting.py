@@ -4,6 +4,21 @@ import matplotlib.pyplot as plt
 
 
 def plot_atom_positions(atom_list, virtual_and_interfacial_atoms, radial_dep):
+    """
+
+    Parameters
+    ----------
+    atom_list :
+        
+    virtual_and_interfacial_atoms :
+        
+    radial_dep :
+        
+
+    Returns
+    -------
+
+    """
 
     # from mpl_toolkits.mplot3d import Axes3D
     # import matplotlib.pyplot as plt
@@ -58,6 +73,21 @@ def plot_atom_positions(atom_list, virtual_and_interfacial_atoms, radial_dep):
 
 
 def plot_bs_split(kk, vba, cba):
+    """
+
+    Parameters
+    ----------
+    kk :
+        
+    vba :
+        
+    cba :
+        
+
+    Returns
+    -------
+
+    """
 
     fig, ax = plt.subplots(1, 2)
     ax[0].set_ylim(-1.0, -0.3)
@@ -78,6 +108,21 @@ def plot_bs_split(kk, vba, cba):
 
 
 def plot_atom_positions1(h, virtual_and_interfacial_atoms, radial_dep):
+    """
+
+    Parameters
+    ----------
+    h :
+        
+    virtual_and_interfacial_atoms :
+        
+    radial_dep :
+        
+
+    Returns
+    -------
+
+    """
 
     # from mpl_toolkits.mplot3d import Axes3D
     # import matplotlib.pyplot as plt

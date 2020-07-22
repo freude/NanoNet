@@ -9,14 +9,21 @@ np.warnings.filterwarnings('ignore')
 
 
 def simple_chain_greens_function(energy, h_0, h_r):
-    """
-    Analytical expression for the chain response function
+    """Analytical expression for the chain response function
     according to []
 
-    :param energy:
-    :param h_0:
-    :param h_r:
-    :return:
+    Parameters
+    ----------
+    energy :
+        param h_0:
+    h_r :
+        return:
+    h_0 :
+        
+
+    Returns
+    -------
+
     """
 
     gf = (energy - h_0) / (2 * h_r ** 2)
@@ -33,10 +40,16 @@ def simple_chain_greens_function(energy, h_0, h_r):
 
 
 def single_atom_chain():
-    """
-    Test set for a single-atom chain.
-
+    """Test set for a single-atom chain.
+    
     :return:
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+
     """
 
     sys.path.insert(0, '/home/mk/TB_project/tb')
@@ -81,6 +94,7 @@ def single_atom_chain():
 
 
 def complex_chain():
+    """ """
     sys.path.insert(0, '/home/mk/TB_project/tb')
 
     a = tb.Orbitals('A')
@@ -139,6 +153,7 @@ def complex_chain():
 
 
 def test_single_atom_chain():
+    """ """
     energy, dos, tr, h, sgf_l, sgf_r = single_atom_chain()
 
     h_l, h_0, h_r = h.get_hamiltonians()
@@ -149,6 +164,7 @@ def test_single_atom_chain():
 
 
 def test_complex_chain():
+    """ """
     energy, dos, tr, h, sgf_l, sgf_r = complex_chain()
 
     np.testing.assert_allclose(dos, expected_dos_of_complex_chain(), rtol=1e-2)
@@ -156,6 +172,19 @@ def test_complex_chain():
 
 
 def run_for_periods(single_period_test, periods):
+    """
+
+    Parameters
+    ----------
+    single_period_test :
+        
+    periods :
+        
+
+    Returns
+    -------
+
+    """
     energy, dos, tr, h, sgf_l, sgf_r = single_period_test()
     h_l, h_0, h_r = h.get_hamiltonians()
     cell = h.ct.pcv
@@ -187,6 +216,19 @@ def run_for_periods(single_period_test, periods):
 
 
 def run_for_periods_recursive(single_period_test, periods):
+    """
+
+    Parameters
+    ----------
+    single_period_test :
+        
+    periods :
+        
+
+    Returns
+    -------
+
+    """
     energy, dos, tr, h, sgf_l, sgf_r = single_period_test()
     h_l, h_0, h_r = h.get_hamiltonians()
     cell = h.ct.pcv
@@ -212,26 +254,31 @@ def run_for_periods_recursive(single_period_test, periods):
 
 
 def test_gf_single_atom_chain_several_periods():
+    """ """
     for j in range(5):
         run_for_periods(single_atom_chain, periods=j)
 
 
 def test_gf_complex_chain_several_periods():
+    """ """
     for j in range(5):
         run_for_periods(complex_chain, periods=j)
 
 
 def test_gf_single_atom_chain_several_periods_recursive():
+    """ """
     for j in range(5):
         run_for_periods_recursive(single_atom_chain, periods=j)
 
 
 def test_gf_complex_chain_several_periods_recursive():
+    """ """
     for j in range(5):
         run_for_periods_recursive(complex_chain, periods=j)
 
 
 def expected_dos_of_complex_chain():
+    """ """
     return np.array([8.71733068e-10, 9.16642348e-10, 9.64117652e-10, 1.01431709e-09,
                      1.06741601e-09, 1.12359914e-09, 1.18306191e-09, 1.24601712e-09,
                      1.31269013e-09, 1.38332359e-09, 1.45817603e-09, 1.53752718e-09,
@@ -410,6 +457,7 @@ def expected_dos_of_complex_chain():
 
 
 def expected_tr_of_complex_chain():
+    """ """
     return np.array([3.16736609e-20, 3.49411800e-20, 3.85646747e-20, 4.25847343e-20,
                      4.70473911e-20, 5.20039879e-20, 5.75120587e-20, 6.36364602e-20,
                      7.04498182e-20, 7.80339854e-20, 8.64808201e-20, 9.58941115e-20,
@@ -588,6 +636,7 @@ def expected_tr_of_complex_chain():
 
 
 def expected_dens_of_complex_chain():
+    """ """
     return np.array([1.75500165e-009, 1.94141418e-009, 2.14990898e-009, 2.38339649e-009,
                      2.64519687e-009, 2.93912081e-009, 3.26954760e-009, 3.64151425e-009,
                      4.06082037e-009, 4.53417774e-009, 5.06932795e-009, 5.67527028e-009,
@@ -679,9 +728,39 @@ def expected_dens_of_complex_chain():
 
 
 def test_double_barrier_density_recursive(single_period_test=complex_chain, periods=20):
+    """
+
+    Parameters
+    ----------
+    single_period_test :
+         (Default value = complex_chain)
+    periods :
+         (Default value = 20)
+
+    Returns
+    -------
+
+    """
     from nanonet.negf.field import Field1D
 
     def qw(coord, coords_of_steps, jumps, width=1):
+        """
+
+        Parameters
+        ----------
+        coord :
+            
+        coords_of_steps :
+            
+        jumps :
+            
+        width :
+             (Default value = 1)
+
+        Returns
+        -------
+
+        """
         ans = 0
         for j, item in enumerate(coords_of_steps):
             ans += jumps[j] * 0.5 * (np.tanh(coord - item) / width + 1.0)
@@ -689,6 +768,17 @@ def test_double_barrier_density_recursive(single_period_test=complex_chain, peri
         return ans
 
     def z_dependence(coord):
+        """
+
+        Parameters
+        ----------
+        coord :
+            
+
+        Returns
+        -------
+
+        """
         coords_of_steps = [-15.0, -11.0, 11.0, 15.0]
         jumps = [-1.7, 1.7, -1.7, 1.7]
 

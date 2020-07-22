@@ -15,39 +15,41 @@ from scipy.sparse.linalg import lgmres
 
 
 def sort_lexico(coords=None, **kwargs):
-    """
-    Lexicographic sort
+    """Lexicographic sort
 
     Parameters
     ----------
     coords : array
-        list of atomic coordinates
+        list of atomic coordinates (Default value = None)
+    **kwargs :
+        
 
     Returns
     -------
-        ans : array
-            list of reordered indices
+
+    
     """
     return np.lexsort((coords[:, 0], coords[:, 1], coords[:, 2]))
 
 
 def sort_projection(coords=None, left_lead=None, right_lead=None, **kwargs):
-    """
-    Sorting procedure that uses projections on a vector pointing from one electrode to another as the sorting keys.
+    """Sorting procedure that uses projections on a vector pointing from one electrode to another as the sorting keys.
 
     Parameters
     ----------
     coords : array
-        list of atomic coordinates
+        list of atomic coordinates (Default value = None)
     left_lead : array
-        list of the atom indices contacting the left lead
+        list of the atom indices contacting the left lead (Default value = None)
     right_lead : array
-        list of the atom indices contacting the right lead
+        list of the atom indices contacting the right lead (Default value = None)
+    **kwargs :
+        
 
     Returns
     -------
-        ans : array
-            list of reordered indices
+
+    
     """
     vec = np.mean(coords[left_lead], axis=0) - np.mean(coords[right_lead], axis=0)
     keys = np.dot(coords, vec) / np.linalg.norm(vec)
@@ -56,8 +58,7 @@ def sort_projection(coords=None, left_lead=None, right_lead=None, **kwargs):
 
 
 def sort_capacitance(coords, mat, left_lead, right_lead, **kwargs):
-    """
-    Sorting procedure that uses a potential function defined over atomic coordinates as the sorting keys.
+    """Sorting procedure that uses a potential function defined over atomic coordinates as the sorting keys.
 
     Parameters
     ----------
@@ -69,11 +70,13 @@ def sort_capacitance(coords, mat, left_lead, right_lead, **kwargs):
         list of the atom indices contacting the left lead
     right_lead : array
         list of the atom indices contacting the right lead
+    **kwargs :
+        
 
     Returns
     -------
-        ans : array
-            list of reordered indices
+
+    
     """
 
     charge = np.zeros(coords.shape[0], dtype=np.complex)

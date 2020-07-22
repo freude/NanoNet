@@ -35,6 +35,31 @@ from nanonet.negf.greens_functions import surface_greens_function_poles
 #
 #     return fff
 def object_function1(vec, energy, init_basis, extended_basis, h_l, h_0, h_r, num_of_states):
+    """
+
+    Parameters
+    ----------
+    vec :
+        
+    energy :
+        
+    init_basis :
+        
+    extended_basis :
+        
+    h_l :
+        
+    h_0 :
+        
+    h_r :
+        
+    num_of_states :
+        
+
+    Returns
+    -------
+
+    """
 
     extended_basis1 = np.array(1.0 / np.sqrt(np.dot(vec, vec.conj().T))) * np.array(extended_basis * vec.T)
     extended_basis1 = np.hstack((init_basis, extended_basis1))
@@ -51,6 +76,31 @@ def object_function1(vec, energy, init_basis, extended_basis, h_l, h_0, h_r, num
 
 
 def object_function(vec, energy, init_basis, extended_basis, h_l, h_0, h_r, num_of_states):
+    """
+
+    Parameters
+    ----------
+    vec :
+        
+    energy :
+        
+    init_basis :
+        
+    extended_basis :
+        
+    h_l :
+        
+    h_0 :
+        
+    h_r :
+        
+    num_of_states :
+        
+
+    Returns
+    -------
+
+    """
 
     extended_basis1 = np.array(1.0 / np.sqrt(np.dot(vec, vec.conj().T))) * np.array(extended_basis * vec.T)
     extended_basis1 = np.hstack((init_basis, extended_basis1))
@@ -67,6 +117,23 @@ def object_function(vec, energy, init_basis, extended_basis, h_l, h_0, h_r, num_
 
 
 def bs(E, h_l, h_0, h_r):
+    """
+
+    Parameters
+    ----------
+    E :
+        
+    h_l :
+        
+    h_0 :
+        
+    h_r :
+        
+
+    Returns
+    -------
+
+    """
 
     h_list = [h_l, h_0 - E * np.identity(h_0.shape[0]), h_r]
     vals, vects = surface_greens_function_poles(h_list)
@@ -86,6 +153,23 @@ def bs(E, h_l, h_0, h_r):
 
 
 def bs_vs_e(energy, h_l, h_0, h_r):
+    """
+
+    Parameters
+    ----------
+    energy :
+        
+    h_l :
+        
+    h_0 :
+        
+    h_r :
+        
+
+    Returns
+    -------
+
+    """
 
     init_basis = []
     vals_for_plot = []
@@ -108,6 +192,27 @@ def bs_vs_e(energy, h_l, h_0, h_r):
 
 
 def reduce_mode_space(energy, h_l, h_0, h_r, thr, input_file=""):
+    """
+
+    Parameters
+    ----------
+    energy :
+        
+    h_l :
+        
+    h_0 :
+        
+    h_r :
+        
+    thr :
+        
+    input_file :
+         (Default value = "")
+
+    Returns
+    -------
+
+    """
 
     # energy = np.linspace(2.0, 3.7, 50)
 

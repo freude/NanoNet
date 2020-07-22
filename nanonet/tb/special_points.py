@@ -2,6 +2,19 @@ import numpy as np
 
 
 def get_high_symmetry_point_in_cartesian_space(reciprocal_lattice_vectors, coordinate_of_high_symmetry_point):
+    """
+
+    Parameters
+    ----------
+    reciprocal_lattice_vectors :
+        
+    coordinate_of_high_symmetry_point :
+        
+
+    Returns
+    -------
+
+    """
     cartesian_coordinate_in_reciprocal_space = np.squeeze(np.dot(coordinate_of_high_symmetry_point,
                                                                  reciprocal_lattice_vectors)).tolist()
     return cartesian_coordinate_in_reciprocal_space

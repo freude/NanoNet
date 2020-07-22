@@ -7,15 +7,23 @@ import scipy.linalg as linalg
 
 
 def surface_greens_function_poles(h_list):
-    """
-    Computes eigenvalues and eigenvectors for the complex band structure problem.
+    """Computes eigenvalues and eigenvectors for the complex band structure problem.
     The eigenvalues correspond to the wave vectors as `exp(ik)`.
 
-    :param h_list:   list of the Hamiltonian blocks - blocks describes coupling
-                     with left-side neighbours, Hamiltonian of the device and
-                     coupling with right-side neighbours
-    :return:         eigenvalues, k, and eigenvectors, U,
-    :rtype:          numpy.array, numpy.array
+    Parameters
+    ----------
+    h_list :
+        list of the Hamiltonian blocks - blocks describes coupling
+        with left-side lead, Hamiltonian of the device region and
+        coupling with right-side lead
+
+    Returns
+    -------
+    eigenvals : numpy.ndarray
+        Non-zero value indicates error code, or zero on success.
+    eigenvects : numpy.ndarray
+        Human readable error message, or None on success.
+    
     """
 
     # linearize polynomial eigenvalue problem
@@ -24,8 +32,8 @@ def surface_greens_function_poles(h_list):
     full_matrix_size = pr_order * matix_size
     identity = np.identity(matix_size)
 
-    main_matrix = np.zeros((full_matrix_size, full_matrix_size), dtype=np.complex)
-    overlap_matrix = np.zeros((full_matrix_size, full_matrix_size), dtype=np.complex)
+    main_matrix = np.zeros((full_matrix_size, full_matrix_size), dtype=np.complex128)
+    overlap_matrix = np.zeros((full_matrix_size, full_matrix_size), dtype=np.complex128)
 
     for j in range(pr_order):
 
@@ -43,32 +51,32 @@ def surface_greens_function_poles(h_list):
 
     alpha, betha, _, eigenvects, _, _ = linalg.lapack.cggev(main_matrix, overlap_matrix)
 
-    eigenvals = np.zeros(alpha.shape, dtype=np.complex)
-
-    for j, item in enumerate(zip(alpha, betha)):
-        if np.abs(item[1]) != 0.0:
-            eigenvals[j] = item[0] / item[1]
-        else:
-            eigenvals[j] = 1e10
+    betha[betha == 0] = 1e-9
+    eigenvals = alpha / betha
 
     # sort absolute values
     ind = np.argsort(np.abs(eigenvals))
     eigenvals = eigenvals[ind]
     eigenvects = eigenvects[:, ind]
-
-    vals = np.copy(eigenvals)
-    mask1 = np.abs(vals) < 0.9999999
-    mask2 = np.abs(vals) > 1.0000001
-    vals = np.angle(vals)
-
-    vals[mask1] = -5
-    vals[mask2] = 5
-    ind = np.argsort(vals, kind='mergesort')
-
-    eigenvals = eigenvals[ind]
-    eigenvects = eigenvects[:, ind]
-
     eigenvects = eigenvects[matix_size:, :]
+
+    # vals = np.copy(eigenvals)
+    # mask1 = np.abs(vals) < 0.9999999
+    # mask2 = np.abs(vals) > 1.0000001
+    # vals = np.angle(vals)
+    #
+    # vals[mask1] = -5
+    # vals[mask2] = 5
+    # ind = np.argsort(vals, kind='mergesort')
+    #
+    # eigenvals = eigenvals[ind]
+    # eigenvects = eigenvects[:, ind]
+
+    ind = np.squeeze(np.where(np.abs(np.abs(eigenvals)-1.0) < 0.01))
+    if len(ind) > 0:
+        gv = group_velocity(eigenvects[:, ind], eigenvals[ind], h_list[2])
+        print(gv)
+
     eigenvals = np.diag(eigenvals)
 
     norms = linalg.norm(eigenvects, axis=0)
@@ -79,23 +87,57 @@ def surface_greens_function_poles(h_list):
 
 
 def group_velocity(eigenvector, eigenvalue, h_r):
-    """
-    Computes the group velocity of wave packets
+    """Computes the group velocity of wave packets
 
-    :param eigenvector:       eigenvector
-    :type eigenvector:        numpy.matrix(dtype=numpy.complex)
-    :param eigenvalue:        eigenvalue
-    :type eigenvector:        numpy.complex
-    :param h_r:               coupling Hamiltonian
-    :type h_r:                numpy.matrix
-    :return:                  group velocity for a pair consisting of
-                              an eigenvector and an eigenvalue
+    Parameters
+    ----------
+    eigenvector : numpy.matrix(dtype=numpy.complex)
+        eigenvector
+    eigenvalue :
+        eigenvalue
+    h_r : numpy.matrix
+        coupling Hamiltonian
+
+    Returns
+    -------
+
+    
     """
 
-    return np.imag(np.dot(np.dot(np.dot(eigenvector.conj().T, h_r), eigenvalue), eigenvector))
+    num_vecs = eigenvector.shape[1]
+    if num_vecs > 1:
+        ans = np.zeros(num_vecs)
+        for j in range(num_vecs):
+            ans[j] = np.imag(np.dot(np.dot(np.dot(eigenvector[:, j].conj().T, h_r), eigenvalue[j]), eigenvector[:, j]))
+    else:
+        ans = np.imag(np.dot(np.dot(np.dot(eigenvector.conj().T, h_r), eigenvalue), eigenvector))
+
+    return ans
 
 
 def iterate_gf(E, h_0, h_l, h_r, gf, num_iter):
+    """
+
+    Parameters
+    ----------
+    E :
+        
+    h_0 :
+        
+    h_l :
+        
+    h_r :
+        
+    gf :
+        
+    num_iter :
+        
+
+    Returns
+    -------
+
+    
+    """
 
     for _ in range(num_iter):
         gf = h_r.dot(np.linalg.pinv(E * np.identity(h_0.shape[0]) - h_0 - gf)).dot(h_l)
@@ -103,71 +145,44 @@ def iterate_gf(E, h_0, h_l, h_r, gf, num_iter):
     return gf
 
 
-def surface_greens_function(E, h_l, h_0, h_r, iterate=True, damp=0.0001j):
-    """
-    Computes surface self-energies using the eigenvalue decomposition.
+def surface_greens_function(E, h_l, h_0, h_r, iterate=False, damp=0.0001j):
+    """Computes surface self-energies using the eigenvalue decomposition.
     The procedure is described in
     [M. Wimmer, Quantum transport in nanostructures: From computational concepts
     to spintronics in graphene and magnetic tunnel junctions, 2009, ISBN-9783868450255].
 
-    :param E:         energy array
-    :param h_l:       left-side coupling Hamiltonian
-    :param h_0:       channel Hamiltonian
-    :param h_r:       right-side coupling Hamiltonian
-    :param iterate:   iterate to stabilize TB matrix
-    :param damp:      damping
+    Parameters
+    ----------
+    E :
+        energy array
+    h_l :
+        left-side coupling Hamiltonian
+    h_0 :
+        channel Hamiltonian
+    h_r :
+        right-side coupling Hamiltonian
+    iterate :
+        iterate to stabilize TB matrix (Default value = False)
+    damp :
+        damping (Default value = 0.0001j)
 
-    :return:          left- and right-side self-energies
+    Returns
+    -------
+
+    
     """
 
     h_list = [h_l, h_0 - (E+damp) * np.identity(h_0.shape[0]), h_r]
     vals, vects = surface_greens_function_poles(h_list)
-    vals = np.diag(vals)
+    num_eigs = len(vals)
 
-    u_right = np.zeros(h_0.shape, dtype=np.complex)
-    u_left = np.zeros(h_0.shape, dtype=np.complex)
-    lambda_right = np.zeros(h_0.shape, dtype=np.complex)
-    lambda_left = np.zeros(h_0.shape, dtype=np.complex)
-
-    alpha = 0.01
-
-    for j in range(h_0.shape[0]):
-        if np.abs(vals[j]) > 1.0 + alpha:
-
-            lambda_left[j, j] = vals[j]
-            u_left[:, j] = vects[:, j]
-
-            lambda_right[j, j] = vals[-j + 2*h_0.shape[0]-1]
-            u_right[:, j] = vects[:, -j + 2*h_0.shape[0]-1]
-
-        elif np.abs(vals[j]) < 1.0 - alpha:
-            lambda_right[j, j] = vals[j]
-            u_right[:, j] = vects[:, j]
-
-            lambda_left[j, j] = vals[-j + 2*h_0.shape[0]-1]
-            u_left[:, j] = vects[:, -j + 2*h_0.shape[0]-1]
-
-        else:
-
-            gv = group_velocity(vects[:, j], vals[j], h_r)
-            # print("Group velocity is ", gv, np.angle(vals[j]))
-            if gv > 0:
-
-                lambda_left[j, j] = vals[j]
-                u_left[:, j] = vects[:, j]
-
-                lambda_right[j, j] = vals[-j + 2*h_0.shape[0]-1]
-                u_right[:, j] = vects[:, -j + 2*h_0.shape[0]-1]
-
-            else:
-                lambda_right[j, j] = vals[j]
-                u_right[:, j] = vects[:, j]
-
-                lambda_left[j, j] = vals[-j + 2*h_0.shape[0]-1]
-                u_left[:, j] = vects[:, -j + 2*h_0.shape[0]-1]
+    u_right = vects[:, :num_eigs//2]
+    u_left = vects[:, num_eigs-1:num_eigs//2-1:-1]
+    lambda_right = vals[:num_eigs//2, :num_eigs//2]
+    lambda_left = vals[num_eigs-1:num_eigs//2-1:-1, num_eigs-1:num_eigs//2-1:-1]
 
     sgf_l = h_r.dot(u_right).dot(lambda_right).dot(np.linalg.pinv(u_right))
-    sgf_r = h_l.dot(u_left).dot(lambda_right).dot(np.linalg.pinv(u_left))
+    sgf_r = h_l.dot(u_left).dot(np.linalg.inv(lambda_left)).dot(np.linalg.pinv(u_left))
 
     if iterate:
         return iterate_gf(E, h_0, h_l, h_r, sgf_l, 2), iterate_gf(E, h_0, h_r, h_l, sgf_r, 2)

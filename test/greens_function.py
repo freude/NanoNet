@@ -9,15 +9,21 @@ import scipy.linalg as linalg
 
 
 def surface_greens_function_poles(h_list):
-    """
-    Computes eigenvalues and eigenvectors for the complex band structure problem.
+    """Computes eigenvalues and eigenvectors for the complex band structure problem.
     The eigenvalues correspond to the wave vectors as `exp(ik)`.
 
-    :param h_list:   list of the Hamiltonian blocks - blocks describes coupling
-                     with left-side neighbours, Hamiltonian of the side and
-                     coupling with right-side neighbours
-    :return:         eigenvalues, k, and eigenvectors, U,
-    :rtype:          numpy.matrix, numpy.matrix
+    Parameters
+    ----------
+    h_list :
+        list of the Hamiltonian blocks - blocks describes coupling
+        with left-side neighbours, Hamiltonian of the side and
+        coupling with right-side neighbours
+
+    Returns
+    -------
+    numpy.matrix, numpy.matrix
+        eigenvalues, k, and eigenvectors, U,
+
     """
 
     # linearize polynomial eigenvalue problem
@@ -82,33 +88,49 @@ def surface_greens_function_poles(h_list):
 
 
 def group_velocity(eigenvector, eigenvalue, h_r):
-    """
-    Computes the group velocity of wave packets
+    """Computes the group velocity of wave packets
 
-    :param eigenvector:       eigenvector
-    :type eigenvector:        numpy.matrix(dtype=numpy.complex)
-    :param eigenvalue:        eigenvalue
-    :type eigenvector:        numpy.complex
-    :param h_r:               coupling Hamiltonian
-    :type h_r:                numpy.matrix
-    :return:                  group velocity for a pair consisting of
-                              an eigenvector and an eigenvalue
+    Parameters
+    ----------
+    eigenvector : numpy.matrix(dtype=numpy.complex)
+        eigenvector
+    eigenvalue :
+        eigenvalue
+    h_r : numpy.matrix
+        coupling Hamiltonian
+
+    Returns
+    -------
+    type
+        group velocity for a pair consisting of
+        an eigenvector and an eigenvalue
+
     """
 
     return np.imag(np.dot(np.dot(np.vdot(eigenvector, h_r), eigenvalue), eigenvector))
 
 
 def iterate_gf(E, h_0, h_l, h_r, gf, num_iter):
-    """
-    Iterates a self-energy to achieve self-consistency
+    """Iterates a self-energy to achieve self-consistency
 
-    :param E:
-    :param h_0:
-    :param h_l:
-    :param h_r:
-    :param gf:
-    :param num_iter:
-    :return:
+    Parameters
+    ----------
+    E :
+        param h_0:
+    h_l :
+        param h_r:
+    gf :
+        param num_iter:
+    h_0 :
+        
+    h_r :
+        
+    num_iter :
+        
+
+    Returns
+    -------
+
     """
 
     for _ in range(num_iter):
@@ -118,19 +140,29 @@ def iterate_gf(E, h_0, h_l, h_r, gf, num_iter):
 
 
 def surface_greens_function(E, h_l, h_0, h_r, iterate=False):
-    """
-    Computes surface self-energies using the eigenvalue decomposition.
+    """Computes surface self-energies using the eigenvalue decomposition.
     The procedure is described in
     [M. Wimmer, Quantum transport in nanostructures: From computational concepts
     to spintronics in graphene and magnetic tunnel junctions, 2009, ISBN-9783868450255].
 
-    :param E:         energy array
-    :param h_l:       left-side coupling Hamiltonian
-    :param h_0:       channel Hamiltonian
-    :param h_r:       right-side coupling Hamiltonian
-    :param iterate:   iterate to stabilize TB matrix
+    Parameters
+    ----------
+    E :
+        energy array
+    h_l :
+        left-side coupling Hamiltonian
+    h_0 :
+        channel Hamiltonian
+    h_r :
+        right-side coupling Hamiltonian
+    iterate :
+        iterate to stabilize TB matrix (Default value = False)
 
-    :return:          left- and right-side self-energies
+    Returns
+    -------
+    type
+        left- and right-side self-energies
+
     """
 
     h_list = [h_l, h_0 - E * np.identity(h_0.shape[0]), h_r]

@@ -6,27 +6,37 @@ from matplotlib import rc
 
 
 def _getline(cube):
-    """
-    Read a line from cube file where first field is an int
+    """Read a line from cube file where first field is an int
     and the remaining fields are floats.
 
-    params:
-        cube: file object of the cube file
+    Parameters
+    ----------
+    cube :
+        file object of the cube file
 
-    returns: (int, list<float>)
+    Returns
+    -------
+    type
+        
+
     """
     line = cube.readline().strip().split()
     return int(line[0]), np.array(list(map(float, line[1:])))
 
 
 def read_cube(fname):
-    """
-    Read cube file into numpy array
+    """Read cube file into numpy array
 
-    params:
-        fname: filename of cube file
+    Parameters
+    ----------
+    fname :
+        filename of cube file
 
-    returns: (data: np.array, metadata: dict)
+    Returns
+    -------
+    type
+        
+
     """
     bohr = 0.529177
     meta = {}
@@ -58,6 +68,7 @@ def read_cube(fname):
 
 
 class Field(object):
+    """ """
 
     def __init__(self, path):
 
@@ -87,10 +98,16 @@ class Field(object):
         self._interpolant = RegularGridInterpolator((x, y, z), data, bounds_error=False)
 
     def set_origin(self, origin):
-        """
-        Set the coordinates of the center of the molecule
-        :param origin:
-        :return:
+        """Set the coordinates of the center of the molecule
+
+        Parameters
+        ----------
+        origin :
+            return:
+
+        Returns
+        -------
+
         """
 
         if isinstance(origin, list):
@@ -100,10 +117,20 @@ class Field(object):
         self._origin_has_changed = True
 
     def rotate(self, axis, theta):
-        """
-        Set the coordinates of the center of the molecule
-        :param origin:
-        :return:
+        """Set the coordinates of the center of the molecule
+
+        Parameters
+        ----------
+        origin :
+            return:
+        axis :
+            
+        theta :
+            
+
+        Returns
+        -------
+
         """
         if axis == 'x':
             rot_mat = np.array([[1.0, 0.0, 0.0],
@@ -123,10 +150,24 @@ class Field(object):
         self._rot_mat.append(rot_mat)
 
     def reset_rotations(self):
+        """ """
 
         self._rot_mat = []
 
     def _transform(self, coords1, translate):
+        """
+
+        Parameters
+        ----------
+        coords1 :
+            
+        translate :
+            
+
+        Returns
+        -------
+
+        """
 
         coords = coords1.copy()
 
@@ -149,6 +190,19 @@ class Field(object):
         return coords
 
     def _inv_transform(self, coords1, translate):
+        """
+
+        Parameters
+        ----------
+        coords1 :
+            
+        translate :
+            
+
+        Returns
+        -------
+
+        """
 
         coords = coords1.copy()
 
@@ -172,6 +226,19 @@ class Field(object):
         return coords
 
     def get_values(self, coords1, translate=None):
+        """
+
+        Parameters
+        ----------
+        coords1 :
+            
+        translate :
+             (Default value = None)
+
+        Returns
+        -------
+
+        """
 
         coords = self._transform(coords1, translate)
         values = self._interpolant(coords)
@@ -179,6 +246,7 @@ class Field(object):
         return np.nan_to_num(values)
 
     def get_atoms(self):
+        """ """
 
         ind = []
         coords = []
@@ -190,6 +258,21 @@ class Field(object):
         return np.array(ind), np.array(coords)
 
     def add_screening(self, eps, mol_y_length, spacing):
+        """
+
+        Parameters
+        ----------
+        eps :
+            
+        mol_y_length :
+            
+        spacing :
+            
+
+        Returns
+        -------
+
+        """
 
         # from negf.poisson import laplacian, PoissonSolver
 
@@ -244,6 +327,7 @@ class Field(object):
 
 
 class Field1D(object):
+    """ """
 
     def __init__(self, coord_dependence, axis=2):
 
@@ -251,6 +335,19 @@ class Field1D(object):
         self._axis = axis
 
     def get_values(self, coords1, translate=None):
+        """
+
+        Parameters
+        ----------
+        coords1 :
+            
+        translate :
+             (Default value = None)
+
+        Returns
+        -------
+
+        """
 
         coords = coords1.copy()
         values = np.zeros(len(coords))
@@ -268,6 +365,7 @@ class Field1D(object):
 
 
 def main():
+    """ """
     import matplotlib.pyplot as plt
 
     fl = Field(path='/home/mk/gaussian_swarm/gauss_comp/out_neutral.cube')
@@ -300,6 +398,19 @@ def main():
 
 
 def laplacian(input_mat, dx):
+    """
+
+    Parameters
+    ----------
+    input_mat :
+        
+    dx :
+        
+
+    Returns
+    -------
+
+    """
     top = input_mat[0:-2, 1:-1, 1:-1]
     left = input_mat[1:-1, 0:-2, 1:-1]
     bottom = input_mat[2:, 1:-1, 1:-1]
@@ -314,6 +425,7 @@ def laplacian(input_mat, dx):
 
 
 def main1():
+    """ """
     import matplotlib.pyplot as plt
 
     # fl = Field(path='/home/mk/gaussian_swarm/gauss_comp/wB_ion.cube')
@@ -388,6 +500,7 @@ def main1():
 
 
 class nf(float):
+    """ """
     def __repr__(self):
         if self.__float__() == 0.0:
             return '0.0'
@@ -396,6 +509,27 @@ class nf(float):
 
 
 def plot(x, y, data, data1, cut_level, n_contours):
+    """
+
+    Parameters
+    ----------
+    x :
+        
+    y :
+        
+    data :
+        
+    data1 :
+        
+    cut_level :
+        
+    n_contours :
+        
+
+    Returns
+    -------
+
+    """
     X, Y = np.meshgrid(x, y, indexing='ij')
 
     data[data > cut_level] = cut_level

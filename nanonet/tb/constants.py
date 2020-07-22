@@ -1,5 +1,5 @@
 """
-The module contains empirical tight-binding parameters and auxiliary global variables.
+The module contains auxiliary global variables.
 """
 import numpy as np
 

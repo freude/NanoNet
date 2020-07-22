@@ -9,8 +9,7 @@ import yaml
 
 
 def accum(accmap, input, func=None, size=None, fill_value=0, dtype=None):
-    """
-    An accumulation function similar to Matlab's `accumarray` function.
+    """An accumulation function similar to Matlab's `accumarray` function.
 
     Parameters
     ----------
@@ -30,25 +29,23 @@ def accum(accmap, input, func=None, size=None, fill_value=0, dtype=None):
     func : callable or None
         The accumulation function.  The function will be passed a list
         of values from `a` to be accumulated.
-        If None, numpy.sum is assumed.
+        If None, numpy.sum is assumed. (Default value = None)
     size : ndarray or None
         The size of the output array.  If None, the size will be determined
-        from `accmap`.
+        from `accmap`. (Default value = None)
     fill_value : scalar
         The default value for elements of the output array.
     dtype : numpy data type, or None
         The data type of the output array.  If None, the data type of
-        `a` is used.
+        `a` is used. (Default value = None)
 
     Returns
     -------
     out : ndarray
         The accumulated results.
-
         The shape of `out` is `size` if `size` is given.  Otherwise the
         shape is determined by the (lexicographically) largest indices of
         the output found in `accmap`.
-
 
     Examples
     --------
@@ -112,12 +109,18 @@ def accum(accmap, input, func=None, size=None, fill_value=0, dtype=None):
 
 
 def xyz2np(xyz):
-    """
-    Transforms xyz-file formatted string to lists of atomic labels and coordinates
+    """Transforms xyz-file formatted string to lists of atomic labels and coordinates
 
-    :param xyz:  xyz-formatted string
-    :return:     list of labels and list of coordinates
-    :rtype:      list, list
+    Parameters
+    ----------
+    xyz :
+        xyz-formatted string
+
+    Returns
+    -------
+    list, list
+        list of labels and list of coordinates
+
     """
 
     xyz = xyz.splitlines()
@@ -149,12 +152,17 @@ def xyz2np(xyz):
 
 
 def count_species(list_of_labels):
-    """
-    From the list of labels creates a dictionary where the keys represents labels and
+    """From the list of labels creates a dictionary where the keys represents labels and
     values are numbers of their repetitions in the list
 
-    :param list_of_labels:
-    :return:
+    Parameters
+    ----------
+    list_of_labels :
+        return:
+
+    Returns
+    -------
+
     """
     counter = {}
 
@@ -171,15 +179,23 @@ def count_species(list_of_labels):
 
 
 def get_k_coords(special_points, num_of_points, label):
-    """
-    Generates a array of the coordinates in the k-space from the set of
+    """Generates a array of the coordinates in the k-space from the set of
     high-symmetry points and number of nodes between them
 
-    :param special_points:   list of labels for high-symmetry points
-    :param num_of_points:    list of node numbers in each section of the path in the k-space
-    :param label:            chemical element
-    :return:                 array of coordinates in k-space
-    :rtype:                  numpy.ndarray
+    Parameters
+    ----------
+    special_points :
+        list of labels for high-symmetry points
+    num_of_points :
+        list of node numbers in each section of the path in the k-space
+    label :
+        chemical element
+
+    Returns
+    -------
+    numpy.ndarray
+        array of coordinates in k-space
+
     """
 
     from nanonet.tb.special_points import SPECIAL_K_POINTS_BI, SPECIAL_K_POINTS_SI
@@ -214,8 +230,14 @@ def get_k_coords(special_points, num_of_points, label):
 def dict2xyz(input_data):
     """
 
-    :param input_data:
-    :return:
+    Parameters
+    ----------
+    input_data :
+        return:
+
+    Returns
+    -------
+
     """
 
     if not isinstance(input_data, dict):
@@ -236,8 +258,14 @@ def dict2xyz(input_data):
 def yaml_parser(input_data):
     """
 
-    :param input_data:
-    :return:
+    Parameters
+    ----------
+    input_data :
+        return:
+
+    Returns
+    -------
+
     """
 
     output = None
@@ -260,10 +288,23 @@ def yaml_parser(input_data):
 
 
 def print_table(myDict, colList=None, sep='\uFFFA'):
-    """ Pretty print a list of dictionaries (myDict) as a dynamically sized table.
+    """Pretty print a list of dictionaries (myDict) as a dynamically sized table.
     If column names (colList) aren't specified, they will show in random order.
     sep: row separator. Ex: sep='\n' on Linux. Default: dummy to not split line.
     Author: Thierry Husson - Use it as you want but don't blame me.
+
+    Parameters
+    ----------
+    myDict :
+        
+    colList :
+         (Default value = None)
+    sep :
+         (Default value = '\uFFFA')
+
+    Returns
+    -------
+
     """
 
     if not colList:
@@ -303,6 +344,17 @@ def print_table(myDict, colList=None, sep='\uFFFA'):
 
 
 def print_dict(dictionary):
+    """
+
+    Parameters
+    ----------
+    dictionary :
+        
+
+    Returns
+    -------
+
+    """
     out = "{:<18} {:<15} \n".format('Label', 'Coordinates')
     for key, value in dictionary.items():
         out += "{:<18} {:<15} \n".format(key, str(value))
@@ -397,6 +449,17 @@ def print_dict(dictionary):
 
 
 def compute_edge(mat):
+    """
+
+    Parameters
+    ----------
+    mat :
+        
+
+    Returns
+    -------
+
+    """
     # First get some statistics
     row, col = np.where(mat != 0.0)  # Output rows and columns of all non-zero elements.
 
@@ -415,13 +478,24 @@ def compute_edge(mat):
 def blocksandborders_constrained(left_block, right_block, edge, edge1):
     """A version of blocksandborders with constraints - periodic boundary conditions.
 
-    :param mat:                    input matrix
-    :param left_block:             left block constrained minimal size
-    :param right_block:            right block constrained minimal size
-    :param edge:                   edge of sparsity pattern
-    :param edge1:                  conjugate edge of sparsity pattern
+    Parameters
+    ----------
+    mat :
+        input matrix
+    left_block :
+        left block constrained minimal size
+    right_block :
+        right block constrained minimal size
+    edge :
+        edge of sparsity pattern
+    edge1 :
+        conjugate edge of sparsity pattern
 
-    :return:                       array of diagonal block sizes
+    Returns
+    -------
+    type
+        array of diagonal block sizes
+
     """
 
     size = len(edge)
@@ -459,11 +533,33 @@ def blocksandborders_constrained(left_block, right_block, edge, edge1):
 
 
 def argsort(seq):
+    """
+
+    Parameters
+    ----------
+    seq :
+        
+
+    Returns
+    -------
+
+    """
     # http://stackoverflow.com/questions/3071415/efficient-method-to-calculate-the-rank-vector-of-a-list-in-python
     return sorted(range(len(seq)), key=seq.__getitem__)
 
 
 def shift(mat):
+    """
+
+    Parameters
+    ----------
+    mat :
+        
+
+    Returns
+    -------
+
+    """
 
     ans = np.zeros(mat.shape, dtype=np.int)
 
@@ -476,6 +572,17 @@ def shift(mat):
 
 
 def bandwidth1(mat):
+    """
+
+    Parameters
+    ----------
+    mat :
+        
+
+    Returns
+    -------
+
+    """
 
     j = 0
 
@@ -486,6 +593,17 @@ def bandwidth1(mat):
 
 
 def bandwidth(mat):
+    """
+
+    Parameters
+    ----------
+    mat :
+        
+
+    Returns
+    -------
+
+    """
 
     ans = 0
 
@@ -498,6 +616,19 @@ def bandwidth(mat):
 
 # Helper function to store the inroder traversal of a tree
 def storeInorder(root, inorder):
+    """
+
+    Parameters
+    ----------
+    root :
+        
+    inorder :
+        
+
+    Returns
+    -------
+
+    """
     # Base Case
     if root is None:
         return
@@ -514,6 +645,17 @@ def storeInorder(root, inorder):
 
 # A helper funtion to count nodes in a binary tree
 def countNodes(root):
+    """
+
+    Parameters
+    ----------
+    root :
+        
+
+    Returns
+    -------
+
+    """
     if root is None:
         return 0
 
@@ -521,6 +663,19 @@ def countNodes(root):
 
 
 def is_in_coords(coord, coords):
+    """
+
+    Parameters
+    ----------
+    coord :
+        
+    coords :
+        
+
+    Returns
+    -------
+
+    """
 
     ans = False
 

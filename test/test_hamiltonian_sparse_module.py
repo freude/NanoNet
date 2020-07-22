@@ -4,6 +4,7 @@ from test.test_hamiltonian_module import expected_bulk_silicon_band_structure
 
 
 def test_simple_atomic_chain():
+    """ """
     site_energy = -1.0
     coupling = -1.0
     l_const = 1.0
@@ -38,6 +39,7 @@ def test_simple_atomic_chain():
 
 
 def test_atomic_chain_two_kinds_of_atoms():
+    """ """
     site_energy1 = -1.0
     site_energy2 = -2.0
     coupling = -1.0
@@ -81,6 +83,7 @@ def test_atomic_chain_two_kinds_of_atoms():
 
 
 def test_bulk_silicon():
+    """ """
     a_si = 5.50
     PRIMITIVE_CELL = [[0, 0.5 * a_si, 0.5 * a_si],
                       [0.5 * a_si, 0, 0.5 * a_si],

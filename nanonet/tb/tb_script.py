@@ -8,6 +8,23 @@ import nanonet.tb as tb
 
 
 def preprocess_data(param_file, k_points_file, xyz, code_name):
+    """
+
+    Parameters
+    ----------
+    param_file :
+        
+    k_points_file :
+        
+    xyz :
+        
+    code_name :
+        
+
+    Returns
+    -------
+
+    """
     params = tb.yaml_parser(param_file)    # parse parameter file
 
     if k_points_file is None:   # default k-points
@@ -32,6 +49,25 @@ def preprocess_data(param_file, k_points_file, xyz, code_name):
 
 
 def postprocess_data(kk, band_structure, show, save, code_name):
+    """
+
+    Parameters
+    ----------
+    kk :
+        
+    band_structure :
+        
+    show :
+        
+    save :
+        
+    code_name :
+        
+
+    Returns
+    -------
+
+    """
 
     flag = True  # 1D system
 
@@ -104,6 +140,27 @@ def postprocess_data(kk, band_structure, show, save, code_name):
 
 
 def main1(param_file, k_points_file, xyz, show, save, code_name):
+    """
+
+    Parameters
+    ----------
+    param_file :
+        
+    k_points_file :
+        
+    xyz :
+        
+    show :
+        
+    save :
+        
+    code_name :
+        
+
+    Returns
+    -------
+
+    """
 
     params, wave_vector, code_name = preprocess_data(param_file, k_points_file, xyz, code_name)
 
@@ -124,6 +181,7 @@ def main1(param_file, k_points_file, xyz, show, save, code_name):
 
 
 def create_parser():
+    """ """
 
     parser = argparse.ArgumentParser()
 
@@ -157,6 +215,7 @@ def create_parser():
 
 
 def main():
+    """ """
 
     parser = create_parser()
     args = parser.parse_args()

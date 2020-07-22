@@ -5,11 +5,27 @@ from nanonet.negf.field import Field
 
 
 def fd(energy, ef, temp):
+    """
+
+    Parameters
+    ----------
+    energy :
+        
+    ef :
+        
+    temp :
+        
+
+    Returns
+    -------
+
+    """
     kb = 8.61733e-5       # Boltzmann constant in eV
     return 1.0 / (1.0 + np.exp((energy - ef) / (kb * temp)))
 
 
 class HamiltonianChain(object):
+    """ """
 
     def __init__(self, h_l, h_0, h_r, coords):
 
@@ -35,6 +51,7 @@ class HamiltonianChain(object):
 
     @property
     def sgf(self):
+        """ """
 
         sgf = [None for _ in range(len(self.h_0))]
 
@@ -49,6 +66,21 @@ class HamiltonianChain(object):
         return sgf
 
     def translate(self, period, left_translations, right_translations):
+        """
+
+        Parameters
+        ----------
+        period :
+            
+        left_translations :
+            
+        right_translations :
+            
+
+        Returns
+        -------
+
+        """
 
         self.elem_length = np.array(period)
         self.left_translations = left_translations
@@ -65,6 +97,19 @@ class HamiltonianChain(object):
                    [self.h_r for _ in range(right_translations)]
 
     def add_field(self, field, eps=7.0):
+        """
+
+        Parameters
+        ----------
+        field :
+            
+        eps :
+             (Default value = 7.0)
+
+        Returns
+        -------
+
+        """
 
         field_buf = []
 
@@ -87,6 +132,7 @@ class HamiltonianChain(object):
             self.h_0[jjj] = self.h_0[jjj] - np.diag(field_buf[jjj])
 
     def remove_field(self):
+        """ """
 
         if isinstance(self.fields, list):
             for item in self.fields:
@@ -96,6 +142,27 @@ class HamiltonianChain(object):
         self.fields = None
 
     def add_self_energies(self, sgf_l, sgf_r, energy=0, tempr=0, ef1=0, ef2=0):
+        """
+
+        Parameters
+        ----------
+        sgf_l :
+            
+        sgf_r :
+            
+        energy :
+             (Default value = 0)
+        tempr :
+             (Default value = 0)
+        ef1 :
+             (Default value = 0)
+        ef2 :
+             (Default value = 0)
+
+        Returns
+        -------
+
+        """
 
         self.energy = energy
         self.tempr = tempr
@@ -109,6 +176,7 @@ class HamiltonianChain(object):
         self.h_0[0] = self.h_0[0] + sgf_r
 
     def remove_self_energies(self):
+        """ """
 
         self.h_0[-1] = self.h_0[-1] - self.sgf_l
         self.h_0[0] = self.h_0[0] - self.sgf_r
@@ -117,6 +185,19 @@ class HamiltonianChain(object):
         self.sgf_r = None
 
     def translate_self_energies(self, sgf_l, sgf_r):
+        """
+
+        Parameters
+        ----------
+        sgf_l :
+            
+        sgf_r :
+            
+
+        Returns
+        -------
+
+        """
 
         mat_list = [item * 0.0 for item in self.h_0]
 
@@ -124,6 +205,7 @@ class HamiltonianChain(object):
 
     @property
     def coords(self):
+        """ """
         if self.elem_length is not None:
             coords = [self._coords - jjj * self.elem_length for jjj in range(self.left_translations, 0, -1)] + \
                      [self._coords] + \
@@ -134,6 +216,17 @@ class HamiltonianChain(object):
             return self._coords
 
     def z_coords_map(self, ind):
+        """
+
+        Parameters
+        ----------
+        ind :
+            
+
+        Returns
+        -------
+
+        """
 
         if len(self._z_coords_map) == 0:
 
@@ -149,12 +242,14 @@ class HamiltonianChain(object):
         return int(self._z_coords_map[ind])
 
     def z_coords(self):
+        """ """
 
         unique_coords = np.sort(np.array(list(set(self.coords[:, 2]))))
 
         return unique_coords
 
     def get_matrix(self):
+        """ """
 
         if isinstance(self.h_0, list):
             matrix = block_diag(*tuple(self.h_0))
@@ -171,6 +266,7 @@ class HamiltonianChain(object):
         return matrix
 
     def visualize(self):
+        """ """
 
         import matplotlib.pyplot as plt
         from matplotlib import cm
@@ -197,6 +293,7 @@ class HamiltonianChain(object):
 
 
 class HamiltonianChainComposer(HamiltonianChain):
+    """ """
 
     def __init__(self, h_l, h_0, h_r, coords, params):
         super(HamiltonianChainComposer, self).__init__(h_l, h_0, h_r, coords)

@@ -9,9 +9,7 @@ import numpy as np
 
 
 class AbstractStructureDesigner(with_metaclass(ABCMeta, object)):
-    """
-    The class is an abstraction for the list of atomic coordinates.
-    """
+    """The class is an abstraction for the list of atomic coordinates."""
 
     def __init__(self):
 
@@ -19,6 +17,17 @@ class AbstractStructureDesigner(with_metaclass(ABCMeta, object)):
         self._kd_tree = None
 
     def _get_neighbours(self, query):
+        """
+
+        Parameters
+        ----------
+        query :
+            
+
+        Returns
+        -------
+
+        """
 
         if isinstance(query, list) or isinstance(query, np.ndarray):
             ans = self._kd_tree.query(query,
@@ -45,40 +54,74 @@ class AbstractStructureDesigner(with_metaclass(ABCMeta, object)):
 
     @abstractmethod
     def get_neighbours(self, query):
+        """
+
+        Parameters
+        ----------
+        query :
+            
+
+        Returns
+        -------
+
+        """
         pass
 
     @property
     @abstractmethod
     def atom_list(self):
+        """ """
         pass
 
 
 class AbstractBasis(with_metaclass(ABCMeta, object)):
-    """
-    The class contains information about sets of quantum numbers and
+    """The class contains information about sets of quantum numbers and
     dimensionality of the Hilbert space.
     It is also equipped with the member functions translating quantum numbers
     into a raw index and vise versa.
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+
     """
 
     @abstractmethod
     def qn2ind(self, qn):
-        """
-        The member function trasform a dictionary of quantum numbers into a matrix index
+        """The member function trasform a dictionary of quantum numbers into a matrix index
 
-        :param qn:
-        :type qn:
+        Parameters
+        ----------
+        qn :
+            type qn:
+            
+            :return ind:   index
 
-        :return ind:   index
-        :rtype:        int
+        Returns
+        -------
+
         """
         pass
 
     @abstractmethod
     def ind2qn(self, ind):
+        """
+
+        Parameters
+        ----------
+        ind :
+            
+
+        Returns
+        -------
+
+        """
         pass
 
     @property
     @abstractmethod
     def orbitals_dict(self):
+        """ """
         pass
