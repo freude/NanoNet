@@ -91,7 +91,7 @@ def group_velocity(eigenvector, eigenvalue, h_r):
     return gv
 
 
-def iterate_gf(E, h_0, h_l, h_r, gf, num_iter):
+def iterate_gf(E, h_0, h_l, h_r, se, num_iter):
     """
 
     Parameters
@@ -116,7 +116,7 @@ def iterate_gf(E, h_0, h_l, h_r, gf, num_iter):
     """
 
     for _ in range(num_iter):
-        se = h_r.dot(np.linalg.pinv(E * np.identity(h_0.shape[0]) - h_0 - gf)).dot(h_l)
+        se = h_r.dot(np.linalg.pinv(E * np.identity(h_0.shape[0]) - h_0 - se)).dot(h_l)
 
     return se
 
