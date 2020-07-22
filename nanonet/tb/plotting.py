@@ -91,14 +91,14 @@ def plot_bs_split(kk, vba, cba):
 
     fig, ax = plt.subplots(1, 2)
     ax[0].set_ylim(-1.0, -0.3)
-    ax[0].plot(kk, np.sort(np.real(vba)))
+    ax[0].plot(kk, np.sort(np.real(vba)), 'k')
     ax[0].set_xlabel(r'Wave vector ($\frac{\pi}{a}$)')
     ax[0].set_ylabel(r'Energy (eV)')
     ax[0].set_title('Valence band')
     # plt.savefig('bs_vb.pdf')
 
     ax[1].set_ylim(2.0, 2.7)
-    ax[1].plot(kk, np.sort(np.real(cba)))
+    ax[1].plot(kk, np.sort(np.real(cba)), 'k')
     ax[1].set_xlabel(r'Wave vector ($\frac{\pi}{a}$)')
     ax[1].set_ylabel(r'Energy (eV)')
     ax[1].set_title('Conduction band')

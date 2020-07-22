@@ -45,21 +45,24 @@ def main():
     h.set_periodic_bc(primitive_cell)
 
     # define wave vector coordinates
-    sym_points = ['L', 'GAMMA', 'X']
-    num_points = [20, 20]
-    k_points = get_k_coords(sym_points, num_points, SPECIAL_K_POINTS_SI)
+    sym_points = ['L', 'GAMMA', 'X', 'W', 'K', 'L', 'W', 'X', 'K', 'GAMMA']
+    num_points = [15, 20, 15, 10, 15, 15, 15, 15, 20]
+    k_points = get_k_coords(sym_points, num_points, 'Si')
 
     # compute band structure
-    band_structure = []
-    for ii, item in enumerate(k_points):
-        eigenvalues, _ = h.diagonalize_periodic_bc(k_points[ii])
-        band_structure.append(eigenvalues)
+    band_structure = np.zeros((sum(num_points), h.h_matrix.shape[0]))
+
+    for jj, item in enumerate(k_points):
+        band_structure[jj, :], _ = h.diagonalize_periodic_bc(item)
 
     # visualize
-    band_structure = np.array(band_structure)
     ax = plt.axes()
-    ax.plot(band_structure)
-    plt.ylim((-15, 15))
+    ax.set_title('Band structure of the bulk silicon')
+    ax.set_ylabel('Energy (eV)')
+    ax.plot(np.sort(np.real(band_structure))[:, :8], 'k')
+    ax.plot([0, band_structure.shape[0]], [0, 0], '--', color='k', linewidth=0.5)
+    plt.xticks(np.insert(np.cumsum(num_points) - 1, 0, 0), labels=sym_points)
+    ax.xaxis.grid()
     plt.show()
 
 

@@ -87,17 +87,25 @@ def d_me(N, l, m1, m2):
 
     """
 
-    prefactor = ((0.5 * (1 + N)) ** l) * (((1 - N) / (1 + N)) ** (m1 * 0.5 - m2 * 0.5)) * \
-        math.sqrt(math.factorial(l + m2) * math.factorial(l - m2) *
-                  math.factorial(l + m1) * math.factorial(l - m1))
+    if N == -1.0 and m1 == m2:
+        prefactor = math.sqrt(math.factorial(l + m2) * math.factorial(l - m2) *
+                              math.factorial(l + m1) * math.factorial(l - m1))
+    else:
+        prefactor = ((0.5 * (1 + N)) ** l) * (((1 - N) / (1 + N)) ** (m1 * 0.5 - m2 * 0.5)) * \
+            math.sqrt(math.factorial(l + m2) * math.factorial(l - m2) *
+                      math.factorial(l + m1) * math.factorial(l - m1))
 
     ans = 0
-
     for t in range(2 * l + 2):
         if l + m2 - t >= 0 and l - m1 - t >= 0 and t + m1 - m2 >= 0:
-            ans += ((-1) ** t) * (((1 - N) / (1 + N)) ** t) / \
-                   (math.factorial(l + m2 - t) * math.factorial(l - m1 - t) *
-                    math.factorial(t) * math.factorial(t + m1 - m2))
+            if N == -1.0 and t == 0:
+                ans += ((-1) ** t) / \
+                       (math.factorial(l + m2 - t) * math.factorial(l - m1 - t) *
+                        math.factorial(t) * math.factorial(t + m1 - m2))
+            else:
+                ans += ((-1) ** t) * (((1 - N) / (1 + N)) ** t) / \
+                       (math.factorial(l + m2 - t) * math.factorial(l - m1 - t) *
+                        math.factorial(t) * math.factorial(t + m1 - m2))
 
     return np.nan_to_num(ans * prefactor)
 

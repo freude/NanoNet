@@ -50,7 +50,7 @@ def main(energy):
         # compute right-lead coupling
         gamma_r = 1j * (R - R.conj().T)
         # compute transmission
-        tr[j] = np.real(np.trace(gamma_l * g_trans * gamma_r * g_trans.conj().T))
+        tr[j] = np.real(np.trace(gamma_l.dot(g_trans).dot(gamma_r).dot(g_trans.conj().T)))
 
         print("{} of {}: energy is {}".format(j + 1, energy.shape[0], E))
 
@@ -69,11 +69,11 @@ if __name__ == '__main__':
 
     # plot DOS and transmission spectrum
     fig, ax = plt.subplots(1, 2)
-    ax[0].plot(energy, dos)
+    ax[0].plot(energy, dos, 'k')
     ax[0].set_ylabel(r'DOS (a.u)')
     ax[0].set_xlabel(r'Energy (eV)')
 
-    ax[1].plot(energy, tr)
+    ax[1].plot(energy, tr, 'k')
     ax[1].set_ylabel(r'Transmission (a.u.)')
     ax[1].set_xlabel(r'Energy (eV)')
     fig.tight_layout()

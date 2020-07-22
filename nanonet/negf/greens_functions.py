@@ -59,29 +59,7 @@ def surface_greens_function_poles(h_list):
     eigenvals = eigenvals[ind]
     eigenvects = eigenvects[:, ind]
     eigenvects = eigenvects[matix_size:, :]
-
-    # vals = np.copy(eigenvals)
-    # mask1 = np.abs(vals) < 0.9999999
-    # mask2 = np.abs(vals) > 1.0000001
-    # vals = np.angle(vals)
-    #
-    # vals[mask1] = -5
-    # vals[mask2] = 5
-    # ind = np.argsort(vals, kind='mergesort')
-    #
-    # eigenvals = eigenvals[ind]
-    # eigenvects = eigenvects[:, ind]
-
-    ind = np.squeeze(np.where(np.abs(np.abs(eigenvals)-1.0) < 0.01))
-    if len(ind) > 0:
-        gv = group_velocity(eigenvects[:, ind], eigenvals[ind], h_list[2])
-        print(gv)
-
     eigenvals = np.diag(eigenvals)
-
-    norms = linalg.norm(eigenvects, axis=0)
-    norms = np.array([1e30 if np.abs(norm) < 0.000001 else norm for norm in norms])
-    eigenvects = eigenvects / norms[np.newaxis, :]
 
     return eigenvals, eigenvects
 
