@@ -2,11 +2,9 @@ from __future__ import division
 import numpy as np
 from scipy.spatial import cKDTree as KDTree
 
-__date__ = "2010-11-09 Nov"  # weights, doc
 
-#...............................................................................
 class Invdisttree:
-    """inverse-distance-weighted interpolation using KDTree:
+    """Inverse-distance-weighted interpolation using KDTree:
     invdisttree = Invdisttree( X, z )  -- data points, values
     interpol = invdisttree( q, nnear=3, eps=0, p=1, weights=None, stat=0 )
     interpolates z from the 3 points nearest each query point q;
@@ -55,8 +53,6 @@ class Invdisttree:
     -------
 
     """
-# anykernel( dj / av dj ) is also scale-free
-# error analysis, |f(x) - idw(x)| ? todo: regular grid, nnear ndim+1, 2*ndim
 
     def __init__( self, X, z, leafsize=10, stat=0 ):
         assert len(X) == len(z), "len(X) %d != len(z) %d" % (len(X), len(z))

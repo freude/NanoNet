@@ -30,7 +30,7 @@ def main():
     hl, h0, hr = hamiltonian.get_hamiltonians()
 
     # specify energy array
-    energy = np.linspace(2.1, 2.2, 50)
+    energy = np.linspace(2.1, 2.5, 50)
 
     # specify dephasing constant
     damp = 0.001j
@@ -42,21 +42,23 @@ def main():
     # energy loop
     for j, E in enumerate(energy):
 
-        logging.info("{} Energy: {} eV".format(j, E))
+        logging.info("{0} Energy: {1:.4f} eV".format(j, E))
 
         # compute self-energies describing boundary conditions at the leads contacts
-        R, L = negf.surface_greens_function(E, hl, h0, hr, iterate=False, damp=damp)
+        R, L = negf.surface_greens_function(E, hl, h0, hr, iterate=True, damp=damp)
 
         # compute Green's functions using the recursive Green's function algorithm
-        g_trans, grd, grl, gru, gr_left = negf.recursive_gf(E, [hl, hl], [h0+L, h0, h0+R], [hr, hr], damp=damp)
+        # g_trans, grd, grl, gru, gr_left = negf.recursive_gf(E, [hl, hl], [h0 + L, h0, h0 + R], [hr, hr], damp=damp)
+        g_trans, grd, grl, gru, gr_left = negf.recursive_gf(E, [hl], [h0 + L + R], [hr], damp=damp)
 
         # number of subblocks
-        num_periods = len(grd)
+        num_blocks = len(grd)
 
         # compute DOS
-        for jj in range(num_periods):
-            dos[j] = dos[j] - np.real(np.trace(np.imag(grd[jj]))) / num_periods
+        for jj in range(num_blocks):
+            dos[j] = dos[j] - np.trace(np.imag(grd[jj])) / num_blocks
 
+        # coupling matrices
         gamma_l = 1j * (L - L.conj().T)
         gamma_r = 1j * (R - R.conj().T)
 
@@ -64,13 +66,15 @@ def main():
         tr[j] = np.real(np.trace(gamma_l.dot(g_trans).dot(gamma_r).dot(g_trans.conj().T)))
 
     # visualize
-    plt.plot(energy, dos)
-    plt.show()
+    fig, ax = plt.subplots(2, 1)
+    ax[0].plot(energy, dos, 'k')
+    ax[0].set_ylabel(r'DOS (a.u)')
+    ax[0].set_xlabel(r'Energy (eV)')
 
-    plt.plot(dos)
-    plt.show()
-
-    plt.plot(energy, tr)
+    ax[1].plot(energy, tr, 'k')
+    ax[1].set_ylabel(r'Transmission (a.u.)')
+    ax[1].set_xlabel(r'Energy (eV)')
+    fig.tight_layout()
     plt.show()
 
 

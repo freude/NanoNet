@@ -5,48 +5,26 @@ import scipy.linalg as linalg
 
 def mat_left_div(mat_a, mat_b):
     """
+    Solves the linear problem AX=B, where A is the linear operator,
+    X is an unknown vector and B is the right-hand side column vector.
 
     Parameters
     ----------
-    mat_a :
-        
-    mat_b :
-        
+    mat_a : numpy.ndarray (dtype=numpy.float)
+        Linear operator
+    mat_b : numpy.ndarray (dtype=numpy.float)
+        Right-side column vector
 
     Returns
     -------
-
+    ans : numpy.ndarray (dtype=numpy.float)
+        Solution of the linear system
     """
 
-    # ans, resid, rank, s = linalg.lstsq(mat_a, mat_b, lapack_driver='gelsy')
-    ans, resid, rank, s = np.linalg.lstsq(mat_a, mat_b, rcond=None)
+    # ans, resid, rank, s = np.linalg.lstsq(mat_a, mat_b, rcond=1e-9)
+    ans, resid, rank, s = linalg.lstsq(mat_a, mat_b, lapack_driver='gelsy')
 
     return ans
-
-
-def mat_mul(list_of_matrices):
-    """
-
-    Parameters
-    ----------
-    list_of_matrices :
-        
-
-    Returns
-    -------
-
-    """
-    num_of_mat = len(list_of_matrices)
-
-    unity = np.eye(list_of_matrices[num_of_mat - 1].shape[0])
-
-    for j, item in enumerate(list_of_matrices):
-        list_of_matrices[j] = item
-
-    for j in range(9, -1, -1):
-        unity = list_of_matrices[j] * unity
-
-    return unity
 
 
 def recursive_gf(energy, mat_l_list, mat_d_list, mat_u_list, s_in=0, s_out=0, damp=0.000001j):
@@ -59,20 +37,14 @@ def recursive_gf(energy, mat_l_list, mat_d_list, mat_u_list, s_in=0, s_out=0, da
 
     Parameters
     ----------
-    energy : numpy array
-        energy
-    mat_d_list : list:                  list of numpy arrays
-        list of diagonal blocks
-    mat_u_list : list:                  list of numpy arrays
-        list of upper-diagonal blocks
-    mat_l_list : list:                  list of numpy arrays
-
-:return grd, grl, gru, gr_left:    retarded Green's
-                                   function: block-diagonal,
-                                             lower block-diagonal,
-                                             upper block-diagonal,
-                                             left-connected
-        list of lower-diagonal blocks
+    energy : numpy.ndarray (dtype=numpy.float)
+        Energy array
+    mat_d_list : list of numpy.ndarray (dtype=numpy.float)
+        List of diagonal blocks
+    mat_u_list : list of numpy.ndarray (dtype=numpy.float)
+        List of upper-diagonal blocks
+    mat_l_list : list of numpy.ndarray (dtype=numpy.float)
+        List of lower-diagonal blocks
     s_in :
          (Default value = 0)
     s_out :
@@ -82,7 +54,32 @@ def recursive_gf(energy, mat_l_list, mat_d_list, mat_u_list, s_in=0, s_out=0, da
 
     Returns
     -------
-
+    g_trans : numpy.ndarray (dtype=numpy.complex)
+        Blocks of the retarded Green's function responsible for transmission
+    grd : numpy.ndarray (dtype=numpy.complex)
+        Diagonal blocks of the retarded Green's function
+    grl : numpy.ndarray (dtype=numpy.complex)
+        Lower diagonal blocks of the retarded Green's function
+    gru : numpy.ndarray (dtype=numpy.complex)
+        Upper diagonal blocks of the retarded Green's function
+    gr_left : numpy.ndarray (dtype=numpy.complex)
+        Left-conencted blocks of the retarded Green's function
+    gnd : numpy.ndarray (dtype=numpy.complex)
+        Diagonal blocks of the retarded Green's function
+    gnl : numpy.ndarray (dtype=numpy.complex)
+        Lower diagonal blocks of the retarded Green's function
+    gnu : numpy.ndarray (dtype=numpy.complex)
+        Upper diagonal blocks of the retarded Green's function
+    gin_left : numpy.ndarray (dtype=numpy.complex)
+        Left-conencted blocks of the retarded Green's function
+    gpd : numpy.ndarray (dtype=numpy.complex)
+        Diagonal blocks of the retarded Green's function
+    gpl : numpy.ndarray (dtype=numpy.complex)
+        Lower diagonal blocks of the retarded Green's function
+    gpu : numpy.ndarray (dtype=numpy.complex)
+        Upper diagonal blocks of the retarded Green's function
+    gip_left : numpy.ndarray (dtype=numpy.complex)
+        Left-conencted blocks of the retarded Green's function
     """
     # -------------------------------------------------------------------
     # ---------- convert input arrays to the matrix data type -----------
