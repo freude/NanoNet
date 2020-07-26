@@ -27,7 +27,7 @@ def mat_left_div(mat_a, mat_b):
     return ans
 
 
-def recursive_gf(energy, mat_l_list, mat_d_list, mat_u_list, s_in=0, s_out=0, damp=0.000001j):
+def _recursive_gf(energy, mat_l_list, mat_d_list, mat_u_list, s_in=0, s_out=0, damp=0.000001j):
     """The recursive Green's function algorithm is taken from
     M. P. Anantram, M. S. Lundstrom and D. E. Nikonov, Proceedings of the IEEE, 96, 1511 - 1550 (2008)
     DOI: 10.1109/JPROC.2008.927355
@@ -204,3 +204,79 @@ def recursive_gf(energy, mat_l_list, mat_d_list, mat_u_list, s_in=0, s_out=0, da
                grd, grl, gru, gr_left, \
                gnd, gnl, gnu, gin_left, \
                gpd, gpl, gpu, gip_left
+
+
+def recursive_gf(energy, mat_l_list, mat_d_list, mat_u_list, left_se=None, right_se=None, s_in=0, s_out=0, damp=0.000001j):
+    """The recursive Green's function algorithm is taken from
+    M. P. Anantram, M. S. Lundstrom and D. E. Nikonov, Proceedings of the IEEE, 96, 1511 - 1550 (2008)
+    DOI: 10.1109/JPROC.2008.927355
+
+    In order to get the electron correlation function output, the parameters s_in has to be set.
+    For the hole correlation function, the parameter s_out has to be set.
+
+    Parameters
+    ----------
+    energy : numpy.ndarray (dtype=numpy.float)
+        Energy array
+    mat_d_list : list of numpy.ndarray (dtype=numpy.float)
+        List of diagonal blocks
+    mat_u_list : list of numpy.ndarray (dtype=numpy.float)
+        List of upper-diagonal blocks
+    mat_l_list : list of numpy.ndarray (dtype=numpy.float)
+        List of lower-diagonal blocks
+    s_in :
+         (Default value = 0)
+    s_out :
+         (Default value = 0)
+    damp :
+         (Default value = 0.000001j)
+
+    Returns
+    -------
+    g_trans : numpy.ndarray (dtype=numpy.complex)
+        Blocks of the retarded Green's function responsible for transmission
+    grd : numpy.ndarray (dtype=numpy.complex)
+        Diagonal blocks of the retarded Green's function
+    grl : numpy.ndarray (dtype=numpy.complex)
+        Lower diagonal blocks of the retarded Green's function
+    gru : numpy.ndarray (dtype=numpy.complex)
+        Upper diagonal blocks of the retarded Green's function
+    gr_left : numpy.ndarray (dtype=numpy.complex)
+        Left-conencted blocks of the retarded Green's function
+    gnd : numpy.ndarray (dtype=numpy.complex)
+        Diagonal blocks of the retarded Green's function
+    gnl : numpy.ndarray (dtype=numpy.complex)
+        Lower diagonal blocks of the retarded Green's function
+    gnu : numpy.ndarray (dtype=numpy.complex)
+        Upper diagonal blocks of the retarded Green's function
+    gin_left : numpy.ndarray (dtype=numpy.complex)
+        Left-conencted blocks of the retarded Green's function
+    gpd : numpy.ndarray (dtype=numpy.complex)
+        Diagonal blocks of the retarded Green's function
+    gpl : numpy.ndarray (dtype=numpy.complex)
+        Lower diagonal blocks of the retarded Green's function
+    gpu : numpy.ndarray (dtype=numpy.complex)
+        Upper diagonal blocks of the retarded Green's function
+    gip_left : numpy.ndarray (dtype=numpy.complex)
+        Left-conencted blocks of the retarded Green's function
+    """
+
+    if isinstance(left_se, np.ndarray):
+        s01, s02 = mat_d_list[0].shape
+        left_se = left_se[:s01, :s02]
+        mat_d_list[0] = mat_d_list[0] + left_se
+
+    if isinstance(right_se, np.ndarray):
+        s11, s12 = mat_d_list[-1].shape
+        right_se = right_se[-s11:, -s12:]
+        mat_d_list[-1] = mat_d_list[-1] + right_se
+
+    ans = _recursive_gf(energy, mat_l_list, mat_d_list, mat_u_list, s_in=s_in, s_out=s_out, damp=damp)
+
+    if isinstance(left_se, np.ndarray):
+        mat_d_list[0] = mat_d_list[0] - left_se
+
+    if isinstance(right_se, np.ndarray):
+        mat_d_list[-1] = mat_d_list[-1] - right_se
+
+    return ans

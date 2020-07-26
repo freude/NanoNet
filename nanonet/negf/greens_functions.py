@@ -3,19 +3,22 @@ The module contains functions that computes Green's functions and their poles
 """
 from __future__ import print_function, division
 import numpy as np
+import scipy.sparse as sp
 import scipy.linalg as linalg
 
 
-def surface_greens_function_poles(h_list):
+def surface_greens_function_poles(hl, h0, hr):
     """Computes eigenvalues and eigenvectors for the complex band structure problem.
     The eigenvalues correspond to the wave vectors as `exp(ik)`.
 
     Parameters
     ----------
-    h_list : list
-        List of the Hamiltonian blocks - blocks describes coupling
-        with left-side lead, Hamiltonian of the device region and
-        coupling with right-side lead
+    hl : numpy.ndarray (dtype=numpy.float)
+        Left-side coupling Hamiltonian
+    h0 : numpy.ndarray (dtype=numpy.float)
+        Hamiltonian of the device region
+    hr : numpy.ndarray (dtype=numpy.float)
+        Right-side coupling Hamiltonian
 
     Returns
     -------
@@ -26,27 +29,48 @@ def surface_greens_function_poles(h_list):
     """
 
     # linearize polynomial eigenvalue problem
-    pr_order = len(h_list) - 1
-    matix_size = h_list[0].shape[0]
-    full_matrix_size = pr_order * matix_size
-    identity = np.identity(matix_size)
 
+    shapes_d = []
+    shapes_ud = []
+    shapes_ld = []
+
+    if isinstance(h0, list):
+        num_blocks = len(h0)
+        for j in range(len(h0)):
+            shapes_d.append(h0[j].shape[0])
+            shapes_ld.append(hl[j].shape)
+            shapes_ud.append(hr[j].shape)
+        matix_size = np.sum(shapes_d)
+    else:
+        num_blocks = 1
+        shapes_d.append(h0.shape[0])
+        shapes_ld.append(hl.shape)
+        shapes_ud.append(hr.shape)
+        matix_size = h0.shape[0]
+        hl = [hl]
+        h0 = [h0]
+        hr = [hr]
+
+    full_matrix_size = 2 * matix_size
+    identity = np.identity(matix_size)
     main_matrix = np.zeros((full_matrix_size, full_matrix_size), dtype=np.complex)
     overlap_matrix = np.zeros((full_matrix_size, full_matrix_size), dtype=np.complex)
+    main_matrix[0:matix_size, matix_size:2 * matix_size] = identity
+    overlap_matrix[0:matix_size, 0:matix_size] = identity
+    main_matrix[matix_size:matix_size+hl[-1].shape[0], matix_size-hl[-1].shape[1]:matix_size] = -hl[-1]
+    overlap_matrix[2*matix_size-hr[-1].shape[0]:2*matix_size, matix_size:matix_size+hr[-1].shape[1]] = hr[-1]
 
-    for j in range(pr_order):
+    offfset = matix_size
 
-        main_matrix[(pr_order - 1) * matix_size:pr_order * matix_size,
-                    j * matix_size:(j + 1) * matix_size] = -h_list[j]
+    for j in range(num_blocks):
 
-        if j == pr_order - 1:
-            overlap_matrix[j * matix_size:(j + 1) * matix_size,
-                           j * matix_size:(j + 1) * matix_size] = h_list[pr_order]
-        else:
-            overlap_matrix[j * matix_size:(j + 1) * matix_size,
-                           j * matix_size:(j + 1) * matix_size] = identity
-            main_matrix[j * matix_size:(j + 1) * matix_size,
-                        (j + 1) * matix_size:(j + 2) * matix_size] = identity
+        main_matrix[offfset:offfset+h0[j].shape[0], offfset:offfset+h0[j].shape[0]] = -h0[j]
+
+        if j > 0:
+            main_matrix[offfset:offfset + hl[j - 1].shape[0], offfset - hl[j - 1].shape[1]:offfset] = hl[j - 1]
+            main_matrix[offfset - hl[j - 1].shape[1]:offfset, offfset:offfset + hl[j - 1].shape[0]] = hr[j - 1]
+
+        offfset += h0[j].shape[0]
 
     alpha, betha, _, eigenvects, _, _ = linalg.lapack.cggev(main_matrix, overlap_matrix)
 
@@ -116,8 +140,7 @@ def iterate_gf(E, h_0, h_l, h_r, se, num_iter):
     """
 
     for _ in range(num_iter):
-        se = h_r.dot(np.linalg.pinv(E * np.identity(h_0.shape[0]) - h_0 - se)).dot(h_l)
-
+        se = h_r.dot(linalg.pinv(E * np.identity(h_0.shape[0]) - h_0 - se)).dot(h_l)
     return se
 
 
@@ -150,19 +173,87 @@ def surface_greens_function(E, h_l, h_0, h_r, iterate=False, damp=0.0001j):
         Right-lead self-energy matrix
     """
 
-    h_list = [h_l, h_0 - (E+damp) * np.identity(h_0.shape[0]), h_r]
-    vals, vects = surface_greens_function_poles(h_list)
+    # linearize polynomial eigenvalue problem
+
+    shapes_d = []
+    shapes_ud = []
+    shapes_ld = []
+
+    if isinstance(h_0, list):
+        num_blocks = len(h_0)
+        for j in range(len(h_0)):
+            shapes_d.append(h_0[j].shape[0])
+            shapes_ld.append(h_l[j].shape)
+            shapes_ud.append(h_r[j].shape)
+        matix_size = np.sum(shapes_d)
+    else:
+        num_blocks = 1
+        shapes_d.append(h_0.shape[0])
+        shapes_ld.append(h_l.shape)
+        shapes_ud.append(h_r.shape)
+        matix_size = h_0.shape[0]
+        h_l = [h_l]
+        h_0 = [h_0]
+        h_r = [h_r]
+
+    full_matrix_size = 2 * matix_size
+    identity = np.identity(matix_size)
+    main_matrix = np.zeros((full_matrix_size, full_matrix_size), dtype=np.complex)
+    overlap_matrix = np.zeros((full_matrix_size, full_matrix_size), dtype=np.complex)
+    main_matrix[0:matix_size, matix_size:2 * matix_size] = identity
+    overlap_matrix[0:matix_size, 0:matix_size] = identity
+    main_matrix[matix_size:matix_size+h_l[-1].shape[0], matix_size-h_l[-1].shape[1]:matix_size] = -h_l[-1]
+    overlap_matrix[2*matix_size-h_r[-1].shape[0]:2*matix_size, matix_size:matix_size+h_r[-1].shape[1]] = h_r[-1]
+
+    offfset = matix_size
+
+    for j in range(num_blocks):
+
+        main_matrix[offfset:offfset+h_0[j].shape[0], offfset:offfset+h_0[j].shape[0]] = -h_0[j]
+
+        if j > 0:
+            main_matrix[offfset:offfset + h_l[j - 1].shape[0], offfset - h_l[j - 1].shape[1]:offfset] = -h_l[j - 1]
+            main_matrix[offfset - h_l[j - 1].shape[1]:offfset, offfset:offfset + h_l[j - 1].shape[0]] = -h_r[j - 1]
+
+        offfset += h_0[j].shape[0]
+
+    main_matrix[matix_size:2*matix_size, matix_size:2*matix_size] = \
+        (E + damp) * np.identity(matix_size) + main_matrix[matix_size:2*matix_size, matix_size:2*matix_size]
+
+    alpha, betha, _, vects, _, _ = linalg.lapack.cggev(main_matrix, overlap_matrix)
+
+    betha[betha == 0] = 1e-19
+    vals = alpha / betha
+
+    # sort absolute values
+    ind = np.argsort(np.abs(vals))
+    vals = vals[ind]
+    vects = vects[:, ind]
+    vects = vects[matix_size:, :]
+
+    # vals, vects = surface_greens_function_poles(E, h_l, h_0, h_r, damp)
     num_eigs = len(vals)
 
-    u_right = vects[:, :num_eigs//2]
-    u_left = vects[:, num_eigs-1:num_eigs//2-1:-1]
-    lambda_right = np.diag(vals[:num_eigs//2])
-    lambda_left = np.diag(vals[num_eigs-1:num_eigs//2-1:-1])
+    u_right = vects[:, :num_eigs // 2]
+    u_left = vects[:, num_eigs - 1:num_eigs // 2 - 1:-1]
+    lambda_right = np.diag(vals[:num_eigs // 2])
+    lambda_left = np.diag(vals[num_eigs - 1:num_eigs // 2 - 1:-1])
 
-    sgf_l = h_r.dot(u_right).dot(lambda_right).dot(np.linalg.pinv(u_right))
-    sgf_r = h_l.dot(u_left).dot(np.linalg.inv(lambda_left)).dot(np.linalg.pinv(u_left))
+    h0 = -main_matrix[matix_size:2*matix_size, matix_size:2*matix_size] + (E + damp) * np.identity(matix_size)
+    hl = -main_matrix[matix_size:2*matix_size, 0:matix_size]
+    hr = overlap_matrix[matix_size:2*matix_size, matix_size:2*matix_size]
+
+    sgf_l = hr.dot(u_right).dot(lambda_right).dot(np.linalg.pinv(u_right))
+    sgf_r = hl.dot(u_left).dot(np.linalg.inv(lambda_left)).dot(np.linalg.pinv(u_left))
 
     if iterate:
-        return iterate_gf(E, h_0, h_l, h_r, sgf_l, 2), iterate_gf(E, h_0, h_r, h_l, sgf_r, 2)
+        sgf_l = iterate_gf(E, h0, hl, hr, sgf_l, 2)
+        sgf_r = iterate_gf(E, h0, hr, hl, sgf_r, 2)
+
+    s01, s02 = h_0[0].shape
+    s11, s12 = h_0[-1].shape
+
+    sgf_l = sgf_l[-s11:, -s12:]
+    sgf_r = sgf_r[:s01, :s02]
 
     return sgf_l, sgf_r

@@ -14,7 +14,7 @@ from nanonet.tb.structure_designer import StructDesignerXYZ, CyclicTopology
 from nanonet.tb.diatomic_matrix_element import me
 from nanonet.tb.orbitals import Orbitals
 from nanonet.tb.aux_functions import dict2xyz
-from nanonet.tb.block_tridiagonalization import split_into_subblocks_optimized, cut_in_blocks, split_into_subblocks
+from nanonet.tb.block_tridiagonalization import find_nonzero_lines, split_into_subblocks_optimized, cut_in_blocks, split_into_subblocks
 import nanonet.verbosity as verbosity
 
 
@@ -26,12 +26,6 @@ class BasisTB(AbstractBasis, StructDesignerXYZ):
     dimensionality of the Hilbert space.
     It is also equipped with the member functions translating quantum numbers
     into a matrix index and vise versa using a set of index offsets.
-
-    Parameters
-    ----------
-
-    Returns
-    -------
 
     Examples
     --------
@@ -96,7 +90,7 @@ class BasisTB(AbstractBasis, StructDesignerXYZ):
         logging.info("---------------------------------\n")
 
     def qn2ind(self, qn):
-        """Computes a matrix index of an element from the index of atom and the index of atomic orbital.
+        """Computes a matrix index of an matrix element from the index of atom and the index of atomic orbital.
 
         Parameters
         ----------
@@ -106,8 +100,8 @@ class BasisTB(AbstractBasis, StructDesignerXYZ):
 
         Returns
         -------
-
-        
+        type int
+            Index of the TB matrix
         """
 
         qn = OrderedDict(qn)
@@ -148,12 +142,6 @@ class BasisTB(AbstractBasis, StructDesignerXYZ):
 class Hamiltonian(BasisTB):
     """Class defines a Hamiltonian matrix as well as a set of member-functions
     allowing to build, diagonalize and visualize the matrix.
-
-    Parameters
-    ----------
-
-    Returns
-    -------
 
     Examples
     --------
@@ -208,14 +196,15 @@ class Hamiltonian(BasisTB):
 
         Parameters
         ----------
-        int_radial_dep :
-             (Default value = None)
-        radial_dep :
-             (Default value = None)
+        int_radial_dep : func
+             Integer radial dependence function (Default value = None)
+        radial_dep : func
+             Radial dependence function (Default value = None)
 
         Returns
         -------
-
+        type Hamiltonian
+            Returns the instance of the class Hamiltonian
         """
 
         if radial_dep is None:
@@ -276,16 +265,12 @@ class Hamiltonian(BasisTB):
 
     def set_periodic_bc(self, primitive_cell):
         """Set periodic boundary conditions.
-        The function creates an object of the class CyclicTopology.
+        The function sets the periodic boundary conditions by creating an object of the class CyclicTopology.
 
         Parameters
         ----------
-        primitive_cell :
+        primitive_cell : list
             list of vectors defining a primitive cell
-
-        Returns
-        -------
-
         """
         if list(primitive_cell):
             self.ct = CyclicTopology(primitive_cell,
@@ -297,19 +282,20 @@ class Hamiltonian(BasisTB):
 
     def diagonalize(self):
         """Diagonalize the Hamiltonian matrix for the finite isolated system
-        :return:
-
-        Parameters
-        ----------
+        (without periodic boundary conditions)
 
         Returns
         -------
-
+        vals : numpy.ndarray
+            Eigenvalues
+        vects : numpy.ndarray
+            Eigenvectors
         """
 
         vals, vects = np.linalg.eigh(self.h_matrix)
         vals = np.real(vals)
         ind = np.argsort(vals)
+
         return vals[ind], vects[:, ind]
 
     def diagonalize_periodic_bc(self, k_vector):
@@ -318,12 +304,15 @@ class Hamiltonian(BasisTB):
 
         Parameters
         ----------
-        k_vector :
+        k_vector : numpy.ndarray
             wave vector
 
         Returns
         -------
-
+        vals : numpy.ndarray
+            Eigenvalues
+        vects : numpy.ndarray
+            Eigenvectors
         """
 
         k_vector = list(k_vector)
@@ -363,23 +352,22 @@ class Hamiltonian(BasisTB):
 
         Parameters
         ----------
-        atom1 :
-            atom index
-        atom2 :
-            atom index
-        l1 :
-            index of a localized basis function
-        l2 :
-            index of a localized basis function
-        coords :
-            coordinates of radius vector pointing from one atom to another
+        atom1 : int
+            Atom index
+        atom2 : int
+            Atom index
+        l1 : int
+            Index of a localized basis function
+        l2 : int
+            Index of a localized basis function
+        coords : numpy.ndarray
+            Coordinates of radius vector pointing from one atom to another
             it may differ from the actual coordinates of atoms (Default value = None)
 
         Returns
         -------
-        float
-            matrix element
-
+        type float
+            Inter-cites matrix element
         """
 
         # on site (pick right table of parameters for a certain atom)
@@ -433,7 +421,7 @@ class Hamiltonian(BasisTB):
 
         Parameters
         ----------
-        atom :
+        atom : Atom
             
         ind1 :
             
@@ -442,7 +430,8 @@ class Hamiltonian(BasisTB):
 
         Returns
         -------
-
+        type float
+            Spin-orbit coupling energy
         """
 
         type1 = atom.orbitals[ind1]['title']
@@ -653,18 +642,23 @@ class Hamiltonian(BasisTB):
 
         """
 
+        hl, h0, hr = self.get_hamiltonians()
+
         if left is None and right is None:
-            hl, h0, hr = self.get_hamiltonians()
-        else:
-            hl = left
-            h0 = self.h_matrix
-            hr = right
+            h_r_h = find_nonzero_lines(hr, 'bottom')
+            h_r_v = find_nonzero_lines(hr[-h_r_h:, :], 'left')
+            h_l_h = find_nonzero_lines(hl, 'top')
+            h_l_v = find_nonzero_lines(hl[:h_l_h, :], 'right')
+            left = max(h_l_h, h_r_v)
+            right = max(h_r_h, h_l_v)
 
         if optimized:
-            subblocks = split_into_subblocks_optimized(h0, left=hl, right=hr)
+            subblocks = split_into_subblocks_optimized(h0, left=left, right=right)
         else:
-            subblocks = split_into_subblocks(h0, hl, hr)
+            subblocks = split_into_subblocks(h0, left, right)
 
         h01, hl1, hr1 = cut_in_blocks(h0, subblocks)
+        hl1.append(hl[:left, -right:])
+        hr1.append(hr[-right:, :left])
 
         return hl1, h01, hr1, subblocks
