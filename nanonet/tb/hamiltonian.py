@@ -625,7 +625,7 @@ class Hamiltonian(BasisTB):
 
         return np.array(self._coords)
 
-    def get_hamiltonians_block_tridiagonal(self, left=None, right=None, optimized=True):
+    def get_hamiltonians_block_tridiagonal(self, left=-1, right=-1, optimized=True):
         """
 
         Parameters
@@ -644,7 +644,7 @@ class Hamiltonian(BasisTB):
 
         hl, h0, hr = self.get_hamiltonians()
 
-        if left is None and right is None:
+        if left == -1 and right == -1:
             h_r_h = find_nonzero_lines(hr, 'bottom')
             h_r_v = find_nonzero_lines(hr[-h_r_h:, :], 'left')
             h_l_h = find_nonzero_lines(hl, 'top')
@@ -658,11 +658,9 @@ class Hamiltonian(BasisTB):
             subblocks = split_into_subblocks(h0, left, right)
 
         h01, hl1, hr1 = cut_in_blocks(h0, subblocks)
+
         if left is not None and right is not None:
             hl1.append(hl[:left, -right:])
             hr1.append(hr[-right:, :left])
-        else:
-            hl1.append(hl)
-            hr1.append(hr)
 
         return hl1, h01, hr1, subblocks
