@@ -1,6 +1,7 @@
 """
 This example script computes DOS and transmission function for the silicon nanowire
-using the recursive Green's function algorithm.
+using the recursive Green's function algorithm with splitting the Hamiltonian matrix
+into sub-blocks.
 """
 import logging
 import numpy as np

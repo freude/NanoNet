@@ -1,9 +1,15 @@
 from setuptools import setup, find_namespace_packages
 
 
+with open("README.md", "r") as fh:
+    long_description = fh.read()
+
+
 setup(name='nanonet',
-      version='1.0',
+      version='1.1.5',
       description='Python framework for tight-binding computations',
+      long_description=long_description,
+      long_description_content_type="text/markdown",
       author='M. V. Klymenko, J. A. Vaitkus, J. S. Smith, J. H. Cole',
       author_email='mike.klymenko@rmit.edu.au',
       license='MIT',
@@ -11,5 +17,12 @@ setup(name='nanonet',
       entry_points={
         'console_scripts': ['tb = tb.tb_script:main', 'tbmpi = tb.tbmpi_script:main', 'gf = tb.gf_script:main'],
       },
-      zip_safe=False
+      url = "https://github.com/freude/NanoNet",
+      zip_safe=False,
+      classifiers=[
+            "Programming Language :: Python :: 3",
+            "License :: OSI Approved :: MIT License",
+            "Operating System :: OS Independent",
+      ],
+      python_requires='>=3.6'
       )
