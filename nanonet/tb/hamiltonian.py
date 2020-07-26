@@ -658,7 +658,11 @@ class Hamiltonian(BasisTB):
             subblocks = split_into_subblocks(h0, left, right)
 
         h01, hl1, hr1 = cut_in_blocks(h0, subblocks)
-        hl1.append(hl[:left, -right:])
-        hr1.append(hr[-right:, :left])
+        if left is not None and right is not None:
+            hl1.append(hl[:left, -right:])
+            hr1.append(hr[-right:, :left])
+        else:
+            hl1.append(hl)
+            hr1.append(hr)
 
         return hl1, h01, hr1, subblocks

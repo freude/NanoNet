@@ -135,8 +135,7 @@ def bs(E, h_l, h_0, h_r):
 
     """
 
-    h_list = [h_l, h_0 - E * np.identity(h_0.shape[0]), h_r]
-    vals, vects = surface_greens_function_poles(h_list)
+    vals, vects = surface_greens_function_poles(h_l, h_0 - E * np.identity(h_0.shape[0]), h_r)
     vals = np.diag(vals)
 
     vals_for_plot = vals.copy()
