@@ -134,14 +134,13 @@ atoms per unit cell:
                     A2 0.0 1.0 0.0
                     A3 0.0 2.0 0.0
                     A4 0.0 3.0 0.0
-                """
+                 """
     ```
 4. Make instance of the Hamiltonian class and specify periodic boundary conditions if any:
     ```python
     h = tb.Hamiltonian(xyz=input_file, nn_distance=1.4)
     h.initialize()
-    period = [0, 0, 1.0]
-    h.set_periodic_bc([period])
+    h.set_periodic_bc([[0, 0, 1.0]])
     h_l, h_0, h_r = h.get_hamiltonians()
     ``` 
   
