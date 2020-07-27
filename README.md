@@ -94,13 +94,13 @@ atoms per unit cell:
 
 0. If the package is properly installed, the work starts with the import of all necessary modules:
 
-```python
-import numpy as np
-import matplotlib.pyplot as plt
-import nanonet.tb as tb
-from nanonet.negf.recursive_greens_functions import recursive_gf
-from nanonet.negf.greens_functions import surface_greens_function
-```
+    ```python
+    import numpy as np
+    import matplotlib.pyplot as plt
+    import nanonet.tb as tb
+    from nanonet.negf.recursive_greens_functions import recursive_gf
+    from nanonet.negf.greens_functions import surface_greens_function
+    ```
  
 1. First, one needs to specify atomic species and corresponding basis sets. We assume that each atom has one s-type atomic orbital with energy -1 eV. It is also possible to use predefined basis sets as
  is shown in examples in the ipython notebooks.
