@@ -85,79 +85,86 @@ If the package is properly installed, the work starts with the import of all nec
 import numpy as np
 import matplotlib.pyplot as plt
 import nanonet.tb as tb
+from nanonet.negf.recursive_greens_functions import recursive_gf
+from nanonet.negf.greens_functions import surface_greens_function
 ```
 
-Below we demonstrate band structure computation for an infinite atomic chain with two 
-atoms A and B per unit cell [--A---B--].
-1. First, one needs to specify atomic species and corresponding basis sets. We assume that each atom has one s-type atomic orbital with energies -1 eV and -0.7 eV respectively. It is also possible to use predefined basis sets as
+Below we demonstrate band structure computation for a nanoribbon with four 
+atoms per unit cell:
+ 
+1. First, one needs to specify atomic species and corresponding basis sets. We assume that each atom has one s-type atomic orbital with energy -1 eV. It is also possible to use predefined basis sets as
  is shown in examples in the ipython notebooks.
  
     ```python
-    a = tb.Orbitals('A')
-    a.add_orbital(title='s', energy=-1)
-    b = tb.Orbitals('B')
-    b.add_orbital(title='s', energy=-0.7)
+    orb = tb.Orbitals('A')
+    orb.add_orbital(title='s', energy=-1.0)
     ```
 
-2. Specify geometry of the system - determine position of atoms
-and specify periodic boundary conditions if any. This is done by creating an object of 
-the class Hamiltonian with proper arguments.
- 
+2. Set tight-binding parameters:
     ```python
-    xyz_file = """2
-    Atomic Chain
-    A       0.0    0.0    0.0
-    B       0.0    0.0    1.0
-    """
-    
-    h = tb.Hamiltonian(xyz=xyz_file, nn_distance=1.1)
+    tb.Orbitals.orbital_sets = {'A': orb}
+    tb.set_tb_params(PARAMS_A_A={"ss_sigma": 1.0})
     ```
 
-2. Now one needs to specify the coupling parameters between pairs of atoms with a given diatomic symmetry and initialize the Hamiltonian - compute Hamiltonian matrix elements
-
-    For isolated system:
-        
+3. Define atomic coordinates for the unit cell:
     ```python
-    tb.set_tb_params(PARAMS_A_B={'ss_sigma': 0.3})
+    input_file = """4
+                    Nanostrip
+                    A1 0.0 0.0 0.0
+                    A2 0.0 1.0 0.0
+                    A3 0.0 2.0 0.0
+                    A4 0.0 3.0 0.0
+                """
+    ```
+4. Make instance of the Hamiltonian class and specify periodic boundary conditions if any:
+    ```python
+    h = tb.Hamiltonian(xyz=input_file, nn_distance=1.4)
     h.initialize()
-    ```
-3. Specify periodic boundary conditions:
-        
-    ```python
-    lattice_constant = 2.0
-    h.set_periodic_bc([[0, 0, lattice_constant]])
-    ```
-5. Specify wave vectors:
-    
-    ```python
-    num_points = 20
-    kk = np.linspace(0, np.pi/lattice_constant, num_points, endpoint=True)
-    ```
+    period = [0, 0, 1.0]
+    h.set_periodic_bc([period])
+    h_l, h_0, h_r = h.get_hamiltonians()
+    ``` 
+  
+5. Compute DOS and transmission using Green's functions:
 
-6. Find the eigenvalues and eigenstates of the Hamiltonian for each wave vector.
-    
     ```python
-    band_sructure = []
-
-    for jj in range(num_points):
-        vals, _ = h.diagonalize_periodic_bc([0.0, 0.0, kk[jj]])
-        band_sructure.append(vals)
+    energy = np.linspace(-5.0, 5.0, 150)
+    dos = np.zeros((energy.shape[0]))
+    tr = np.zeros((energy.shape[0]))
     
-    band_sructure = np.array(band_sructure)
+    for j, E in enumerate(energy):
+        # compute surface Green's functions
+        L, R = surface_greens_function(E, h_l, h_0, h_r)
+        # recursive Green's functions
+        g_trans, grd, grl, gru, gr_left = recursive_gf(E, [h_l], [h_0 + L + R], [h_r])
+        # compute DOS
+        dos[j] = np.real(np.trace(1j * (grd[0] - grd[0].conj().T)))
+        # compute left-lead coupling
+        gamma_l = 1j * (L - L.conj().T)
+        # compute right-lead coupling
+        gamma_r = 1j * (R - R.conj().T)
+        # compute transmission
+        tr[j] = np.real(np.trace(gamma_l.dot(g_trans).dot(gamma_r).dot(g_trans.conj().T)))
     
-    ax = plt.axes()
-    ax.set_title('Band structure of the atomic chain')
-    ax.set_xlabel(r'Wave vector ($\frac{\pi}{a}$)', fontsize=14)
-    ax.set_ylabel(r'Energy (eV)', fontsize=14)
-    ax.plot(kk * lattice_constant / np.pi, np.sort(np.real(band_sructure)), 'k')
+    tr = np.array(tr)
+    dos = np.array(dos)
+    ```
+6. Plot DOS and transmission spectrum:
+    ```python
+    fig, ax = plt.subplots(1, 2)
+    ax[0].plot(energy, dos, 'k')
+    ax[0].set_ylabel(r'DOS (a.u)')
+    ax[0].set_xlabel(r'Energy (eV)')
+    
+    ax[1].plot(energy, tr, 'k')
+    ax[1].set_ylabel(r'Transmission (a.u.)')
+    ax[1].set_xlabel(r'Energy (eV)')
+    fig.tight_layout()
     plt.show()
     ```
-
 7. Done. The result will appear on the screen.
 
-<img src="https://user-images.githubusercontent.com/4588093/83520984-e86a3600-a521-11ea-920e-9f53dac680fc.png" width="350">
-
-
+![gh_img](https://user-images.githubusercontent.com/4588093/88499950-c74a3100-d00a-11ea-9d0f-86fa470fa47e.png)
 ### Command line interface
 
 The package is equipped with the command line tool `tb` the usage of which reads:
