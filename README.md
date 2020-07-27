@@ -164,7 +164,7 @@ atoms per unit cell:
         # compute right-lead coupling
         gamma_r = 1j * (R - R.conj().T)
         # compute transmission
-        tr[j] = np.real(np.trace(gamma_l.dot(g_trans).dot(gamma_r).dot(g_trans.conj().T)))
+        tr[j] = np.real(np.trace(gamma_l @ g_trans @ gamma_r @ g_trans.conj().T)))
     ```
 6. Plot DOS and transmission spectrum:
     ```python
