@@ -24,14 +24,7 @@ All computations can be governed by means of the python application programming 
 
 ### Requirements
 
-The source distribution can be obtained from GitHub:
-
-```bash
-git clone https://github.com/freude/NanoNet.git
-cd NanoNet
-```
-
-`Nanonet` requires `openmpi` to be installed in the system:
+`NanoNet` requires `openmpi` to be installed in the system:
 
 Ubuntu
  ```bash
@@ -41,14 +34,31 @@ Ubuntu
  ```bash
  brew install open-mpi
  ```
+
+### Installing from PiPy
+
+The easiest way to install `NanoNet` without tests is from the PiPy repository:
+
+```bash
+pip install nano-net
+```
+
+### Installing from sources
+
+The source distribution can be obtained from GitHub:
+
+```bash
+git clone https://github.com/freude/NanoNet.git
+cd NanoNet
+```
+
+
  All other dependencies can be installed at once by invoking the following command
  from within the source directory:
 
 ```bash
 pip install -r requirements.txt
 ```
-
-### Installing
 
 In order to install the package `Nanonet` just invoke
 the following line in the bash from within the source directory:
@@ -59,7 +69,7 @@ pip install .
 
 ### Running the tests
 
-All tests may be run by invoking the command:
+If the source distribution is available, all tests may be run by invoking the following command in the root directory:
 
 ```
 nosetests --with-doctest
@@ -155,9 +165,6 @@ atoms per unit cell:
         gamma_r = 1j * (R - R.conj().T)
         # compute transmission
         tr[j] = np.real(np.trace(gamma_l.dot(g_trans).dot(gamma_r).dot(g_trans.conj().T)))
-    
-    tr = np.array(tr)
-    dos = np.array(dos)
     ```
 6. Plot DOS and transmission spectrum:
     ```python

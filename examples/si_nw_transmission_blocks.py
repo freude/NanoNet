@@ -12,21 +12,21 @@ from nanonet.tb import Orbitals
 from nanonet.tb.sorting_algorithms import sort_projection
 
 
+def sorting(coords, **kwargs):
+    return np.argsort(coords[:, 2], kind='mergesort')
+
+
 def main():
     # use a predefined basis sets
     Orbitals.orbital_sets = {'Si': 'SiliconSP3D5S', 'H': 'HydrogenS'}
 
     # specify atomic coordinates file stored in xyz format
     path = "input_samples/SiNW2.xyz"
-    right_lead = [0, 33, 35, 17, 16, 51, 25, 9, 53, 68, 1, 8, 24]
-    left_lead = [40, 66, 58, 47, 48, 71, 72, 73, 74, 65, 6, 22, 7, 23, 14, 30, 15, 31]
 
     # define leads indices
     hamiltonian = Hamiltonian(xyz=path,
                               nn_distance=2.4,
-                              sort_func=sort_projection,
-                              left_lead=left_lead,
-                              right_lead=right_lead).initialize()
+                              sort_func=sorting).initialize()
 
     # set periodic boundary conditions
     a_si = 5.50
@@ -67,14 +67,14 @@ def main():
 
         # compute DOS
         for jj in range(num_blocks):
-            dos[j] = dos[j] - np.trace(np.imag(grd[jj])) / num_blocks
+            dos[j] -= np.trace(np.imag(grd[jj])) / num_blocks
 
         # coupling matrices
         gamma_l = 1j * (L - L.conj().T)
         gamma_r = 1j * (R - R.conj().T)
 
         # compute transmission spectrum
-        tr[j] = np.real(np.trace(gamma_l.dot(g_trans).dot(gamma_r).dot(g_trans.conj().T)))
+        tr[j] = np.real(np.trace(gamma_l @ g_trans @ gamma_r @ g_trans.conj().T))
 
     # visualize
     fig, ax = plt.subplots(2, 1)
