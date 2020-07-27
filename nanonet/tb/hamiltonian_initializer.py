@@ -6,10 +6,10 @@ initializing Hamiltonian objects from a Python dictionary.
 from __future__ import absolute_import
 import sys
 import numpy as np
-from .orbitals import Orbitals
-from . import diatomic_matrix_element as dme
-from .hamiltonian import Hamiltonian
-from .hamiltonian_sparse import HamiltonianSp
+from nanonet.tb.orbitals import Orbitals
+from nanonet.tb import tb_params as dme
+from nanonet.tb.hamiltonian import Hamiltonian
+from nanonet.tb.hamiltonian_sparse import HamiltonianSp
 
 
 def set_tb_params(**kwargs):

@@ -12,7 +12,7 @@ import sys
 import math
 from .constants import *
 import warnings
-from nanonet.tb.tb_params import *
+from nanonet.tb import tb_params
 
 
 def me_diatomic(bond, n, l_min, l_max, m, which_neighbour):
@@ -54,14 +54,12 @@ def me_diatomic(bond, n, l_min, l_max, m, which_neighbour):
 
     try:
         if which_neighbour == 0:
-            return getattr(sys.modules[__name__], 'PARAMS_' + bond)[label]
+            return getattr(sys.modules[tb_params.__name__], 'PARAMS_' + bond)[label]
         elif which_neighbour == 100:
             return 0
         else:
-            return getattr(sys.modules[__name__], 'PARAMS_' + bond + str(which_neighbour))[label]
+            return getattr(sys.modules[tb_params.__name__], 'PARAMS_' + bond + str(which_neighbour))[label]
     except KeyError:
-        warnings.warn('There is no parameter PARAMS_' +
-                      bond + '[' + label + ']' + ' in the dictionary', UserWarning)
         return 0
 
 

@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 from pkg_resources import get_distribution
 
-__version__ = get_distribution('nanonet').version
+__version__ = get_distribution('nano-net').version
 __author__ = "Mike Klymenko"
 __email__ = "mike.klymenko@rmit.edu.au"
 
