@@ -79,7 +79,20 @@ Below is a short example demonstrating usage of the `tb` package.
 More illustrative examples can be found in the ipython notebooks
 in the directory `jupyter_notebooks` inside the source directory.
 
-If the package is properly installed, the work starts with the import of all necessary modules:
+Below we demonstrate band structure computation for a nanoribbon with four 
+atoms per unit cell:
+
+<pre>
+--A--
+  |
+--A--
+  |
+--A--
+  |
+--A--
+</pre>
+
+0. If the package is properly installed, the work starts with the import of all necessary modules:
 
 ```python
 import numpy as np
@@ -88,9 +101,6 @@ import nanonet.tb as tb
 from nanonet.negf.recursive_greens_functions import recursive_gf
 from nanonet.negf.greens_functions import surface_greens_function
 ```
-
-Below we demonstrate band structure computation for a nanoribbon with four 
-atoms per unit cell:
  
 1. First, one needs to specify atomic species and corresponding basis sets. We assume that each atom has one s-type atomic orbital with energy -1 eV. It is also possible to use predefined basis sets as
  is shown in examples in the ipython notebooks.
