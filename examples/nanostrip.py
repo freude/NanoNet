@@ -14,7 +14,6 @@ def main(energy):
     orb.add_orbital('s', energy=-1.0)
 
     # set TB parameters
-    tb.Orbitals.orbital_sets = {'A': orb}
     tb.set_tb_params(PARAMS_A_A={"ss_sigma": 1.0})
 
     # define atomic coordinates for the unit cell

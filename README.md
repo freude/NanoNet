@@ -122,7 +122,6 @@ atoms per unit cell:
 
 2. Set tight-binding parameters:
     ```python
-    tb.Orbitals.orbital_sets = {'A': orb}
     tb.set_tb_params(PARAMS_A_A={"ss_sigma": 1.0})
     ```
 
