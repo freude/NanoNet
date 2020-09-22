@@ -45,7 +45,7 @@ def main():
         logging.info("{0} Energy: {1:.4f} eV".format(j, E))
 
         # compute self-energies describing boundary conditions at the leads contacts
-        R, L = negf.surface_greens_function(E, hl, h0, hr, iterate=True, damp=damp)
+        L, R = negf.surface_greens_function(E, hl, h0, hr, iterate=True, damp=damp)
 
         # compute Green's functions using the recursive Green's function algorithm
         # g_trans, grd, grl, gru, gr_left = negf.recursive_gf(E, [hl, hl], [h0 + L, h0, h0 + R], [hr, hr], damp=damp)

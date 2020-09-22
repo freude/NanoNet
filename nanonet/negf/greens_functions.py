@@ -256,4 +256,4 @@ def surface_greens_function(E, h_l, h_0, h_r, iterate=False, damp=0.0001j):
     sgf_l = sgf_l[-s11:, -s12:]
     sgf_r = sgf_r[:s01, :s02]
 
-    return sgf_l, sgf_r
+    return sgf_r, sgf_l
