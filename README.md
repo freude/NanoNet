@@ -79,7 +79,7 @@ nosetests --with-doctest
 
 - [Atomic chain](jupyter_notebooks/atom_chains.ipynb)
 - [Huckel model](jupyter_notebooks/Hukel_model.ipynb)
-- [Bulk silicon](jupyter_notebooks/bulk_silicon.ipynb)
+- [Bulk silicon](https://nbviewer.jupyter.org/github/freude/NanoNet/blob/master/jupyter_notebooks/bulk_silicon.ipynb)
 - [Bulk silicon - initialization via an input file](jupyter_notebooks/bulk_silicon_with_input_file.ipynb)
 - [Silicon nanowire](jupyter_notebooks/silicon_nanowire.ipynb)
 
