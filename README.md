@@ -77,11 +77,11 @@ nosetests --with-doctest
 
 ### Examples of usage
 
-- [Atomic chain](jupyter_notebooks/atom_chains.ipynb)
-- [Huckel model](jupyter_notebooks/Hukel_model.ipynb)
+- [Atomic chain](https://nbviewer.jupyter.org/github/freude/NanoNet/blob/master/jupyter_notebooks/atom_chains.ipynb)
+- [Huckel model](https://nbviewer.jupyter.org/github/freude/NanoNet/blob/master/jupyter_notebooks/Hukel_model.ipynb)
 - [Bulk silicon](https://nbviewer.jupyter.org/github/freude/NanoNet/blob/master/jupyter_notebooks/bulk_silicon.ipynb)
-- [Bulk silicon - initialization via an input file](jupyter_notebooks/bulk_silicon_with_input_file.ipynb)
-- [Silicon nanowire](jupyter_notebooks/silicon_nanowire.ipynb)
+- [Bulk silicon - initialization via an input file](https://nbviewer.jupyter.org/github/freude/NanoNet/blob/master/jupyter_notebooks/bulk_silicon_with_input_file.ipynb)
+- [Silicon nanowire](https://nbviewer.jupyter.org/github/freude/NanoNet/blob/master/jupyter_notebooks/silicon_nanowire.ipynb)
 
 ### Python interface
 
