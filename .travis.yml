@@ -8,19 +8,19 @@ jobs:
         - "pypy3"  # currently Python 3.6.1,  PyPy 7.1.1-beta0
       before_install:
         - sudo apt-get install libopenmpi-dev
-    - name: "Python 3.7.4 on macOS"
-      os: osx
-      env: TOXENV=py33
-      osx_image: xcode7.2  # Python 3.7.4 running on macOS 10.14.4
-      language: generic       # 'language: python' is an error on Travis CI macOS
-      cache:
-          directories:
-            - $HOME/Library/Caches/Homebrew
-      before_install:
-        - brew update
-        - brew install open-mpi
-        - python3 -m venv env
-        - source env/bin/activate
+#     - name: "Python 3.7.4 on macOS"
+#       os: osx
+#       env: TOXENV=py33
+#       osx_image: xcode7.2  # Python 3.7.4 running on macOS 10.14.4
+#       language: generic       # 'language: python' is an error on Travis CI macOS
+#       cache:
+#           directories:
+#             - $HOME/Library/Caches/Homebrew
+#       before_install:
+#         - brew update
+#         - brew install open-mpi
+#         - python3 -m venv env
+#         - source env/bin/activate
     
 # command to install dependencies
 install:
