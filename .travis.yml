@@ -12,7 +12,7 @@ jobs:
       os: osx
       env: TOXENV=py33
       osx_image: xcode12.2  # Python 3.7.4 running on macOS 10.14.4
-      language: shell       # 'language: python' is an error on Travis CI macOS
+      language: generic       # 'language: python' is an error on Travis CI macOS
       cache:
           directories:
             - $HOME/Library/Caches/Homebrew
