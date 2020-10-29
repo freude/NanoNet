@@ -9,6 +9,7 @@ import logging
 import inspect
 from operator import mul
 import numpy as np
+import scipy
 from nanonet.tb.abstract_interfaces import AbstractBasis
 from nanonet.tb.structure_designer import StructDesignerXYZ, CyclicTopology
 from nanonet.tb.diatomic_matrix_element import me
@@ -164,6 +165,8 @@ class Hamiltonian(BasisTB):
     def __init__(self, **kwargs):
 
         nn_distance = kwargs.get('nn_distance', 2.39)
+        self.compute_overlap = kwargs.get('comp_overlap', False)
+        self.compute_angular = kwargs.get('comp_angular_dep', True)
 
         logging.info('The verbosity level is {}'.format(verbosity.VERBOSITY))
         logging.info('The radius of the neighbourhood is {} Ang'.format(nn_distance))
@@ -178,8 +181,10 @@ class Hamiltonian(BasisTB):
 
         self._coords = None  # coordinates of sites
         self.h_matrix = None  # Hamiltonian for an isolated system
+        self.ov_matrix = None  # overlap matrix for an isolated system
         self.h_matrix_bc_factor = None  # exponential Bloch factors for pbc
         self.h_matrix_bc_add = None  # additive Bloch exponentials for pbc
+        self.ov_matrix_bc_add = None  # additive Bloch exponentials for pbc
         # (interaction with virtual neighbours
         # in adacent primitive cells due to pbc)
 
@@ -230,6 +235,10 @@ class Hamiltonian(BasisTB):
         self.h_matrix_bc_add = np.zeros((self.basis_size, self.basis_size), dtype=np.complex)
         self.h_matrix_bc_factor = np.ones((self.basis_size, self.basis_size), dtype=np.complex)
 
+        if self.compute_overlap:
+            self.ov_matrix = np.zeros((self.basis_size, self.basis_size), dtype=np.complex)
+            self.ov_matrix_bc_add = np.zeros((self.basis_size, self.basis_size), dtype=np.complex)
+
         # loop over all nodes
         for j1 in range(self.num_of_nodes):
 
@@ -242,6 +251,8 @@ class Hamiltonian(BasisTB):
                     for l1 in range(self.orbitals_dict[list(self.atom_list.keys())[j1]].num_of_orbitals):
                         ind1 = self.qn2ind([('atoms', j1), ('l', l1)], )
                         self.h_matrix[ind1, ind1] = self._get_me(j1, j2, l1, l1)
+                        if self.compute_overlap:
+                            self.ov_matrix[ind1, ind1] = self._get_me(j1, j2, l1, l1, overlap=True)
                         self._coords[ind1] = list(self.atom_list.values())[j1]
 
                         if self.so_coupling != 0:
@@ -257,6 +268,8 @@ class Hamiltonian(BasisTB):
                             ind2 = self.qn2ind([('atoms', j2), ('l', l2)], )
 
                             self.h_matrix[ind1, ind2] = self._get_me(j1, j2, l1, l2)
+                            if self.compute_overlap:
+                                self.ov_matrix[ind1, ind2] = self._get_me(j1, j2, l1, l2, overlap=True)
 
         logging.info("Unique distances: \n    {}".format("\n    ".join(unique_distances)))
         logging.info("---------------------------------\n")
@@ -292,7 +305,7 @@ class Hamiltonian(BasisTB):
             Eigenvectors
         """
 
-        vals, vects = np.linalg.eigh(self.h_matrix)
+        vals, vects = scipy.linalg.eigh(self.h_matrix, self.ov_matrix)
         vals = np.real(vals)
         ind = np.argsort(vals)
 
@@ -322,9 +335,14 @@ class Hamiltonian(BasisTB):
             self._reset_periodic_bc()
             self.k_vector = k_vector
             self._compute_h_matrix_bc_factor()
-            self._compute_h_matrix_bc_add()
+            self._compute_h_matrix_bc_add(overlap=self.compute_overlap)
 
-        vals, vects = np.linalg.eigh(self.h_matrix_bc_factor * self.h_matrix + self.h_matrix_bc_add)
+        if self.compute_overlap:
+            vals, vects = scipy.linalg.eigh(self.h_matrix_bc_factor * self.h_matrix + self.h_matrix_bc_add,
+                                            self.h_matrix_bc_factor * self.ov_matrix + self.ov_matrix_bc_add)
+        else:
+            vals, vects = np.linalg.eigh(self.h_matrix_bc_factor * self.h_matrix + self.h_matrix_bc_add)
+
         vals = np.real(vals)
         ind = np.argsort(vals)
 
@@ -345,7 +363,7 @@ class Hamiltonian(BasisTB):
 
         return self.orbitals_dict[list(self.atom_list.keys())[ind]]
 
-    def _get_me(self, atom1, atom2, l1, l2, coords=None):
+    def _get_me(self, atom1, atom2, l1, l2, coords=None, overlap=False):
         """Compute the matrix element <atom1, l1|H|l2, atom2>.
         The function is called in the member function initialize() and invokes the function
         me() from the module diatomic_matrix_element.
@@ -363,6 +381,8 @@ class Hamiltonian(BasisTB):
         coords : numpy.ndarray
             Coordinates of radius vector pointing from one atom to another
             it may differ from the actual coordinates of atoms (Default value = None)
+        overlap : bool
+            A flag indicating that the overlap matrix element has to be computed
 
         Returns
         -------
@@ -374,7 +394,10 @@ class Hamiltonian(BasisTB):
         if atom1 == atom2 and coords is None:
             atom_obj = self._ind2atom(atom1)
             if l1 == l2:
-                return atom_obj.orbitals[l1]['energy']
+                if overlap:
+                    return 1.0
+                else:
+                    return atom_obj.orbitals[l1]['energy']
             else:
                 return self._comp_so(atom_obj, l1, l2)
 
@@ -412,9 +435,13 @@ class Hamiltonian(BasisTB):
                 factor = self.radial_dependence(norm)
 
             # compute directional cosines
-            coords1 /= norm
+            if self.compute_angular:
+                coords1 /= norm
+            else:
+                coords1 = np.array([1.0, 0.0, 0.0])
 
-            return me(atom_kind1, l1, atom_kind2, l2, coords1, which_neighbour) * factor
+            return me(atom_kind1, l1, atom_kind2, l2, coords1, which_neighbour,
+                      overlap=overlap) * factor
 
     def _comp_so(self, atom, ind1, ind2):
         """
@@ -498,6 +525,7 @@ class Hamiltonian(BasisTB):
         """
 
         self.h_matrix_bc_add = np.zeros((self.basis_size, self.basis_size), dtype=np.complex)
+        self.ov_matrix_bc_add = np.zeros((self.basis_size, self.basis_size), dtype=np.complex)
         self.h_matrix_bc_factor = np.ones((self.basis_size, self.basis_size), dtype=np.complex)
         self.k_vector = None
 
@@ -522,14 +550,15 @@ class Hamiltonian(BasisTB):
                             self.h_matrix_bc_factor[ind1, ind2] = phase
                             # self.h_matrix[ind2, ind1] = self.h_matrix[ind1, ind2]
 
-    def _compute_h_matrix_bc_add(self, split_the_leads=False):
+    def _compute_h_matrix_bc_add(self, split_the_leads=False, overlap=False):
         """Compute additive Bloch exponentials needed to specify pbc
 
         Parameters
         ----------
         split_the_leads :
              (Default value = False)
-
+        overlap :
+             (Default value = False)
         Returns
         -------
 
@@ -574,15 +603,19 @@ class Hamiltonian(BasisTB):
                             if split_the_leads:
                                 if flag == 'R':
                                     self.h_matrix_left_lead[ind1, ind2] += phase * \
-                                                                           self._get_me(j1, ind, l1, l2, coords)
+                                                                           self._get_me(j1, ind, l1, l2, coords=coords)
                                 elif flag == 'L':
                                     self.h_matrix_right_lead[ind1, ind2] += phase * \
-                                                                            self._get_me(j1, ind, l1, l2, coords)
+                                                                            self._get_me(j1, ind, l1, l2, coords=coords)
                                 else:
                                     raise ValueError("Wrong flag value")
                             else:
                                 self.h_matrix_bc_add[ind1, ind2] += phase * \
                                                                     self._get_me(j1, ind, l1, l2, coords)
+                                if overlap:
+                                    self.ov_matrix_bc_add[ind1, ind2] += phase * \
+                                                                         self._get_me(j1, ind, l1, l2,
+                                                                                      coords=coords, overlap=True)
 
     def get_hamiltonians(self):
         """Return a list of Hamiltonian matrices. For 1D systems, the list is [Hl, Hc, Hr],
@@ -631,6 +664,7 @@ class Hamiltonian(BasisTB):
         Parameters
         ----------
         left :
+             (Default value = None)
              (Default value = None)
         right :
              (Default value = None)

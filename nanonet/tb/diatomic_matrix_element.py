@@ -15,7 +15,7 @@ import warnings
 from nanonet.tb import tb_params
 
 
-def me_diatomic(bond, n, l_min, l_max, m, which_neighbour):
+def me_diatomic(bond, n, l_min, l_max, m, which_neighbour, overlap=False):
     """The function looks up into the table of parameters making a query parametrized by:
 
     Parameters
@@ -32,6 +32,9 @@ def me_diatomic(bond, n, l_min, l_max, m, which_neighbour):
         symmetry of the electron wave function in the diatomic molecule
         takes values "sigma", "pi" and "delta"
     which_neighbour :
+
+    overlap : bool
+        A flag indicating that the overlap matrix element has to be computed
         
 
     Returns
@@ -52,13 +55,18 @@ def me_diatomic(bond, n, l_min, l_max, m, which_neighbour):
     # else:
     #     raise ValueError('Wrong value of the value variable')
 
+    if overlap:
+        flag = 'OV_'
+    else:
+        flag = 'PARAMS_'
+
     try:
         if which_neighbour == 0:
-            return getattr(sys.modules[tb_params.__name__], 'PARAMS_' + bond)[label]
+            return getattr(sys.modules[tb_params.__name__], flag + bond)[label]
         elif which_neighbour == 100:
             return 0
         else:
-            return getattr(sys.modules[tb_params.__name__], 'PARAMS_' + bond + str(which_neighbour))[label]
+            return getattr(sys.modules[tb_params.__name__], flag + bond + str(which_neighbour))[label]
     except KeyError:
         return 0
 
@@ -220,7 +228,7 @@ def t_me(N, l, m1, m2, gamma):
                (((-1) ** abs(m2)) * d_me(N, l, abs(m1), abs(m2)) - d_me(N, l, abs(m1), -abs(m2)))
 
 
-def me(atom1, ll1, atom2, ll2, coords, which_neighbour=0):
+def me(atom1, ll1, atom2, ll2, coords, which_neighbour=0, overlap=False):
     """Computes the non-diagonal matrix element of the tight-binding Hamiltonian -
     coupling between two sites, both are described by LCAO basis sets.
     This function is evoked in the member function _get_me() of the Hamiltonian object.
@@ -239,7 +247,8 @@ def me(atom1, ll1, atom2, ll2, coords, which_neighbour=0):
         coordinates of radius vector pointing from one site to another
     which_neighbour : int
         Order of a nearest neighbour (first-, second-, third- etc) (Default value = 0)
-
+    overlap : bool
+            A flag indicating that the overlap matrix element has to be computed
     Returns
     -------
 
@@ -289,12 +298,12 @@ def me(atom1, ll1, atom2, ll2, coords, which_neighbour=0):
         prefactor = (-1) ** ((l1 - l2 + abs(l1 - l2)) * 0.5)
         ans = 2 * a_coef(m1, gamma) * a_coef(m2, gamma) * \
             d_me(N, l1, abs(m1), 0) * d_me(N, l2, abs(m2), 0) * \
-            me_diatomic(atoms, code, l_min, l_max, 0, which_neighbour)
+            me_diatomic(atoms, code, l_min, l_max, 0, which_neighbour, overlap=overlap)
 
         for m in range(1, l_min+1):
             ans += (s_me(N, l1, m1, m, gamma) * s_me(N, l2, m2, m, gamma) +
                     t_me(N, l1, m1, m, gamma) * t_me(N, l2, m2, m, gamma)) * \
-                   me_diatomic(atoms, code, l_min, l_max, m, which_neighbour)
+                   me_diatomic(atoms, code, l_min, l_max, m, which_neighbour, overlap=overlap)
 
         return prefactor * ans
     else:

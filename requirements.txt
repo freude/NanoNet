@@ -7,3 +7,4 @@ nose
 mpi4py
 future
 pyfiglet
+ase

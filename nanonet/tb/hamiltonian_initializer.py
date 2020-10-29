@@ -26,7 +26,7 @@ def set_tb_params(**kwargs):
     
     """
     for item in kwargs:
-        if item.startswith('PARAMS_'):
+        if item.startswith('PARAMS_') or item.startswith('OV_'):
             setattr(dme, item, kwargs[item])
 
 

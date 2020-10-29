@@ -219,7 +219,7 @@ class CyclicTopology(AbstractStructureDesigner):
 
         logging.info("Primitive_cell_vectors: \n {} \n".format(primitive_cell_vectors))
         logging.debug("Virtual and interfacial atoms: \n "
-                     "{} ".format(print_dict(self.virtual_and_interfacial_atoms)))
+                      "{} ".format(print_dict(self.virtual_and_interfacial_atoms)))
         logging.info("---------------------------------\n")
 
     @property
