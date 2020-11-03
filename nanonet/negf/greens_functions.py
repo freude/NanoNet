@@ -257,3 +257,120 @@ def surface_greens_function(E, h_l, h_0, h_r, iterate=False, damp=0.0001j):
     sgf_r = sgf_r[:s01, :s02]
 
     return sgf_r, sgf_l
+
+
+def simple_iterative_greens_function(E, h_l, h_0, h_r, **kwargs):
+    """Computes the self-energy matrix using the canonical mixing technique.
+    Parameters
+    ----------
+    E : float
+        energy
+
+    h_l : numpy array
+          left block of three-block-diagonal Hamiltonian
+
+    h_0 : numpy array
+          central block of three-block-diagonal Hamiltonian
+
+    h_r : numpy array
+          right block of three-block-diagonal Hamiltonian
+
+    kwargs : dict
+          additional named arguments:
+            s_l : numpy array (Default value = zero matrix)
+                  left block of three-block-diagonal overlap matrix
+
+            s_0 : numpy array (Default value = identity matrix)
+                  central block of three-block-diagonal overlap matrix
+
+            s_r : numpy array (Default value = zero matrix)
+                  right block of three-block-diagonal overlap matrix
+
+            alpha : float (Default value = 0.5)
+                    mixing parameter (0 < alpha < 1) for green's function
+
+            posinf : float (Default value = 1e-6)
+                     positive infinitesimal a.k.a broadening parameter
+                     that shifts solution off real axis
+
+            initialguess : numpy array (Default value = zero matrix)
+                     initial guess of the self-energy, allows restarting of algorithm
+                     to gain increased precision, or if the user has a good idea of
+                     what the self-energy should be, can boost convergence
+
+            nconv : float (Default value = 1e-10)
+                    convergence requirement for iteration using the 2-norm,
+                    also known as the largest singular value.
+
+    Returns
+    -------
+    numpy.matrix
+
+        #Guide for usage.
+
+        A user provides the energy; onsite-, hopping-, and overlap- matrices;
+        the mixing parameter; the broadening parameter; initial guess (optional);
+        and convergence criterion in order to compute the retarded self-energy.
+
+        Note that due to its singular nature, computing the self-energy of a
+        matrix with posinf=0 is numerically undefined when starting from scratch,
+        however, if the user desires, they may compute the solution at some small
+        posinf, say 1e-8, then use that as an input guess for a posinf=0 input,
+        the imaginary part of the initial guess shifts the solution off the real
+        line and allows for convergence. We do not suggest starting a posinf=0
+        iteration from an arbitrary guess due to instability in convergence.
+
+    """
+
+    s_l = kwargs.get('s_l', np.zeros(h_0.shape[0]))
+    s_0 = kwargs.get('s_0', np.identity(h_0.shape[0]))
+    s_r = kwargs.get('s_r', np.zeros(h_0.shape[0]))
+    alpha = kwargs.get('alpha', 0.5)
+    posinf = kwargs.get('posinf', 1e-6)
+    initialguess = kwargs.get('initialguess', np.zeros(h_0.shape[0]))
+    nconv = kwargs.get('nconv', 1e-10)
+
+    #####This is where the function would start if working properly:
+
+    # Check inputs:
+    # If alpha is in an unphysical range, fix it to 0.5:
+    if (alpha < 0) or (alpha > 1):
+        alpha = 0.5
+    else:
+        alpha = alpha
+
+    # If posinf is negative or imaginary set it to its modulus
+    posinf = np.abs(posinf);
+
+    # Define initial K-matrices
+    KL = (E + 1j * posinf) * s_l - h_l;
+    K0 = (E + 1j * posinf) * s_0 - h_0;
+    KR = (E + 1j * posinf) * s_r - h_r;
+
+    # Form initial guess
+    AN = K0 - initialguess
+
+    # initialize iteration parameters
+    NewSelfEnergy = initialguess  #
+    convcheck = 1  # dummy parameter much larger than nconv
+    ctN = 0  # parameter to count how many iterations it took
+
+    while convcheck > nconv:
+        ctN = ctN + 1
+
+        # To compare between iterations
+        OldSelfEnergy = NewSelfEnergy
+        # Factorize and solve inverse
+        lu, piv = linalg.lu_factor(AN)
+        XN = linalg.lu_solve((lu, piv), KR)
+        NewSelfEnergy = KL.dot(XN)
+        # Check magnitude of change, if too big, mix in new solution
+        convcheck = linalg.norm(OldSelfEnergy - NewSelfEnergy, 2)
+        AN = (1 - alpha) * AN + alpha * (K0 - KL.dot(XN));
+        # print(convcheck) #for debugging
+
+    # other outputs could the green's function if a flag is set because it requires
+    # another inverse or the value of convcheck
+
+    return NewSelfEnergy
+
