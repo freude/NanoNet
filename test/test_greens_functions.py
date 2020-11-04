@@ -858,7 +858,7 @@ def test_simple_iterative_greens_function():
     value = np.array([[ 0.25-0.814841j, -0.5 -0.153404j],
                       [-0.5 -0.153404j,  0.25-0.814841j]])
     
-    np.testing.assert_allclose(ans, value)
+    np.testing.assert_allclose(ans, value, rtol=1e-05)
 
 
 if __name__ == '__main__':
