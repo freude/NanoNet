@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import nanonet.tb as tb
-from nanonet.negf.greens_functions import simple_iterative_greens_function, surface_greens_function
+from nanonet.negf.greens_functions import simple_iterative_greens_function, sancho_rubio_iterative_greens_function, surface_greens_function 
 
 
 def main(surf_greens_fun):
@@ -30,13 +30,13 @@ def main(surf_greens_fun):
     sgf_r = []
 
     for E in energy:
-        sf = surf_greens_fun(E, h_l, h_0, h_r)
+        sf = surf_greens_fun(E, h_l, h_0, h_r , damp=0.001j)
         if isinstance(sf, tuple):
             L = sf[0]
             R = sf[1]
         else:
             L = sf
-            R = surf_greens_fun(E, h_r, h_0, h_l)
+            R = surf_greens_fun(E, h_r, h_0, h_l , damp=0.001j)
 
         sgf_l.append(L)
         sgf_r.append(R)
@@ -108,13 +108,13 @@ def main1(surf_greens_fun):
     sgf_r = []
 
     for E in energy:
-        sf = surf_greens_fun(E, h_l, h_0, h_r)
+        sf = surf_greens_fun(E, h_l, h_0, h_r, damp=0.001j)
         if isinstance(sf, tuple):
             L = sf[0]
             R = sf[1]
         else:
             L = sf
-            R = surf_greens_fun(E, h_r, h_0, h_l)
+            R = surf_greens_fun(E, h_r, h_0, h_l, damp=0.001j)
 
         sgf_l.append(L)
         sgf_r.append(R)
@@ -153,6 +153,8 @@ if __name__ == "__main__":
 
     main(surf_greens_fun=surface_greens_function)
     main(surf_greens_fun=simple_iterative_greens_function)
+    main(surf_greens_fun=sancho_rubio_iterative_greens_function)
     main1(surf_greens_fun=surface_greens_function)
     main1(surf_greens_fun=simple_iterative_greens_function)
+    main1(surf_greens_fun=sancho_rubio_iterative_greens_function)
 
