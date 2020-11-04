@@ -4,6 +4,8 @@ import nanonet.tb as tb
 import nanonet.negf as negf
 from nanonet.negf.hamiltonian_chain import HamiltonianChain
 from nanonet.negf.recursive_greens_functions import recursive_gf
+from nanonet.negf.greens_functions import simple_iterative_greens_function
+
 
 np.warnings.filterwarnings('ignore')
 
@@ -210,7 +212,6 @@ def run_for_periods(single_period_test, periods):
         tr1[j] = np.real(np.trace(gamma_l.dot(gf).dot(gamma_r).dot(gf.conj().T)))
         dos1[j] = np.real(np.trace(1j * (gf - gf.conj().T))) / num_periods
 
-    print('hi')
     np.testing.assert_allclose(dos, dos1, atol=15)
     np.testing.assert_allclose(tr, tr1, atol=0.2)
 
@@ -827,11 +828,45 @@ def test_double_barrier_density_recursive(single_period_test=complex_chain, peri
     np.testing.assert_allclose(np.sum(dens, axis=1)[::2], expected_dens_of_complex_chain(), rtol=1e-2)
 
 
+def test_simple_iterative_greens_function():
+
+    E = 0.5
+
+    h_0 = np.array([[0, 1], [1, 0]])
+    h_l = np.array([[1, 0], [0, 1]])
+    h_r = np.conj(h_l).T
+
+    s_l = np.zeros(h_0.shape[0])
+    s_0 = np.identity(h_0.shape[0])
+    s_r = np.zeros(h_0.shape[0])
+
+    alpha = 0.5
+    posinf = 1e-2
+    initialguess = np.zeros(h_0.shape[0])
+    nconv = 1e-10
+
+    ans = simple_iterative_greens_function(E, h_l, h_0, h_r,
+                                           s_l=s_l,
+                                           s_0=s_0,
+                                           s_r=s_r,
+                                           alpha=alpha,
+                                           posinf=posinf,
+                                           initialguess=initialguess,
+                                           nconv=nconv)
+
+    # The output should then be:
+    value = np.array([[ 0.24781094-0.80987031j, -0.49651996-0.15338929j],
+                      [-0.49651996-0.15338929j,  0.24781094-0.80987031j]])
+
+    np.testing.assert_allclose(ans, value)
+
+
 if __name__ == '__main__':
     # test_double_barrier_density_recursive()
     # test_gf_complex_chain_several_periods()
     # test_gf_single_atom_chain_several_periods()
-    test_double_barrier_density_recursive(complex_chain, 20)
+    # test_double_barrier_density_recursive(complex_chain, 20)
     # test_complex_chain()
     # test_gf_complex_chain_several_periods_recursive()
     # test_single_atom_chain()
+    test_simple_iterative_greens_function()
