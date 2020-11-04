@@ -200,6 +200,6 @@ National Computational Infrastructure, which is supported by the Australian Gove
 
 ## References
 
-[M.V.Klymenko, J.A.Vaitkus, J.S.Smith, and J.H.Cole, "NanoNET: An extendable Python framework for semi-empirical tight-binding models." *Computer Physics Communications* Volume 259, 107676 (2021)](https://doi.org/10.1016/j.cpc.2020.107676)
+[M.V.Klymenko, J.A.Vaitkus, J.S.Smith, and J.H.Cole, "NanoNET: An extendable Python framework for semi-empirical tight-binding models," *Computer Physics Communications*, Volume 259, 107676 (2021)](https://doi.org/10.1016/j.cpc.2020.107676)
 
 
