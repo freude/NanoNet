@@ -855,10 +855,10 @@ def test_simple_iterative_greens_function():
                                            nconv=nconv)
 
     # The output should then be:
-    value = np.array([[ 0.24781094-0.80987031j, -0.49651996-0.15338929j],
-                      [-0.49651996-0.15338929j,  0.24781094-0.80987031j]])
-
-    np.testing.assert_allclose(ans, value)
+    value = np.array([[ 0.25-0.814841j, -0.5 -0.153404j],
+                      [-0.5 -0.153404j,  0.25-0.814841j]])
+    
+    np.testing.assert_allclose(ans, value, rtol=1e-05)
 
 
 if __name__ == '__main__':
