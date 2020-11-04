@@ -36,7 +36,7 @@ def main(surf_greens_fun):
             R = sf[1]
         else:
             L = sf
-            R = L
+            R = surf_greens_fun(E, h_r, h_0, h_l)
 
         sgf_l.append(L)
         sgf_r.append(R)
@@ -114,7 +114,7 @@ def main1(surf_greens_fun):
             R = sf[1]
         else:
             L = sf
-            R = L
+            R = surf_greens_fun(E, h_r, h_0, h_l)
 
         sgf_l.append(L)
         sgf_r.append(R)
