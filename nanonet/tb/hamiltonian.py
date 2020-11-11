@@ -624,6 +624,9 @@ class Hamiltonian(BasisTB):
                                                                          self._get_me(j1, ind, l1, l2,
                                                                                       coords=coords, overlap=True)
 
+            logging.info("Unique distances: \n    {}".format("\n    ".join(unique_distances)))
+            logging.info("---------------------------------\n")
+
     def get_hamiltonians(self):
         """Return a list of Hamiltonian matrices. For 1D systems, the list is [Hl, Hc, Hr],
         where Hc is the Hamiltonian describing interactions between atoms within a unit cell,

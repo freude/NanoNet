@@ -56,7 +56,7 @@ def me_diatomic_sym(bond, n, l_min, l_max, m, which_neighbour, overlap=False):
 
     val = me_diatomic(bond, n, l_min, l_max, m, which_neighbour, overlap=overlap)
 
-    if val != 1.0:
+    if val != 0:
 
         label = n[0] + ORBITAL_QN[l_min] + n[1] + ORBITAL_QN[l_max] + '_' + M_QN[m]
 
