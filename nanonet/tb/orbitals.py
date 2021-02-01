@@ -28,7 +28,7 @@ class Orbitals(object):
         self.num_of_orbitals = 0
         Orbitals.orbital_sets[self.title] = self
 
-    def add_orbital(self, title, energy=0.0, principal=0, orbital=0, magnetic=0, spin=0):
+    def add_orbital(self, title, energy=0.0, principal=0, orbital=0, magnetic=0, spin=0, tag=0):
         """Adds an orbital to the set of orbitals
 
         Parameters
@@ -57,7 +57,8 @@ class Orbitals(object):
                    'n': principal,
                    'l': orbital,
                    'm': magnetic,
-                   's': spin}
+                   's': spin,
+                   'tag': tag}
 
         self.orbitals.append(orbital)
         self.num_of_orbitals += 1

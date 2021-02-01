@@ -19,9 +19,6 @@ from nanonet.tb.block_tridiagonalization import find_nonzero_lines, split_into_s
 import nanonet.verbosity as verbosity
 
 
-unique_distances = set()
-
-
 class BasisTB(AbstractBasis, StructDesignerXYZ):
     """The class contains information about sets of quantum numbers and
     dimensionality of the Hilbert space.
@@ -195,6 +192,8 @@ class Hamiltonian(BasisTB):
         self.radial_dependence = None
         self.int_radial_dependence = None
         self.so_coupling = kwargs.get('so_coupling', 0.0)
+        self.log_outputed = False
+        self.unique_distances = set()
 
     def initialize(self, int_radial_dep=None, radial_dep=None):
         """Compute matrix elements of the Hamiltonian.
@@ -271,7 +270,7 @@ class Hamiltonian(BasisTB):
                             if self.compute_overlap:
                                 self.ov_matrix[ind1, ind2] = self._get_me(j1, j2, l1, l2, overlap=True)
 
-        logging.info("Unique distances: \n    {}".format("\n    ".join(unique_distances)))
+        logging.info("Unique distances: \n    {}".format("\n    ".join(self.unique_distances)))
         logging.info("---------------------------------\n")
 
         return self
@@ -293,7 +292,7 @@ class Hamiltonian(BasisTB):
         else:
             self.ct = None
 
-    def diagonalize(self):
+    def diagonalize(self, k_vector=None):
         """Diagonalize the Hamiltonian matrix for the finite isolated system
         (without periodic boundary conditions)
 
@@ -305,11 +304,18 @@ class Hamiltonian(BasisTB):
             Eigenvectors
         """
 
-        vals, vects = scipy.linalg.eigh(self.h_matrix, self.ov_matrix)
-        vals = np.real(vals)
-        ind = np.argsort(vals)
+        if self.ct is not None:
+            if k_vector is None:
+                k_vector = [0, 0, 0]
+            vals, vects = self.diagonalize_periodic_bc(k_vector)
+        else:
+            vals, vects = scipy.linalg.eigh(self.h_matrix, self.ov_matrix)
+            vals = np.real(vals)
+            ind = np.argsort(vals)
+            vals = vals[ind]
+            vects = vects[:, ind]
 
-        return vals[ind], vects[:, ind]
+        return vals, vects
 
     def diagonalize_periodic_bc(self, k_vector):
         """Diagonalize the Hamiltonian matrix with the periodic boundary conditions
@@ -341,7 +347,7 @@ class Hamiltonian(BasisTB):
             vals, vects = scipy.linalg.eigh(self.h_matrix_bc_factor * self.h_matrix + self.h_matrix_bc_add,
                                             self.h_matrix_bc_factor * self.ov_matrix + self.ov_matrix_bc_add)
         else:
-            vals, vects = np.linalg.eigh(self.h_matrix_bc_factor * self.h_matrix + self.h_matrix_bc_add)
+            vals, vects = scipy.linalg.eig(self.h_matrix_bc_factor * self.h_matrix + self.h_matrix_bc_add)
 
         vals = np.real(vals)
         ind = np.argsort(vals)
@@ -418,11 +424,12 @@ class Hamiltonian(BasisTB):
 
             if verbosity.VERBOSITY > 0:
 
-                coordinates = np.array2string(norm, precision=4) + " Ang between atoms " + \
+                coordinates = str(int(np.degrees(np.arccos(coords1[0]/norm)))) + u"\N{DEGREE SIGN} and " + \
+                              np.array2string(norm, precision=4) + " Ang between atoms " + \
                               self._ind2atom(atom1).title + " and " + self._ind2atom(atom2).title
 
-                if coordinates not in unique_distances:
-                    unique_distances.add(coordinates)
+                if coordinates not in self.unique_distances:
+                    self.unique_distances.add(coordinates)
 
             if self.int_radial_dependence is None:
                 which_neighbour = ""
@@ -616,6 +623,11 @@ class Hamiltonian(BasisTB):
                                     self.ov_matrix_bc_add[ind1, ind2] += phase * \
                                                                          self._get_me(j1, ind, l1, l2,
                                                                                       coords=coords, overlap=True)
+
+            if not self.log_outputed:
+                logging.info("Unique distances: \n    {}".format("\n    ".join(self.unique_distances)))
+                logging.info("---------------------------------\n")
+                self.log_outputed = True
 
     def get_hamiltonians(self):
         """Return a list of Hamiltonian matrices. For 1D systems, the list is [Hl, Hc, Hr],

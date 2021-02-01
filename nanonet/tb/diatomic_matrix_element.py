@@ -11,7 +11,6 @@ from __future__ import division
 import sys
 import math
 from .constants import *
-import warnings
 from nanonet.tb import tb_params
 
 
@@ -306,6 +305,71 @@ def me(atom1, ll1, atom2, ll2, coords, which_neighbour=0, overlap=False):
                    me_diatomic(atoms, code, l_min, l_max, m, which_neighbour, overlap=overlap)
 
         return prefactor * ans
+    else:
+        return 0
+
+
+def me_qsymm(atom1, ll1, atom2, ll2, coords):
+    """Computes the non-diagonal matrix element of the tight-binding Hamiltonian -
+    coupling between two sites, both are described by LCAO basis sets.
+    This function is evoked in the member function _get_me() of the Hamiltonian object.
+
+    Parameters
+    ----------
+    atom1 : tb.Orbitals
+        basis set associated with the first site
+    ll1 : int
+        index specifying a particular orbital in the basis set for the first site
+    atom2 : tb.Orbitals
+        basis set associated with the first site
+    ll2 : int
+        index specifying a particular orbital in the basis set for the second site
+    coords : array
+        coordinates of radius vector pointing from one site to another
+    which_neighbour : int
+        Order of a nearest neighbour (first-, second-, third- etc) (Default value = 0)
+    overlap : bool
+            A flag indicating that the overlap matrix element has to be computed
+    Returns
+    -------
+
+
+    """
+    family = tb_params.family
+    params = tb_params.params
+
+    # determine type of bonds
+    atoms = sorted([item.upper() for item in [atom1.title, atom2.title]])
+    atoms = atoms[0] + '_' + atoms[1]
+
+    # quantum numbers for the first atom
+    n1 = atom1.orbitals[ll1]['tag']
+    s1 = atom1.orbitals[ll1]['s']
+
+    # quantum numbers for the second atom
+    n2 = atom2.orbitals[ll2]['tag']
+    s2 = atom2.orbitals[ll2]['s']
+
+    if s1 == s2:
+        norm = np.linalg.norm(coords)
+        L = coords[0] / norm
+        M = coords[1] / norm
+        N = coords[2] / norm
+
+        ans = list(family[0].data.values())[0] * 0.0
+
+        for j, item in enumerate(family):
+            keys = list(item.data.keys())
+            values = list(item.data.values())
+            for j1, item1 in enumerate(keys):
+                item1 = np.hstack((item1[0], np.zeros(3)))
+                if np.abs(L - item1[0]) < 0.001 and\
+                   np.abs(M - item1[1]) < 0.001 and\
+                   np.abs(N - item1[2]) < 0.001:
+                    ans += params[j] * values[j1]
+                    # print(L, item1[0][0])
+        print(ans[n1, n2])
+        return ans[n1, n2]
     else:
         return 0
 

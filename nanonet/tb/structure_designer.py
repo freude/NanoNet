@@ -255,8 +255,8 @@ class CyclicTopology(AbstractStructureDesigner):
                 distances2[j1, j2] = np.inner(coord - basis_vec, basis_vec) / self.sizes[j2]
 
         # transform distance to the boolean variable defining whether atom belongs to the interface or not
-        distances1 = np.abs(distances1 - np.min(distances1)) < self._nn_distance * 0.25
-        distances2 = np.abs(np.abs(distances2) - np.min(np.abs(distances2))) < self._nn_distance * 0.25
+        distances1 = np.abs(distances1 - np.min(distances1)) < self._nn_distance
+        distances2 = np.abs(np.abs(distances2) - np.min(np.abs(distances2))) < self._nn_distance
 
         # distances1 = np.ones(distances1.shape)
         # distances2 = np.ones(distances1.shape)

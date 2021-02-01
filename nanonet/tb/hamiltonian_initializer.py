@@ -6,6 +6,7 @@ initializing Hamiltonian objects from a Python dictionary.
 from __future__ import absolute_import
 import sys
 import numpy as np
+import qsymm
 from nanonet.tb.orbitals import Orbitals
 from nanonet.tb import tb_params as dme
 from nanonet.tb.hamiltonian import Hamiltonian
@@ -26,8 +27,16 @@ def set_tb_params(**kwargs):
     
     """
     for item in kwargs:
-        if item.startswith('PARAMS_') or item.startswith('OV_'):
+        if item.startswith('PARAMS_') or item.startswith('OV_') or item.startswith('params'):
             setattr(dme, item, kwargs[item])
+
+    if 'symm' in kwargs and 'norbs' in kwargs and 'hopping_vectors' in kwargs:
+
+        family = qsymm.bloch_family(kwargs['hopping_vectors'],
+                                    kwargs['symm'],
+                                    kwargs['norbs'],
+                                    bloch_model=True)
+        setattr(dme, 'family', family[2:])
 
 
 def initializer(**kwargs):

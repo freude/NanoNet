@@ -7,7 +7,7 @@ with open('requirements.txt') as fp:
     install_requires = fp.read().splitlines()
 
 setup(name='nano-net',
-      version='1.3.1',
+      version='1.3.3',
       description='Python framework for tight-binding computations',
       long_description=long_description,
       long_description_content_type="text/markdown",
@@ -26,5 +26,8 @@ setup(name='nano-net',
             "Operating System :: OS Independent",
       ],
       python_requires='>=3.6',
-      install_requires=install_requires
+      install_requires=install_requires,
+      extras_require={
+          "ase": ["ase"],
+          "qsymm": ["qsymm"]}
       )

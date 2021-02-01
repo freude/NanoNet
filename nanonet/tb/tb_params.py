@@ -45,3 +45,8 @@ PARAMS_BI_BI3 = {'ss_sigma': 0,
                  'sp_sigma': 0,
                  'pp_sigma': 0.156,
                  'pp_pi': 0}
+
+# ------------------ parameters for qsymm ----------------------
+
+family = None
+params = None
