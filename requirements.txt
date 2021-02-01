@@ -8,3 +8,4 @@ mpi4py
 future
 pyfiglet
 ase
+qsymm
