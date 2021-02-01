@@ -367,8 +367,7 @@ def me_qsymm(atom1, ll1, atom2, ll2, coords):
                    np.abs(M - item1[1]) < 0.001 and\
                    np.abs(N - item1[2]) < 0.001:
                     ans += params[j] * values[j1]
-                    # print(L, item1[0][0])
-        print(ans[n1, n2])
+
         return ans[n1, n2]
     else:
         return 0

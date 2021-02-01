@@ -66,7 +66,7 @@ class HamiltonianQsymm(Hamiltonian):
         type float
             Inter-cites matrix element
         """
-        print(atom1, atom2, l1, l2)
+
         # on site (pick right table of parameters for a certain atom)
         if atom1 == atom2 and coords is None:
             atom_obj = self._ind2atom(atom1)
