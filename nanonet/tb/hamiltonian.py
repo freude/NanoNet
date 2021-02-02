@@ -19,6 +19,9 @@ from nanonet.tb.block_tridiagonalization import find_nonzero_lines, split_into_s
 import nanonet.verbosity as verbosity
 
 
+unique_distances = set()
+
+
 class BasisTB(AbstractBasis, StructDesignerXYZ):
     """The class contains information about sets of quantum numbers and
     dimensionality of the Hilbert space.
@@ -195,6 +198,18 @@ class Hamiltonian(BasisTB):
         self.log_outputed = False
         self.unique_distances = set()
 
+    def _initialize(self):
+
+        self._coords = [0 for _ in range(self.basis_size)]
+        # initialize Hamiltonian matrices
+        self.h_matrix = np.zeros((self.basis_size, self.basis_size), dtype=np.complex)
+        self.h_matrix_bc_add = np.zeros((self.basis_size, self.basis_size), dtype=np.complex)
+        self.h_matrix_bc_factor = np.ones((self.basis_size, self.basis_size), dtype=np.complex)
+
+        if self.compute_overlap:
+            self.ov_matrix = np.zeros((self.basis_size, self.basis_size), dtype=np.complex)
+            self.ov_matrix_bc_add = np.zeros((self.basis_size, self.basis_size), dtype=np.complex)
+
     def initialize(self, int_radial_dep=None, radial_dep=None):
         """Compute matrix elements of the Hamiltonian.
 
@@ -228,15 +243,7 @@ class Hamiltonian(BasisTB):
         self.radial_dependence = radial_dep
         self.int_radial_dependence = int_radial_dep
 
-        self._coords = [0 for _ in range(self.basis_size)]
-        # initialize Hamiltonian matrices
-        self.h_matrix = np.zeros((self.basis_size, self.basis_size), dtype=np.complex)
-        self.h_matrix_bc_add = np.zeros((self.basis_size, self.basis_size), dtype=np.complex)
-        self.h_matrix_bc_factor = np.ones((self.basis_size, self.basis_size), dtype=np.complex)
-
-        if self.compute_overlap:
-            self.ov_matrix = np.zeros((self.basis_size, self.basis_size), dtype=np.complex)
-            self.ov_matrix_bc_add = np.zeros((self.basis_size, self.basis_size), dtype=np.complex)
+        self._initialize()
 
         # loop over all nodes
         for j1 in range(self.num_of_nodes):
@@ -536,6 +543,9 @@ class Hamiltonian(BasisTB):
         self.h_matrix_bc_factor = np.ones((self.basis_size, self.basis_size), dtype=np.complex)
         self.k_vector = None
 
+    def _compute_phase(self, coords):
+        return np.exp(1j * np.dot(self.k_vector, coords))
+
     def _compute_h_matrix_bc_factor(self):
         """Compute the exponential Bloch factors needed when the periodic boundary conditions are applied."""
 
@@ -547,7 +557,7 @@ class Hamiltonian(BasisTB):
                 if j1 != j2:
                     coords = np.array(list(self.atom_list.values())[j1], dtype=float) - \
                              np.array(list(self.atom_list.values())[j2], dtype=float)
-                    phase = np.exp(1j * np.dot(self.k_vector, coords))
+                    phase = self._compute_phase(coords)
 
                     for l1 in range(self.orbitals_dict[list(self.atom_list.keys())[j1]].num_of_orbitals):
                         for l2 in range(self.orbitals_dict[list(self.atom_list.keys())[j2]].num_of_orbitals):
@@ -597,7 +607,7 @@ class Hamiltonian(BasisTB):
                         flag = self.ct.atom_classifier(list(self.ct.virtual_and_interfacial_atoms.values())[j2],
                                                        self.ct.pcv[0])
 
-                    phase = np.exp(1j * np.dot(self.k_vector, coords))
+                    phase = self._compute_phase(coords)
 
                     ind = int(list(self.ct.virtual_and_interfacial_atoms.keys())[j2].split('_')[2])
 
@@ -628,6 +638,7 @@ class Hamiltonian(BasisTB):
                 logging.info("Unique distances: \n    {}".format("\n    ".join(self.unique_distances)))
                 logging.info("---------------------------------\n")
                 self.log_outputed = True
+
 
     def get_hamiltonians(self):
         """Return a list of Hamiltonian matrices. For 1D systems, the list is [Hl, Hc, Hr],

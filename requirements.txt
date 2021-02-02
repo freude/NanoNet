@@ -9,3 +9,5 @@ future
 pyfiglet
 ase
 qsymm
+sympy
+

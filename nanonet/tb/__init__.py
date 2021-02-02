@@ -8,6 +8,7 @@ __email__ = "mike.klymenko@rmit.edu.au"
 from .orbitals import Orbitals
 from .hamiltonian import Hamiltonian
 from .hamiltonian_sparse import HamiltonianSp
+from .hamiltonian_sym import HamiltonianSym
 from .aux_functions import get_k_coords, yaml_parser
 from .hamiltonian_initializer import set_tb_params, initializer
 
