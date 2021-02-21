@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import nanonet.tb as tb
-from nanonet.negf.greens_functions import simple_iterative_greens_function, sancho_rubio_iterative_greens_function, surface_greens_function 
+from nanonet.negf.greens_functions import simple_iterative_greens_function, sancho_rubio_iterative_greens_function, surface_greens_function
 
 
 def main(surf_greens_fun):
@@ -49,13 +49,13 @@ def main(surf_greens_fun):
 
     dos = -np.trace(np.imag(gf), axis1=1, axis2=2)
 
-    tr = np.zeros((energy.shape[0]), dtype=np.complex)
+    tr = np.zeros((energy.shape[0]), dtype=complex)
 
     for j, E in enumerate(energy):
         gf0 = gf[j, :, :]
         gamma_l = 1j * (sgf_l[j, :, :] - sgf_l[j, :, :].conj().T)
         gamma_r = 1j * (sgf_r[j, :, :] - sgf_r[j, :, :].conj().T)
-        tr[j] = np.real(np.trace(gamma_l.dot(gf0).dot(gamma_r).dot(gf0.conj().T)))
+        tr[j] = np.real(np.trace( np.linalg.multi_dot([ gamma_l, gf0, gamma_r, gf0.conj().T ]) ))
         dos[j] = np.real(np.trace(1j * (gf0 - gf0.conj().T)))
 
     fig, axs = plt.subplots(2, figsize=(5, 7))
@@ -127,13 +127,13 @@ def main1(surf_greens_fun):
 
     dos = -np.trace(np.imag(gf), axis1=1, axis2=2)
 
-    tr = np.zeros((energy.shape[0]), dtype=np.complex)
+    tr = np.zeros((energy.shape[0]), dtype=complex)
 
     for j, E in enumerate(energy):
         gf0 = gf[j, :, :]
         gamma_l = 1j * (sgf_l[j, :, :] - sgf_l[j, :, :].conj().T)
         gamma_r = 1j * (sgf_r[j, :, :] - sgf_r[j, :, :].conj().T)
-        tr[j] = np.real(np.trace(gamma_l.dot(gf0).dot(gamma_r).dot(gf0.conj().T)))
+        tr[j]  = np.real(np.trace( np.linalg.multi_dot([ gamma_l, gf0, gamma_r, gf0.conj().T ]) ))
         dos[j] = np.real(np.trace(1j * (gf0 - gf0.conj().T)))
 
     fig, axs = plt.subplots(2, figsize=(5, 7))
@@ -157,4 +157,3 @@ if __name__ == "__main__":
     main1(surf_greens_fun=surface_greens_function)
     main1(surf_greens_fun=simple_iterative_greens_function)
     main1(surf_greens_fun=sancho_rubio_iterative_greens_function)
-
