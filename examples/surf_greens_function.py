@@ -1,9 +1,12 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import nanonet.tb as tb
-from nanonet.negf.greens_functions import simple_iterative_greens_function, sancho_rubio_iterative_greens_function, surface_greens_function
+# noinspection PyUnresolvedReferences
+from nanonet.negf.greens_functions import simple_iterative_greens_function, sancho_rubio_iterative_greens_function, \
+    surface_greens_function
 
 
+# noinspection PyPep8Naming
 def main(surf_greens_fun):
     """ An example for the Green's function usage"""
 
@@ -30,13 +33,13 @@ def main(surf_greens_fun):
     sgf_r = []
 
     for E in energy:
-        sf = surf_greens_fun(E, h_l, h_0, h_r , damp=0.001j)
+        sf = surf_greens_fun(E, h_l, h_0, h_r, damp=0.001j)
         if isinstance(sf, tuple):
             L = sf[0]
             R = sf[1]
         else:
             L = sf
-            R = surf_greens_fun(E, h_r, h_0, h_l , damp=0.001j)
+            R = surf_greens_fun(E, h_r, h_0, h_l, damp=0.001j)
 
         sgf_l.append(L)
         sgf_r.append(R)
@@ -55,7 +58,7 @@ def main(surf_greens_fun):
         gf0 = gf[j, :, :]
         gamma_l = 1j * (sgf_l[j, :, :] - sgf_l[j, :, :].conj().T)
         gamma_r = 1j * (sgf_r[j, :, :] - sgf_r[j, :, :].conj().T)
-        tr[j] = np.real(np.trace( np.linalg.multi_dot([ gamma_l, gf0, gamma_r, gf0.conj().T ]) ))
+        tr[j] = np.real(np.trace(np.linalg.multi_dot([gamma_l, gf0, gamma_r, gf0.conj().T])))
         dos[j] = np.real(np.trace(1j * (gf0 - gf0.conj().T)))
 
     fig, axs = plt.subplots(2, figsize=(5, 7))
@@ -68,7 +71,7 @@ def main(surf_greens_fun):
     # axs[1].title.set_text('Transmission function')
     axs[1].set_xlabel('Energy (eV)')
     axs[1].set_ylabel('Transmission probability')
-    plt.show()
+    plt.show(block=False)
 
 
 def main1(surf_greens_fun):
@@ -133,7 +136,7 @@ def main1(surf_greens_fun):
         gf0 = gf[j, :, :]
         gamma_l = 1j * (sgf_l[j, :, :] - sgf_l[j, :, :].conj().T)
         gamma_r = 1j * (sgf_r[j, :, :] - sgf_r[j, :, :].conj().T)
-        tr[j]  = np.real(np.trace( np.linalg.multi_dot([ gamma_l, gf0, gamma_r, gf0.conj().T ]) ))
+        tr[j] = np.real(np.trace(np.linalg.multi_dot([gamma_l, gf0, gamma_r, gf0.conj().T])))
         dos[j] = np.real(np.trace(1j * (gf0 - gf0.conj().T)))
 
     fig, axs = plt.subplots(2, figsize=(5, 7))
@@ -146,14 +149,16 @@ def main1(surf_greens_fun):
     # axs[1].title.set_text('Transmission function')
     axs[1].set_xlabel('Energy (eV)')
     axs[1].set_ylabel('Transmission probability')
-    plt.show()
+    plt.show(block=False)
 
 
 if __name__ == "__main__":
-
     main(surf_greens_fun=surface_greens_function)
-    main(surf_greens_fun=simple_iterative_greens_function)
+    #main(surf_greens_fun=simple_iterative_greens_function)
     main(surf_greens_fun=sancho_rubio_iterative_greens_function)
     main1(surf_greens_fun=surface_greens_function)
-    main1(surf_greens_fun=simple_iterative_greens_function)
+    #main1(surf_greens_fun=simple_iterative_greens_function)
     main1(surf_greens_fun=sancho_rubio_iterative_greens_function)
+
+
+plt.show() #To stop it auto closing
