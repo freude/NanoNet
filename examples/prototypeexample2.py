@@ -31,12 +31,10 @@ energy = np.linspace(-4.5, 2.5, 716)
 sgf_l = []
 sgf_r = []
 
-gam_l_u = []  #We won't store Gamma, we'll store their decomposition.
-gam_l_s = []
-gam_l_vh = []
-gam_r_u = []
-gam_r_s = []
-gam_r_vh = []
+gam_l_lam = []  #We won't store Gamma, we'll store their decomposition.
+gam_l_v = []
+gam_r_lam = []
+gam_r_v = []
 
 for E in energy:
     # Note that though the surface Green's function technique is very fast, it can
@@ -49,28 +47,23 @@ for E in energy:
     L = simple_iterative_greens_function(E, h_l, h_0, h_r, damp=damp_value, initialguess=L)
     R = simple_iterative_greens_function(E, h_r, h_0, h_l, damp=damp_value, initialguess=R)
 
-    ul, sl, vhl = np.linalg.svd( 1j*( L - L.conj().T ) )
-    ur, sr, vhr = np.linalg.svd( 1j*( R - R.conj().T ) )
+    laml, vl = np.linalg.eigh( 1j*( L - L.conj().T ) )
+    lamr, vr = np.linalg.eigh( 1j*( R - R.conj().T ) )
 
     sgf_l.append(L)
     sgf_r.append(R)
-    gam_l_u.append(ul)
-    gam_l_s.append(sl)
-    gam_l_vh.append(vhl)
-    gam_r_u.append(ur)
-    gam_r_s.append(sr)
-    gam_r_vh.append(vhr)
+    gam_l_lam.append(laml)
+    gam_l_v.append(vl)
+    gam_r_lam.append(lamr)
+    gam_r_v.append(vr)
 
 
 sgf_l = np.array(sgf_l)
 sgf_r = np.array(sgf_r)
-gam_l_u = np.array(gam_l_u)
-gam_l_s = np.array(gam_l_s)
-gam_l_vh = np.array(gam_l_vh)
-gam_r_u = np.array(gam_r_u)
-gam_r_s = np.array(gam_r_s)
-gam_r_vh = np.array(gam_r_vh)
-
+gam_l_lam = np.array(gam_l_lam)
+gam_l_v = np.array(gam_l_v)
+gam_r_lam = np.array(gam_r_lam)
+gam_r_v = np.array(gam_r_v)
 
 num_sites = h_0.shape[0]
 gf = np.linalg.pinv(np.multiply.outer(energy, np.identity(num_sites)) - h_0 - sgf_l - sgf_r)
@@ -99,14 +92,14 @@ plt.show(block=False)
 
 fig, axs = plt.subplots(2, figsize=(5, 7))
 fig.suptitle('Green\'s function technique')
-axs[0].plot(energy, gam_l_s, 'k')
+axs[0].plot(energy, gam_l_lam, 'k') # np.sum(gam_l_lam, 1)
 # axs[0].title.set_text('Density of states')
 axs[0].set_xlabel('Energy (eV)')
-axs[0].set_ylabel('Singular Values (left)')
-axs[1].plot(energy, gam_r_s, 'k')
+axs[0].set_ylabel('Eigenvalues (left)')
+axs[1].plot(energy, gam_r_lam, 'k')
 # axs[1].title.set_text('Transmission function')
 axs[1].set_xlabel('Energy (eV)')
-axs[1].set_ylabel('Singular Values (right)')
+axs[1].set_ylabel('Eigenvalues (right)')
 plt.show(block=False)
 
 
