@@ -11,10 +11,11 @@ def pole_maker(Emin,ChemPot,kT,reltol):
     of quasi-equilibrium solutions for use in efficient non-equilibrium density matrices
     as the user can reuse certain poles but with different weights for little extra cost.
 
-    What A-N does is replaces f(E,mu) with f(E,1j*mu_im)*( f(E,mu) - f(Emin, mu_re) ).
-    By judicious choice of mu_im to be at least p*kT away from the real line and mu_re to
-    be at least p*kT away from the minimum eigenvalue Emin, this gives a controlled relative
-    error of e^-p.
+    What A-N does is replaces f(E,mu) with one that approximates it on the real line:
+    f(E,mu,kT) -> f(E,1j*mu_im,1j*kT_im)*( f(E,mu,kT) - f(Emin, mu_re,kT_re) ) but has
+    drastic changes in the upper complex plane. By judicious choice of mu_im to be at
+    least p*kT away from the real line and mu_re to be at least p*kT away from the
+    minimum eigenvalue Emin, this gives a controlled relative error of e^-p.
 
     This function automatically switches from first order to second order when
     appropriate. This is when the interval divided by the temperature exceeds 10^3.
@@ -36,3 +37,28 @@ def pole_maker(Emin,ChemPot,kT,reltol):
 
     # When energy exceeds 10^3, switch to second order poles.
     z = (ChemPot-Emin)/kT
+
+    if z < 10**3:
+        poles, residues = pole_order_one(Emin, ChemPot, kT, p)
+    else:
+        poles, residues = pole_order_two(Emin, ChemPot, kT, p)
+
+    return poles, residues
+
+
+def pole_order_one(Emin,ChemPot,kT, p):
+
+    poles = 1
+    residues = 1
+
+    return poles, residues
+
+
+def pole_order_two(Emin, ChemPot, kT, p):
+
+    poles = 1
+    residues = 1
+
+    return poles, residues
+
+
