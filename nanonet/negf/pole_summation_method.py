@@ -1,7 +1,7 @@
 import numpy as np
 import scipy.linalg as linalg
 
-def pole_maker(Emin,ChemPot,kT,reltol):
+def pole_maker(Emin, ChemPot, kT, reltol):
     """This is an alternate pole summation method implemented by Areshkin-Nikolic [CITE].
     Similar to the continued-fraction representation of Ozaki, this method allows for
     efficient computation of the density matrix by complex pole summation. Both methods
@@ -46,7 +46,7 @@ def pole_maker(Emin,ChemPot,kT,reltol):
     return poles, residues
 
 
-def pole_order_one(Emin,ChemPot,kT, p):
+def pole_order_one(Emin, ChemPot, kT, p):
 
     poles = 1
     residues = 1
@@ -62,3 +62,23 @@ def pole_order_two(Emin, ChemPot, kT, p):
     return poles, residues
 
 
+def pole_finite_difference(muL, muR, kT, reltol):
+    """
+    For computing the finite difference derivative using pole summation, see Vaitkus thesis
+    """
+
+    p = -np.log(reltol)  # Value of p that gives desired relative tolerance.
+
+    muMin = np.min(muL, muR)
+    muMax = np.max(muL, muR)
+
+    kTim = np.sqrt((muMax - muMin + 2*p*kT)/(6*p/kT))  # Analytical solution for minimum pole number
+    muim = p*kTim  # Where muim should be to get e^-p error
+
+    # Putting muim at p*kTim might overlap it with the other poles, here is
+    # the maths where I make sure to put directly between two poles.
+
+    poles = 1
+    residues = 1
+
+    return poles, residues
