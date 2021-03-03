@@ -64,21 +64,130 @@ def pole_order_two(Emin, ChemPot, kT, p):
 
 def pole_finite_difference(muL, muR, kT, reltol):
     """
-    For computing the finite difference derivative using pole summation, see Vaitkus thesis
+    For computing the finite difference derivative using pole summation, see Vaitkus thesis.
+
+    By using 2x one-sided differences, we can get the forwards, backwards, and centred
+    first derivatives and the centred second derivative. The poles will be written as a vector
+    containing all points, and the residues will be two vectors containing the poles for the
+    backwards and forward differences respectively as (f_mid-f_min) and (f_max-f_mid).
+
+    This choice is so that the user need compute the poles only once and
+    can carry out whichever residues you like using the following recipes:
+
+    h = np.abs(muR - muC)
+
+    Forward  1st = ( (f_max-f_mid)                 ) / (  h)
+    Centred  1st = ( (f_max-f_mid) + (f_mid-f_min) ) / (2*h)
+    Backward 1st = ( (f_mid-f_min)                 ) / (  h)
+    Centred  2nd = ( (f_max-f_mid) - (f_mid-f_min) ) / (2*h)
+
+    Parameters
+    ----------
+    muL    : scalar (dtype=numpy.float)
+           Left chemical potential
+    muR    : scalar (dtype=numpy.float)
+           Right chemical potential
+    kT     : scalar (dtype=numpy.float)
+           The temperature (in units of energy)
+    reltol : scalar (dtype=numpy.float)
+           The desired relative tolerance. p = -np.log(reltol)
+
     """
 
     p = -np.log(reltol)  # Value of p that gives desired relative tolerance.
 
     muMin = np.min(muL, muR)
     muMax = np.max(muL, muR)
+    muMid = 0.5*(muMin + muMax)
 
-    kTim = np.sqrt((muMax - muMin + 2*p*kT)/(6*p/kT))  # Analytical solution for minimum pole number
-    muim = p*kTim  # Where muim should be to get e^-p error
+    kTIm = np.sqrt((muMax - muMin + 2*p*kT)/(6*p/kT))  # Analytical solution for minimum pole number
+    # Correcting temperature so that p*kTIm will be directly between the poles from the other funcs.
+    kTIm = (2*np.pi*kT/p)*np.ceil((p*kTIm)/(2*np.pi*kT))
+    muIm = p*kTIm  # Where muIm should be to get e^-p error
 
-    # Putting muim at p*kTim might overlap it with the other poles, here is
-    # the maths where I make sure to put directly between two poles.
+    # Four pole branches
+    #   :  :  :
+    # - - - - - - D
+    #   :  :  :
+    #   :  :  :
+    #   A  B  C
 
-    poles = 1
-    residues = 1
+    dummyindex = np.arange(-1000, 1000 + 1)  # Integers from -1000 to 1000 inclusive,.
 
-    return poles, residues
+    # Residues for Fermi-Dirac are simply -kT, residue theorem multiplies
+    # by 2*pi*i, then the windowing function multiplies in its own factor:
+
+    # Branch A poles:
+    poleA = muMin + 1j*np.pi*kT*(2*dummyindex + 1)  # Analytical pole location from definition of fermi-fun
+    # Residues for left
+    resA_L = (2j*np.pi*kT)*fermi_fun(poleA, 1j*muIm, 1j*kTIm)
+    # Residues for right
+    resA_R = 0*poleA
+    # Determine which to trim, they must have magnitude over tol and be in upper complex plane
+    zA = (np.abs(resA_L) > np.exp(-p)*kT) & (np.imag(poleA) > 0)
+    poleA = poleA[zA]
+    resA_L = resA_L[zA]
+    resA_R = resA_R[zA]
+
+    # Branch B poles:
+    poleB = muMid + 1j*np.pi*kT*(2*dummyindex + 1)  # Analytical pole location from definition of fermi-fun
+    # Residues for left
+    resB_L = -(2j*np.pi*kT)*fermi_fun(poleB, 1j*muIm, 1j*kTIm)
+    # Residues for right are exactly the negatives of the left by design
+    resB_R = -resB_L
+    # Determine which to trim
+    zB = (np.abs(resB_L) > np.exp(-p)*kT) & (np.imag(poleB) > 0)
+    poleB = poleA[zB]
+    resB_L = resB_L[zB]
+    resB_R = resB_R[zB]
+
+    # Branch C poles:
+    poleC = muMax + 1j*np.pi*kT*(2*dummyindex + 1)  # Analytical pole location from definition of fermi-fun
+    # Residues for left
+    resC_L = 0*poleC
+    # Residues for right
+    resC_R = -(2j*np.pi*kT)*fermi_fun(poleC, 1j*muIm, 1j*kTIm)
+    # Determine which to trim
+    zC = (np.abs(resC_L) > np.exp(-p)*kT) & (np.imag(poleC) > 0)
+    poleC = poleC[zC]
+    resC_L = resC_L[zC]
+    resC_R = resC_R[zC]
+
+    # Branch D poles:
+    poleD = 1j*muIm + 1j*np.pi*kT*(2*dummyindex + 1)  # Analytical pole location from definition of fermi-fun
+    # Residues for left
+    resD_L = (2*np.pi*kTIm)*(fermi_fun(poleD, muMid, kT) - fermi_fun(poleD, muMin, kT))
+    # Residues for right
+    resD_R = (2*np.pi*kTIm)*(fermi_fun(poleD, muMax, kT) - fermi_fun(poleD, muMid, kT))
+    # Determine which to trim
+
+    zD = np.maximum(np.abs(resD_L), np.abs(resD_R)) > np.exp(-p)*kT
+    poleD = poleD[zD]
+    resD_L = resD_L[zD]
+    resD_R = resD_R[zD]
+
+    poles = [poleA, poleB, poleC, poleD]
+    residuesL = [resA_L, resB_L, resC_L, resD_L]
+    residuesR = [resA_R, resB_R, resC_R, resD_R]
+
+    return poles, residuesL, residuesR
+
+
+def fermi_fun(E, mu, kT):
+    """
+    Computes the Fermi-Dirac distribution function. Auxiliary function just to tidy the workspace.
+
+    Parameters
+    ----------
+    E    : scalar (dtype=numpy.float)
+         Energy being evaluated
+    mu   : scalar (dtype=numpy.float)
+         Chemical potential
+    kT   : scalar (dtype=numpy.float)
+         Temperature (in units of energy)
+    """
+
+    x = (E-mu)/(2*kT)
+
+    return 0.5*(1 - np.tanh(x))  # More numerically stable than 1/(exp(x) + 1)
+
