@@ -96,8 +96,8 @@ def pole_finite_difference(muL, muR, kT, reltol):
 
     p = -np.log(reltol)  # Value of p that gives desired relative tolerance.
 
-    muMin = np.min(muL, muR)
-    muMax = np.max(muL, muR)
+    muMin = np.min([muL, muR])
+    muMax = np.max([muL, muR])
     muMid = 0.5*(muMin + muMax)
 
     kTIm = np.sqrt((muMax - muMin + 2*p*kT)/(6*p/kT))  # Analytical solution for minimum pole number
@@ -112,7 +112,8 @@ def pole_finite_difference(muL, muR, kT, reltol):
     #   :  :  :
     #   A  B  C
 
-    dummyindex = np.arange(-1000, 1000 + 1)  # Integers from -1000 to 1000 inclusive,.
+    dummyindex = np.arange(-500, 500 + 1)  # Integers from -500 to 500 inclusive,.
+    # Need to make a more reasonable guess for valid integers, real line is easy, imag is hard
 
     # Residues for Fermi-Dirac are simply -kT, residue theorem multiplies
     # by 2*pi*i, then the windowing function multiplies in its own factor:
@@ -124,7 +125,7 @@ def pole_finite_difference(muL, muR, kT, reltol):
     # Residues for right
     resA_R = 0*poleA
     # Determine which to trim, they must have magnitude over tol and be in upper complex plane
-    zA = (np.abs(resA_L) > np.exp(-p)*kT) & (np.imag(poleA) > 0)
+    zA = (np.abs(resA_L) >= np.exp(-p)*kT) & (np.imag(poleA) > 0)
     poleA = poleA[zA]
     resA_L = resA_L[zA]
     resA_R = resA_R[zA]
@@ -136,8 +137,8 @@ def pole_finite_difference(muL, muR, kT, reltol):
     # Residues for right are exactly the negatives of the left by design
     resB_R = -resB_L
     # Determine which to trim
-    zB = (np.abs(resB_L) > np.exp(-p)*kT) & (np.imag(poleB) > 0)
-    poleB = poleA[zB]
+    zB = (np.abs(resB_L) >= np.exp(-p)*kT) & (np.imag(poleB) > 0)
+    poleB = poleB[zB]
     resB_L = resB_L[zB]
     resB_R = resB_R[zB]
 
@@ -148,13 +149,13 @@ def pole_finite_difference(muL, muR, kT, reltol):
     # Residues for right
     resC_R = -(2j*np.pi*kT)*fermi_fun(poleC, 1j*muIm, 1j*kTIm)
     # Determine which to trim
-    zC = (np.abs(resC_L) > np.exp(-p)*kT) & (np.imag(poleC) > 0)
+    zC = (np.abs(resC_R) >= np.exp(-p)*kT) & (np.imag(poleC) > 0)
     poleC = poleC[zC]
     resC_L = resC_L[zC]
     resC_R = resC_R[zC]
 
     # Branch D poles:
-    poleD = 1j*muIm + 1j*np.pi*kT*(2*dummyindex + 1)  # Analytical pole location from definition of fermi-fun
+    poleD = 1j*muIm - np.pi*kTIm*(2*dummyindex + 1)  # Analytical pole location from definition of fermi-fun
     # Residues for left
     resD_L = (2*np.pi*kTIm)*(fermi_fun(poleD, muMid, kT) - fermi_fun(poleD, muMin, kT))
     # Residues for right
@@ -166,9 +167,9 @@ def pole_finite_difference(muL, muR, kT, reltol):
     resD_L = resD_L[zD]
     resD_R = resD_R[zD]
 
-    poles = [poleA, poleB, poleC, poleD]
-    residuesL = [resA_L, resB_L, resC_L, resD_L]
-    residuesR = [resA_R, resB_R, resC_R, resD_R]
+    poles = np.concatenate((poleA, poleB, poleC, poleD))
+    residuesL = np.concatenate((resA_L, resB_L, resC_L, resD_L))
+    residuesR = np.concatenate((resA_R, resB_R, resC_R, resD_R))
 
     return poles, residuesL, residuesR
 
@@ -186,8 +187,10 @@ def fermi_fun(E, mu, kT):
     kT   : scalar (dtype=numpy.float)
          Temperature (in units of energy)
     """
+    # Tanh should be more numerically stable than 1/(exp(x) + 1), however
+    # numpy has issues with large complex values in both exp and tanh
+    # x = (E - mu)/kT
+    # return 1/(np.exp(x) + 1)
 
     x = (E-mu)/(2*kT)
-
-    return 0.5*(1 - np.tanh(x))  # More numerically stable than 1/(exp(x) + 1)
-
+    return 0.5*(1 - np.tanh(x))
