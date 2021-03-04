@@ -87,8 +87,10 @@ for j, E in enumerate(energy):
 
 muL = -3.92
 muR = -3.90
+#muL = -3.915
+#muR = -3.905
 kT = 0.010
-reltol = 10**-12
+reltol = 10**-6
 
 poles, residuesL, residuesR = pole_summation_method.pole_finite_difference(muL, muR, kT, reltol)
 
@@ -135,10 +137,10 @@ for j, E in enumerate(poles):
     val3 = val3 + 0.5*(residuesR[j] + residuesL[j])*np.diag(gf00)
     val4 = val4 + 0.5*(residuesR[j] - residuesL[j])*np.diag(gf00)
 
-val1 = -2*np.imag(val1)
-val2 = -2*np.imag(val2)
-val3 = -2*np.imag(val3)
-val4 = -2*np.imag(val4)
+val1 = -2*np.imag(val1)/(muR-muL)
+val2 = -2*np.imag(val2)/(muR-muL)
+val3 = -2*np.imag(val3)/(muR-muL)
+val4 = -2*np.imag(val4)/(muR-muL)
 
 plt.plot(val1)
 plt.show(block=False)
