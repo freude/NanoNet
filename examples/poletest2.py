@@ -5,7 +5,7 @@ import nanonet.tb as tb
 from nanonet.negf.greens_functions import simple_iterative_greens_function, sancho_rubio_iterative_greens_function, \
     surface_greens_function
 from nanonet.negf import pole_summation_method
-from nanonet.negf.pole_summation_method import fermi_fun
+from nanonet.negf.pole_summation_method import fermi_fun, fermi_deriv, fermi_deriv2
 
 
 a = tb.Orbitals('A')
@@ -79,13 +79,17 @@ gf = np.linalg.pinv(np.multiply.outer(energy, np.identity(num_sites)) - h_0 - sg
 val01 = np.zeros(h_0.shape[0])
 val02 = np.zeros(h_0.shape[0])
 val03 = np.zeros(h_0.shape[0])
+val00 = np.zeros(h_0.shape[0])
+val04 = np.zeros(h_0.shape[0])
+
 
 for j, E in enumerate(energy):
     gf0 = gf[j, :, :]
     val01 = val01 + np.diag(gf0)*(fermi_fun(E, muR, kT) - fermi_fun(E, muL, kT))
     val02 = val02 + np.diag(gf0)*(fermi_fun(E, muR, kT) - fermi_fun(E, muC, kT))
     val03 = val03 + np.diag(gf0)*(fermi_fun(E, muC, kT) - fermi_fun(E, muL, kT))
-
+    val00 = val00 + np.diag(gf0)*(fermi_deriv(E, muC, kT))  # Analytical derivative
+    val04 = val04 + np.diag(gf0) * (fermi_deriv2(E, muC, kT))  # Analytical second derivative
 
 # for j, E in enumerate(energy):
 #     gf0 = gf[j, :, :]
@@ -105,7 +109,6 @@ for j, E in enumerate(energy):
 # axs[1].set_xlabel('Energy (eV)')
 # axs[1].set_ylabel('Transmission probability')
 # plt.show(block=False)
-
 
 
 poles, residuesL, residuesR = pole_summation_method.pole_finite_difference(muL, muR, kT, reltol)
@@ -153,13 +156,19 @@ for j, E in enumerate(poles):
     val3 = val3 + 0.5*(residuesR[j] + residuesL[j])*np.diag(gf00)
     val4 = val4 + 0.5*(residuesR[j] - residuesL[j])*np.diag(gf00)
 
+
+val00 = -2*np.imag(val00)*(energy[1]-energy[0])*.5
 val01 = -2*np.imag(val01)/(muR-muL)*(energy[1]-energy[0])*.5
 val02 = -2*np.imag(val02)/(muR-muC)*(energy[1]-energy[0])*.5
 val03 = -2*np.imag(val03)/(muC-muL)*(energy[1]-energy[0])*.5
+val04 = -2*np.imag(val04)*(energy[1]-energy[0])*.5/200  # Not sure where 200 is coming from, kT^2 ?
 val1 = -2*np.imag(val1)/(muR-muL)
 val2 = -2*np.imag(val2)/(muR-muL)
 val3 = -2*np.imag(val3)/(muR-muL)
 val4 = -2*np.imag(val4)/(muR-muL)
+
+plt.plot(val00)
+plt.show(block=False)
 
 plt.plot(val01)
 plt.show(block=False)
@@ -168,6 +177,9 @@ plt.plot(val02)
 plt.show(block=False)
 
 plt.plot(val03)
+plt.show(block=False)
+
+plt.plot(val04)
 plt.show(block=False)
 
 plt.plot(val1)

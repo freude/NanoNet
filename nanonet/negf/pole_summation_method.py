@@ -194,3 +194,46 @@ def fermi_fun(E, mu, kT):
 
     x = (E-mu)/(2*kT)
     return 0.5*(1 - np.tanh(x))
+
+
+def fermi_deriv(E, mu, kT):
+    """
+    Computes the Fermi-Dirac distribution function derivative. Auxiliary function just to tidy the workspace.
+
+    Parameters
+    ----------
+    E    : scalar (dtype=numpy.float)
+         Energy being evaluated
+    mu   : scalar (dtype=numpy.float)
+         Chemical potential
+    kT   : scalar (dtype=numpy.float)
+         Temperature (in units of energy)
+    """
+    # Tanh should be more numerically stable than 1/(exp(x) + 1), however
+    # numpy has issues with large complex values in both exp and tanh
+    # x = (E - mu)/kT
+    # return 1/(np.exp(x) + 1)
+
+    x = (E-mu)/(2*kT)
+    return (np.cosh(x)**-2)/(4*kT)
+
+def fermi_deriv2(E, mu, kT):
+    """
+    Computes the Fermi-Dirac distribution function second derivative. Auxiliary function just to tidy the workspace.
+
+    Parameters
+    ----------
+    E    : scalar (dtype=numpy.float)
+         Energy being evaluated
+    mu   : scalar (dtype=numpy.float)
+         Chemical potential
+    kT   : scalar (dtype=numpy.float)
+         Temperature (in units of energy)
+    """
+    # Tanh should be more numerically stable than 1/(exp(x) + 1), however
+    # numpy has issues with large complex values in both exp and tanh
+    # x = (E - mu)/kT
+    # return 1/(np.exp(x) + 1)
+
+    x = (E-mu)/(2*kT)
+    return np.tanh(x)*(np.cosh(x)**-2)/(4*kT**2)
