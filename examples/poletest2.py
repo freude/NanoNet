@@ -7,7 +7,6 @@ from nanonet.negf.greens_functions import simple_iterative_greens_function, sanc
 from nanonet.negf import pole_summation_method
 from nanonet.negf.pole_summation_method import fermi_fun, fermi_deriv, fermi_deriv2
 
-
 a = tb.Orbitals('A')
 a.add_orbital('s', 0)
 

@@ -338,12 +338,12 @@ def simple_iterative_greens_function(E, h_l, h_0, h_r, **kwargs):
         alpha = alpha
 
     # If damp is negative or imaginary set it to its modulus
-    damp = np.abs(damp);
+    damp = np.abs(damp)
 
     # Define initial K-matrices
-    KL = (E + 1j * damp) * s_l - h_l;
-    K0 = (E + 1j * damp) * s_0 - h_0;
-    KR = (E + 1j * damp) * s_r - h_r;
+    KL = (E + 1j * damp) * s_l - h_l
+    K0 = (E + 1j * damp) * s_0 - h_0
+    KR = (E + 1j * damp) * s_r - h_r
 
     # Form initial guess
     AN = K0 - initialguess
@@ -364,7 +364,7 @@ def simple_iterative_greens_function(E, h_l, h_0, h_r, **kwargs):
         NewSelfEnergy = KL.dot(XN)
         # Check magnitude of change, if too big, mix in new solution
         convcheck = linalg.norm(OldSelfEnergy - NewSelfEnergy, 2)
-        AN = (1 - alpha) * AN + alpha * (K0 - KL.dot(XN));
+        AN = (1 - alpha) * AN + alpha * (K0 - KL.dot(XN))
         # print(convcheck) #for debugging
 
     # other outputs could the green's function if a flag is set because it requires
@@ -427,41 +427,41 @@ def sancho_rubio_iterative_greens_function(E, h_l, h_0, h_r, **kwargs):
     nconv = kwargs.get('nconv', 1e-10)
 
     # If damp is negative or imaginary set it to its modulus
-    damp = np.abs(damp);
+    damp = np.abs(damp)
 
     # Define initial K-matrices
-    KL = (E + 1j * damp) * s_l - h_l;
-    K0 = (E + 1j * damp) * s_0 - h_0;
-    KR = (E + 1j * damp) * s_r - h_r;
+    KL = (E + 1j * damp) * s_l - h_l
+    K0 = (E + 1j * damp) * s_0 - h_0
+    KR = (E + 1j * damp) * s_r - h_r
 
     #Seed values
-    alpha0 = KR;
-    beta0 = KL;
-    esOld = K0;
-    eOld = esOld;
-    alpha = alpha0; 
-    beta  = beta0;  
+    alpha0 = KR
+    beta0 = KL
+    esOld = K0
+    eOld = esOld
+    alpha = alpha0
+    beta  = beta0
 
-    itr = 0;       #initialise iteration check
-    normcheck = 1; #initialise normalisation check 
+    itr = 0        # initialise iteration check
+    normcheck = 1  # initialise normalisation check
     maxiter=100
 
-    while (itr<maxiter)&(normcheck>nconv):
-        itr = itr + 1; 
+    while (itr < maxiter) & (normcheck > nconv):
+        itr = itr + 1
         
         lu, piv = linalg.lu_factor(eOld)
         a = linalg.lu_solve((lu, piv), alpha)
         b = linalg.lu_solve((lu, piv), beta)
         
-        alphab = alpha.dot(b);    
-        esNew = esOld - alphab;
-        eNew = eOld - beta.dot(a) - alphab;     
-        alpha = alpha.dot(a);
-        beta = beta.dot(b);
+        alphab = alpha.dot(b)
+        esNew = esOld - alphab
+        eNew = eOld - beta.dot(a) - alphab
+        alpha = alpha.dot(a)
+        beta = beta.dot(b)
         normcheck = linalg.norm(esNew-esOld, 2)
-        eOld  = eNew ;
-        esOld = esNew;
-        #print(normcheck) #for debugging
+        eOld  = eNew
+        esOld = esNew
+        # print(normcheck) #for debugging
  
     
     lu, piv = linalg.lu_factor(esNew)
