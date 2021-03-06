@@ -39,14 +39,14 @@ h.initialize()
 h.set_periodic_bc([[0, 0, 1.0]])
 h_l, h_0, h_r = h.get_hamiltonians()
 
-muL = -3.92
-muR = -3.90
+muL = -3.92   # this is in first subband, to look at similar example
+muR = -3.90   # in second subband add 0.1 to the value, they also agree
 muC = 0.5*(muL + muR)
 # muL = -3.915
 # muR = -3.905
 kT = 0.010
-reltol = 10**-6
-p = np.ceil( -np.log(reltol) )
+reltol = 10**-8
+p = np.ceil(-np.log(reltol))
 
 numE = round((muR - muL + 2*p*kT)/(0.05*kT)) + 1
 
@@ -85,11 +85,11 @@ val04 = np.zeros(h_0.shape[0])
 
 for j, E in enumerate(energy):
     gf0 = gf[j, :, :]
-    val01 = val01 + np.diag(gf0)*(fermi_fun(E, muR, kT) - fermi_fun(E, muL, kT))
+    val01 = val01 + np.diag(gf0)*(fermi_fun(E, muC, kT) - fermi_fun(E, muL, kT))
     val02 = val02 + np.diag(gf0)*(fermi_fun(E, muR, kT) - fermi_fun(E, muC, kT))
-    val03 = val03 + np.diag(gf0)*(fermi_fun(E, muC, kT) - fermi_fun(E, muL, kT))
+    val03 = val03 + np.diag(gf0)*(fermi_fun(E, muR, kT) - fermi_fun(E, muL, kT))
     val00 = val00 + np.diag(gf0)*(fermi_deriv(E, muC, kT))  # Analytical derivative
-    val04 = val04 + np.diag(gf0) * (fermi_deriv2(E, muC, kT))  # Analytical second derivative
+    val04 = val04 + np.diag(gf0)*(fermi_deriv2(E, muC, kT))  # Analytical second derivative
 
 # for j, E in enumerate(energy):
 #     gf0 = gf[j, :, :]
@@ -153,44 +153,55 @@ for j, E in enumerate(poles):
 #    ldos.append(ldostemp)
     val1 = val1 + residuesL[j]*np.diag(gf00)
     val2 = val2 + residuesR[j]*np.diag(gf00)
-    val3 = val3 + 0.5*(residuesR[j] + residuesL[j])*np.diag(gf00)
-    val4 = val4 + 0.5*(residuesR[j] - residuesL[j])*np.diag(gf00)
+    val3 = val3 + (residuesR[j] + residuesL[j])*np.diag(gf00)
+    val4 = val4 + (residuesR[j] - residuesL[j])*np.diag(gf00)
 
 
-val00 = -2*np.imag(val00)*(energy[1]-energy[0])*.5
-val01 = -2*np.imag(val01)/(muR-muL)*(energy[1]-energy[0])*.5
-val02 = -2*np.imag(val02)/(muR-muC)*(energy[1]-energy[0])*.5
-val03 = -2*np.imag(val03)/(muC-muL)*(energy[1]-energy[0])*.5
-val04 = -2*np.imag(val04)*(energy[1]-energy[0])*.5/200  # Not sure where 200 is coming from, kT^2 ?
-val1 = -2*np.imag(val1)/(muR-muL)
-val2 = -2*np.imag(val2)/(muR-muL)
-val3 = -2*np.imag(val3)/(muR-muL)
-val4 = -2*np.imag(val4)/(muR-muL)
+dE = (energy[1]-energy[0])
+dmu = (muR-muL)/2
 
-plt.plot(val00)
-plt.show(block=False)
+# Analytical Derivative
+val00 = -2*np.imag(val00)*dE
 
+# Backwards Finite Diff First Derivative
+val01 = -2*np.imag(val01)*dE/(1*dmu)
+val1 = -2*np.imag(val1)/(1*dmu)
+
+# Forwards Finite Diff First Derivative
+val02 = -2*np.imag(val02)*dE/(1*dmu)
+val2 = -2*np.imag(val2)/(1*dmu)
+
+# Centred Finite Diff First Derivative
+val03 = -2*np.imag(val03)*dE/(2*dmu)
+val3 = -2*np.imag(val3)/(2*dmu)
+
+# Second Derivative
+val04 = -2*np.imag(val04)*dE  # Analytical
+val4 = -2*np.imag(val4)/(1*dmu**2)  # Finite difference pole
+
+# Works
 plt.plot(val01)
 plt.show(block=False)
-
-plt.plot(val02)
-plt.show(block=False)
-
-plt.plot(val03)
-plt.show(block=False)
-
-plt.plot(val04)
-plt.show(block=False)
-
 plt.plot(val1)
 plt.show(block=False)
 
+# Works
 plt.plot(val2)
 plt.show(block=False)
+plt.plot(val02)
+plt.show(block=False)
 
+# Works
+plt.plot(val00)
+plt.show(block=False)
+plt.plot(val03)
+plt.show(block=False)
 plt.plot(val3)
 plt.show(block=False)
 
+# Works
+plt.plot(val04)
+plt.show(block=False)
 plt.plot(val4)
 plt.show(block=False)
 
