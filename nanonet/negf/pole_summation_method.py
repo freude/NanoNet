@@ -1,6 +1,7 @@
 import numpy as np
 import scipy.linalg as linalg
 
+
 def pole_maker(Emin, ChemPot, kT, reltol):
     """This is an alternate pole summation method implemented by Areshkin-Nikolic [CITE].
     Similar to the continued-fraction representation of Ozaki, this method allows for
@@ -36,9 +37,9 @@ def pole_maker(Emin, ChemPot, kT, reltol):
     p = -np.log(reltol)  # Compute the exponent for the relative tolerance desired.
 
     # When energy exceeds 10^3, switch to second order poles.
-    z = (ChemPot-Emin)/kT
+    z = (ChemPot - Emin) / kT
 
-    if z < 10**3:
+    if z < 10 ** 3:
         poles, residues = pole_order_one(Emin, ChemPot, kT, p)
     else:
         poles, residues = pole_order_two(Emin, ChemPot, kT, p)
@@ -47,7 +48,6 @@ def pole_maker(Emin, ChemPot, kT, reltol):
 
 
 def pole_order_one(Emin, ChemPot, kT, p):
-
     poles = 1
     residues = 1
 
@@ -55,7 +55,6 @@ def pole_order_one(Emin, ChemPot, kT, p):
 
 
 def pole_order_two(Emin, ChemPot, kT, p):
-
     poles = 1
     residues = 1
 
@@ -98,12 +97,12 @@ def pole_finite_difference(muL, muR, kT, reltol):
 
     muMin = np.min([muL, muR])
     muMax = np.max([muL, muR])
-    muMid = 0.5*(muMin + muMax)
+    muMid = 0.5 * (muMin + muMax)
 
-    kTIm = np.sqrt((muMax - muMin + 2*p*kT)/(6*p/kT))  # Analytical solution for minimum pole number
+    kTIm = np.sqrt((muMax - muMin + 2 * p * kT) / (6 * p / kT))  # Analytical solution for minimum pole number
     # Correcting temperature so that p*kTIm will be directly between the poles from the other funcs.
-    kTIm = (2*np.pi*kT/p)*np.ceil((p*kTIm)/(2*np.pi*kT))
-    muIm = p*kTIm  # Where muIm should be to get e^-p error
+    kTIm = (2 * np.pi * kT / p) * np.ceil((p * kTIm) / (2 * np.pi * kT))
+    muIm = p * kTIm  # Where muIm should be to get e^-p error
 
     # Four pole branches
     #   :  :  :
@@ -119,50 +118,50 @@ def pole_finite_difference(muL, muR, kT, reltol):
     # by 2*pi*i, then the windowing function multiplies in its own factor:
 
     # Branch A poles:
-    poleA = muMin + 1j*np.pi*kT*(2*dummyindex + 1)  # Analytical pole location from definition of fermi-fun
+    poleA = muMin + 1j * np.pi * kT * (2 * dummyindex + 1)  # Analytical pole location from definition of fermi-fun
     # Residues for left
-    resA_L = (2j*np.pi*kT)*fermi_fun(poleA, 1j*muIm, 1j*kTIm)
+    resA_L = (2j * np.pi * kT) * fermi_fun(poleA, 1j * muIm, 1j * kTIm)
     # Residues for right
-    resA_R = 0*poleA
+    resA_R = 0 * poleA
     # Determine which to trim, they must have magnitude over tol and be in upper complex plane
-    zA = (np.abs(resA_L) >= np.exp(-p)*kT) & (np.imag(poleA) > 0)
+    zA = (np.abs(resA_L) >= np.exp(-p) * kT) & (np.imag(poleA) > 0)
     poleA = poleA[zA]
     resA_L = resA_L[zA]
     resA_R = resA_R[zA]
 
     # Branch B poles:
-    poleB = muMid + 1j*np.pi*kT*(2*dummyindex + 1)  # Analytical pole location from definition of fermi-fun
+    poleB = muMid + 1j * np.pi * kT * (2 * dummyindex + 1)  # Analytical pole location from definition of fermi-fun
     # Residues for left
-    resB_L = -(2j*np.pi*kT)*fermi_fun(poleB, 1j*muIm, 1j*kTIm)
+    resB_L = -(2j * np.pi * kT) * fermi_fun(poleB, 1j * muIm, 1j * kTIm)
     # Residues for right are exactly the negatives of the left by design
     resB_R = -resB_L
     # Determine which to trim
-    zB = (np.abs(resB_L) >= np.exp(-p)*kT) & (np.imag(poleB) > 0)
+    zB = (np.abs(resB_L) >= np.exp(-p) * kT) & (np.imag(poleB) > 0)
     poleB = poleB[zB]
     resB_L = resB_L[zB]
     resB_R = resB_R[zB]
 
     # Branch C poles:
-    poleC = muMax + 1j*np.pi*kT*(2*dummyindex + 1)  # Analytical pole location from definition of fermi-fun
+    poleC = muMax + 1j * np.pi * kT * (2 * dummyindex + 1)  # Analytical pole location from definition of fermi-fun
     # Residues for left
-    resC_L = 0*poleC
+    resC_L = 0 * poleC
     # Residues for right
-    resC_R = -(2j*np.pi*kT)*fermi_fun(poleC, 1j*muIm, 1j*kTIm)
+    resC_R = -(2j * np.pi * kT) * fermi_fun(poleC, 1j * muIm, 1j * kTIm)
     # Determine which to trim
-    zC = (np.abs(resC_R) >= np.exp(-p)*kT) & (np.imag(poleC) > 0)
+    zC = (np.abs(resC_R) >= np.exp(-p) * kT) & (np.imag(poleC) > 0)
     poleC = poleC[zC]
     resC_L = resC_L[zC]
     resC_R = resC_R[zC]
 
     # Branch D poles:
-    poleD = 1j*muIm - np.pi*kTIm*(2*dummyindex + 1)  # Analytical pole location from definition of fermi-fun
+    poleD = 1j * muIm - np.pi * kTIm * (2 * dummyindex + 1)  # Analytical pole location from definition of fermi-fun
     # Residues for left
-    resD_L = (2*np.pi*kTIm)*(fermi_fun(poleD, muMid, kT) - fermi_fun(poleD, muMin, kT))
+    resD_L = (2 * np.pi * kTIm) * (fermi_fun(poleD, muMid, kT) - fermi_fun(poleD, muMin, kT))
     # Residues for right
-    resD_R = (2*np.pi*kTIm)*(fermi_fun(poleD, muMax, kT) - fermi_fun(poleD, muMid, kT))
+    resD_R = (2 * np.pi * kTIm) * (fermi_fun(poleD, muMax, kT) - fermi_fun(poleD, muMid, kT))
     # Determine which to trim
 
-    zD = np.maximum(np.abs(resD_L), np.abs(resD_R)) > np.exp(-p)*kT
+    zD = np.maximum(np.abs(resD_L), np.abs(resD_R)) > np.exp(-p) * kT
     poleD = poleD[zD]
     resD_L = resD_L[zD]
     resD_R = resD_R[zD]
@@ -192,8 +191,8 @@ def fermi_fun(E, mu, kT):
     # x = (E - mu)/kT
     # return 1/(np.exp(x) + 1)
 
-    x = (E-mu)/(2*kT)
-    return 0.5*(1 - np.tanh(x))
+    x = (E - mu) / (2 * kT)
+    return 0.5 * (1 - np.tanh(x))
 
 
 def fermi_deriv(E, mu, kT):
@@ -214,8 +213,9 @@ def fermi_deriv(E, mu, kT):
     # x = (E - mu)/kT
     # return 1/(np.exp(x) + 1)
 
-    x = (E-mu)/(2*kT)
-    return (np.cosh(x)**-2)/(4*kT)
+    x = (E - mu) / (2 * kT)
+    return (np.cosh(x) ** -2) / (4 * kT)
+
 
 def fermi_deriv2(E, mu, kT):
     """
@@ -235,5 +235,5 @@ def fermi_deriv2(E, mu, kT):
     # x = (E - mu)/kT
     # return 1/(np.exp(x) + 1)
 
-    x = (E-mu)/(2*kT)
-    return np.tanh(x)*(np.cosh(x)**-2)/(4*kT**2)
+    x = (E - mu) / (2 * kT)
+    return np.tanh(x) * (np.cosh(x) ** -2) / (4 * kT ** 2)
