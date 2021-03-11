@@ -1,5 +1,6 @@
 import numpy as np
 import scipy.linalg as linalg
+import scipy.optimize as opt
 
 
 def pole_maker(Emin, ChemPot, kT, reltol):
@@ -48,17 +49,103 @@ def pole_maker(Emin, ChemPot, kT, reltol):
 
 
 def pole_order_one(Emin, ChemPot, kT, p):
+
+    kTRe, kTIm, muRe, muIm = pole_minimizer_one(Emin, ChemPot, kT, p)
+
     poles = 1
     residues = 1
 
     return poles, residues
+
+
+def pole_minimizer_one(Emin, ChemPot, kT, p):
+    """
+    This function is minimizing the problem:
+    N = N_AB + N_BC + N_CD, where:
+    N_AB = (muIm + p*kTIm)/(2*pi*kT)
+    N_BC = ( (mu + p*kT) - (muRe - p*kTre) )/(2*pi*kTIm)
+    N_CD = (muIm + p*kTIm)/(2*pi*kTRe)
+    though this has 4 free parameters (excluding p), we
+    set certain parameters so that we do not violate
+    our relative tolerance, these are:
+    muRe = Emin - p*kTre
+    muIm = p*kTim
+    which then reduces this to a two variable problem:
+    N = 2*p*kTIm*(1/kT + 1/kTRe) +
+        ( (ChemPot - Emin) + p*(kT + 2*kTRe) )/( 2*kTIm )
+
+    """
+
+    def pole_cost_one_A(z):
+        kTReA = z[0]  # Added the A to stop it from shadowing
+        kTImA = z[1]  # the variable later on in the function.
+        return 2*p*kTImA*(1/kT + 1/kTReA) + (ChemPot - Emin + p*(kT + 2*kTReA))/(2*kTImA)
+
+    z0 = np.array([kT, kT])
+    zAout = opt.minimize(pole_cost_one_A, z0, tol=1e-8)
+
+    # Now we modify it so that the imaginary part is directly
+    # in-between the poles generated from the real line
+    l_opt = np.ceil(p * zAout.x[1] / (2 * np.pi * kT))
+    muIm = np.pi * kT * (2 * l_opt)
+    kTIm = muIm/p
+
+    def pole_cost_one_B(z):
+        kTReB = z  # Added the zeros to stop it from shadowing
+        return 2*p*kTIm*(1/kT + 1/kTReB) + (ChemPot - Emin + p*(kT + 2*kTReB))/(2*kTIm)
+
+    z1 = zAout.x[0]
+    zBout = opt.minimize(pole_cost_one_B, z1, tol=1e-8)
+
+    m_opt = np.ceil(np.abs(ChemPot - Emin + p*zBout.x[0]) / (2 * np.pi * kTIm))
+    muRe = ChemPot - np.pi * kTIm * (2 * m_opt)
+    kTRe = (Emin-muRe)/p
+
+    return kTRe, kTIm, muRe, muIm
 
 
 def pole_order_two(Emin, ChemPot, kT, p):
+
+    kTRe1, kTIm1, muRe1, muIm1, kTRe2, kTIm2, muRe2, muIm2 = pole_minimizer_two(Emin, ChemPot, kT, p)
+
     poles = 1
     residues = 1
 
     return poles, residues
+
+
+def pole_minimizer_two(Emin, ChemPot, kT, p):
+    """
+    This function is minimizing the problem:
+    N = N_AB + N_BC + N_CD + N_DE + N_EF, where:
+    N_AB =
+    N_BC =
+    N_CD =
+    N_DE =
+    N_EF =
+    though this has x free parameters (excluding p), we
+    set certain parameters so that we do not violate
+    our relative tolerance, these are:
+    muRe1 = x
+    muIm1 = y
+    muRe2 = x
+    muIm2 = y
+    which then reduces this to a x variable problem:
+    N =
+
+    """
+
+    # Run code, get output, real answer will be different than these initial filler values.
+    kTIm1 = kT
+    kTIm2 = kT
+    kTRe1 = kT
+    kTRe2 = kT
+    muRe2 = Emin-p*kTRe2
+    muRe1 = 0.5*(muRe2+ChemPot)  # Initial guess is halfway between
+    muIm1 = p*kTIm1
+    muIm2 = p*kTIm2
+
+    return kTRe1, kTIm1, muRe1, muIm1, kTRe2, kTIm2, muRe2, muIm2
 
 
 def pole_finite_difference(muL, muR, kT, reltol):
@@ -75,10 +162,10 @@ def pole_finite_difference(muL, muR, kT, reltol):
 
     h = np.abs(muR - muC)
 
-    Forward  1st = ( (f_max-f_mid)                 ) / (  h)
-    Centred  1st = ( (f_max-f_mid) + (f_mid-f_min) ) / (2*h)
-    Backward 1st = ( (f_mid-f_min)                 ) / (  h)
-    Centred  2nd = ( (f_max-f_mid) - (f_mid-f_min) ) / (2*h)
+    Forward  1st = ( (f_max-f_mid)                 ) / (   h)
+    Centred  1st = ( (f_max-f_mid) + (f_mid-f_min) ) / ( 2*h)
+    Backward 1st = ( (f_mid-f_min)                 ) / (   h)
+    Centred  2nd = ( (f_max-f_mid) - (f_mid-f_min) ) / (h**2)
 
     Parameters
     ----------
