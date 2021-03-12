@@ -59,27 +59,18 @@ h_l, h_0, h_r = h.get_hamiltonians()
 # the temperature being evaluated, the relative tolerance
 # of the pole summation and the numerical integration
 
-# Emin = -3.98, is the point where there are
-# no more states to the left, we can use this
-# to reduce number of points in the evaluation
-
 Emin = -3.98
-muL = -3.9175
-muR = -3.9025
-muC = 0.5*(muL + muR)  # This is the energy the derivative is being evaluated at
+ChemPot = -3.91
 kT = 0.010
 reltol = 10**-8
 p = np.ceil(-np.log(reltol))  # Integer number of kT away to get the desired relative tolerance.
 
-lowbnd = max(Emin, muL - p*kT)
-uppbnd = muR + p*kT
 # We chose to have our energy spacing be at most 3*kT/40
-numE = round((uppbnd-lowbnd)/(0.075*kT)) + 1
-#numE = round((muR - muL + 2*p*kT)/(0.075*kT)) + 1
+numE = round((ChemPot - Emin + p*kT)/(0.075*kT)) + 1
 
 # We generate our grid for numerical integration, paying mind about the FD tails at muL-p*kT and muR + p*kT.
-energy = np.linspace(lowbnd, uppbnd, numE)
-#energy = np.linspace(muL - p*kT, muR + p*kT, numE)
+energy = np.linspace(Emin, ChemPot + p*kT, numE)
+
 
 # Initialize the storage of the surface Green's funs.
 sgf_l = []
@@ -113,19 +104,16 @@ num_sites = h_0.shape[0]
 gf = np.linalg.pinv(np.multiply.outer(energy, np.identity(num_sites)) - h_0 - sgf_l - sgf_r)
 
 # We preallocate the arrays to store our integrated solutions
-backwardsint = np.zeros(num_sites)
-forwardsint = np.zeros(num_sites)
-centralint = np.zeros(num_sites)
+densityint = np.zeros(num_sites)
 LDOS = []
 
 # The integral is just a sum of the weighted diagonals for whichever integral we are computing
 for j, E in enumerate(energy):
     gf0 = gf[j, :, :]
     gdiag = np.diag(gf0)
-    backwardsint = backwardsint + gdiag*(fermi_fun(E, muC, kT) - fermi_fun(E, muL, kT))
-    forwardsint = forwardsint + gdiag*(fermi_fun(E, muR, kT) - fermi_fun(E, muC, kT))
-    centralint = centralint + gdiag*(fermi_fun(E, muR, kT) - fermi_fun(E, muL, kT))
-    LDOS.append(np.sum(gdiag))
+    densityint = densityint + gdiag*fermi_fun(E, ChemPot, kT)
+    LDOS.append(sum(gdiag))
+
 
 # Now we have completed our numerical integration,
 # we move onto pole summation, simply choose the
@@ -134,7 +122,7 @@ for j, E in enumerate(energy):
 # one set of poles and two sets of residues for
 # the backwards and forwards differences with the
 # central being their sum.
-poles, residuesL, residuesR = pole_summation_method.pole_finite_difference(muL, muR, kT, reltol)
+poles, residues = pole_summation_method.pole_order_one(Emin, ChemPot, kT, p)
 
 # Allocate the surface green's functions for poles.
 sgf2_l = []
@@ -163,56 +151,30 @@ sgf2_r = np.array(sgf2_r)
 
 gf2 = np.linalg.pinv(np.multiply.outer(poles, np.identity(num_sites)) - h_0 - sgf2_l - sgf2_r)
 
-backwardspole = np.zeros(num_sites)
-forwardspole = np.zeros(num_sites)
-centralpole = np.zeros(num_sites)
+densitypole = np.zeros(num_sites)
 
 # Add up the weighted contributions
 for j, E in enumerate(poles):
     gf00 = gf2[j, :, :]
     gdiag2 = np.diag(gf00)
-    backwardspole = backwardspole + residuesL[j]*gdiag2
-    forwardspole = forwardspole + residuesR[j]*gdiag2
-    centralpole = centralpole + (residuesR[j] + residuesL[j])*gdiag2
+    densitypole = densitypole + residues[j]*gdiag2
 
 # dE to correct numerical integration
 dE = (energy[1]-energy[0])
-dmu = (muR-muL)/2
 
 # Backwards Finite Diff First Derivative
-backwardsint = -2*np.imag(backwardsint)*dE/(1*dmu)
-backwardspole = -2*np.imag(backwardspole)/(1*dmu)
-
-# Forwards Finite Diff First Derivative
-forwardsint = -2*np.imag(forwardsint)*dE/(1*dmu)
-forwardspole = -2*np.imag(forwardspole)/(1*dmu)
-
-# Centred Finite Diff First Derivative
-centralint = -2*np.imag(centralint)*dE/(2*dmu)
-centralpole = -2*np.imag(centralpole)/(2*dmu)
-
-
-# LDOS
-LDOS = -2*np.imag(LDOS)
-#plt.plot(energy,LDOS, color='#464646', linestyle='solid')
-#plt.show()
+densityint = -2*np.imag(densityint)*dE
+densitypole = -2*np.imag(densitypole)
 
 # Works
-plt.plot(backwardsint, color='#951158', linestyle='dashed')
-plt.plot(backwardspole, color='#D40F7D')
-plt.plot(forwardspole, color='#00808B', linestyle='dashed')
-plt.plot(forwardsint, color='#00AEC7')
-plt.plot(centralint, color='#899600', linestyle='dashed')
-plt.plot(centralpole, color='#C4D600')
+plt.plot(densityint, color='#951158', linestyle='dashed')
+plt.plot(densitypole, color='#00AEC7')
 
 plt.show()
 
 # Now we compute the relative difference between the two answers, note this isn't really an error
 # as we're computing the same approximate thing two different ways, it's to check if they agree.
-errbackward = np.log10(0.5*np.linalg.norm(backwardsint-backwardspole)/np.linalg.norm(backwardsint+backwardspole))
-errforward = np.log10(0.5*np.linalg.norm(forwardsint-forwardspole)/np.linalg.norm(forwardsint+forwardspole))
-errcentred = np.log10(0.5*np.linalg.norm(centralint-centralpole)/np.linalg.norm(centralint+centralpole))
+errcomp = np.log10(0.5*np.linalg.norm(densityint-densitypole)/np.linalg.norm(densityint+densitypole))
 
-print("Relative backwards differences discrepancy = 10^"+f'{errbackward:.3f}')
-print("Relative forward differences discrepancy = 10^"+f'{errforward:.3f}')
-print("Relative central differences discrepancy = 10^"+f'{errcentred:.3f}')
+print("Relative backwards differences discrepancy = 10^"+f'{errcomp:.3f}')
+

@@ -52,8 +52,48 @@ def pole_order_one(Emin, ChemPot, kT, p):
 
     kTRe, kTIm, muRe, muIm = pole_minimizer_one(Emin, ChemPot, kT, p)
 
-    poles = 1
-    residues = 1
+    # Three pole branches
+    #   :  :
+    # - - - - C
+    #   :  :
+    #   :  :
+    #   A  B
+
+    dummyindex = np.arange(-500, 500 + 1)  # Integers from -500 to 500 inclusive,.
+    # Need to make a more reasonable guess for valid integers, real line is easy, imag is hard
+
+    # Residues for Fermi-Dirac are simply -kT, residue theorem multiplies
+    # by 2*pi*i, then the windowing function multiplies in its own factor:
+
+    # Branch A poles:
+    poleA = muRe + 1j * np.pi * kTRe * (2 * dummyindex + 1)  # Analytical pole location from definition of fermi-fun
+    # Compute their residues
+    resA = (2j * np.pi * kTRe) * fermi_fun(poleA, 1j * muIm, 1j * kTIm)
+    # Determine which to trim, they must have magnitude over tol and be in upper complex plane
+    zA = (np.abs(resA) >= np.exp(-p) * kT) & (np.imag(poleA) > 0)
+    poleA = poleA[zA]
+    resA = resA[zA]
+
+    # Branch B poles:
+    poleB = ChemPot + 1j * np.pi * kT * (2 * dummyindex + 1)  # Analytical pole location from definition of fermi-fun
+    # Compute their residues
+    resB = -(2j * np.pi * kT) * fermi_fun(poleB, 1j * muIm, 1j * kTIm)
+    # Determine which to trim, they must have magnitude over tol and be in upper complex plane
+    zB = (np.abs(resB) >= np.exp(-p) * kT) & (np.imag(poleB) > 0)
+    poleB = poleB[zB]
+    resB = resB[zB]
+
+    # Branch C poles:
+    poleC = 1j * muIm - np.pi * kTIm * (2 * dummyindex + 1)  # Analytical pole location from definition of fermi-fun
+    # Residues
+    resC = (2 * np.pi * kTIm) * (fermi_fun(poleC, ChemPot, kT) - fermi_fun(poleC, muRe, kTRe))
+
+    zC = (np.abs(resC) >= np.exp(-p) * kT) & (np.imag(poleC) > 0)
+    poleC = poleC[zC]
+    resC = resC[zC]
+
+    poles = np.concatenate((poleA, poleB, poleC))
+    residues = np.concatenate((resA, resB, resC))
 
     return poles, residues
 
@@ -73,22 +113,30 @@ def pole_minimizer_one(Emin, ChemPot, kT, p):
     which then reduces this to a two variable problem:
     N = 2*p*kTIm*(1/kT + 1/kTRe) +
         ( (ChemPot - Emin) + p*(kT + 2*kTRe) )/( 2*kTIm )
-
+    The function then optimizes the position of the
+    pole branches not to overlap then outputs the temp-
+    eratures and chemical potentials
     """
 
+    # There's a lot going on here, first we desig-
+    # nate the cost function for the whole problem
     def pole_cost_one_A(z):
         kTReA = z[0]  # Added the A to stop it from shadowing
         kTImA = z[1]  # the variable later on in the function.
         return 2*p*kTImA*(1/kT + 1/kTReA) + (ChemPot - Emin + p*(kT + 2*kTReA))/(2*kTImA)
 
     z0 = np.array([kT, kT])
-    zAout = opt.minimize(pole_cost_one_A, z0, tol=1e-8)
+    zAout = opt.minimize(pole_cost_one_A, z0, bounds=((kT, None),(kT, None)), tol=1e-8)
 
-    # Now we modify it so that the imaginary part is directly
-    # in-between the poles generated from the real line
+    # Now we modify it so that the imaginary chemical potential is
+    # directly in-between the poles generated from the real line
     l_opt = np.ceil(p * zAout.x[1] / (2 * np.pi * kT))
     muIm = np.pi * kT * (2 * l_opt)
-    kTIm = muIm/p
+    kTIm = muIm/p  # Because muIm = p kTIm, kTIm = muIm/p
+
+    # Now that we have fixed the imaginary part, we re-optimize
+    # kTRe, because some marginal improvement may be made after
+    # applying the previous constraints
 
     def pole_cost_one_B(z):
         kTReB = z  # Added the zeros to stop it from shadowing
@@ -97,9 +145,18 @@ def pole_minimizer_one(Emin, ChemPot, kT, p):
     z1 = zAout.x[0]
     zBout = opt.minimize(pole_cost_one_B, z1, tol=1e-8)
 
+    # After it is optimized we once again correct the ans-
+    # wer to be between the poles of the nearest branch,
+    # thereby preventing a second order pole situation.
+
     m_opt = np.ceil(np.abs(ChemPot - Emin + p*zBout.x[0]) / (2 * np.pi * kTIm))
     muRe = ChemPot - np.pi * kTIm * (2 * m_opt)
     kTRe = (Emin-muRe)/p
+
+    # The extra poles introduced from this
+    # positional fixing process is negligible
+    # and is typically no greater than a small
+    # handful of poles.
 
     return kTRe, kTIm, muRe, muIm
 
