@@ -1,11 +1,11 @@
 '''
-This example script computes the finite difference density
-derivative using both numerical integration and complex pole
-summation. It serves  as a demonstration and a validation of
+This example script computes the efficient density matrix
+evaluation using both numerical integration and complex pole
+summation. It serves as a demonstration and a validation of
 the pole summation method. For the given parameters below,
-the numerical energy grid contains 528 energy points and the
-complex pole summation contains only 21. Not only do these
-results agree within 1 part in 10,000 at 1/25th the compu-
+the numerical energy grid contains 348 energy points and the
+complex pole summation contains only 26. Not only do these
+results agree within 1 part in 10,000 at 1/13th the compu-
 tational cost, due to its construction, the complex pole sum-
 mation is more accurate. Where possible, the complex pole
 summation method should be used over numerical integration.
@@ -162,11 +162,14 @@ for j, E in enumerate(poles):
 # dE to correct numerical integration
 dE = (energy[1]-energy[0])
 
-# Backwards Finite Diff First Derivative
+# Density
 densityint = -2*np.imag(densityint)*dE
 densitypole = -2*np.imag(densitypole)
 
-# Works
+# LDOS
+LDOS = -2*np.imag(LDOS)
+
+#
 plt.plot(densityint, color='#951158', linestyle='dashed')
 plt.plot(densitypole, color='#00AEC7')
 
@@ -176,5 +179,8 @@ plt.show()
 # as we're computing the same approximate thing two different ways, it's to check if they agree.
 errcomp = np.log10(0.5*np.linalg.norm(densityint-densitypole)/np.linalg.norm(densityint+densitypole))
 
-print("Relative backwards differences discrepancy = 10^"+f'{errcomp:.3f}')
+print("Relative evaluation discrepancy = 10^"+f'{errcomp:.3f}')
 
+# # Extra stuff
+# plt.plot(energy, LDOS)  # Show the LDOS of the region
+# plt.scatter(np.real(poles), np.imag(poles))  # Show the pole locations

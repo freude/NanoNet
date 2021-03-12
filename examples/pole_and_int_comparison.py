@@ -1,11 +1,12 @@
 '''
 This example script computes the finite difference density
 derivative using both numerical integration and complex pole
-summation. It serves  as a demonstration and a validation of
+summation. It serves as a demonstration and a validation of
 the pole summation method. For the given parameters below,
-the numerical energy grid contains 528 energy points and the
+the numerical energy grid contains 348 energy points (it would
+be larger if the lower bound wasn't truncated by Emin) and the
 complex pole summation contains only 21. Not only do these
-results agree within 1 part in 10,000 at 1/25th the compu-
+results agree within 1 part in 10,000 at 1/16th the compu-
 tational cost, due to its construction, the complex pole sum-
 mation is more accurate. Where possible, the complex pole
 summation method should be used over numerical integration.
@@ -75,11 +76,11 @@ lowbnd = max(Emin, muL - p*kT)
 uppbnd = muR + p*kT
 # We chose to have our energy spacing be at most 3*kT/40
 numE = round((uppbnd-lowbnd)/(0.075*kT)) + 1
-#numE = round((muR - muL + 2*p*kT)/(0.075*kT)) + 1
+# numE = round((muR - muL + 2*p*kT)/(0.075*kT)) + 1
 
 # We generate our grid for numerical integration, paying mind about the FD tails at muL-p*kT and muR + p*kT.
 energy = np.linspace(lowbnd, uppbnd, numE)
-#energy = np.linspace(muL - p*kT, muR + p*kT, numE)
+# energy = np.linspace(muL - p*kT, muR + p*kT, numE)
 
 # Initialize the storage of the surface Green's funs.
 sgf_l = []
