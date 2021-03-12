@@ -3,8 +3,8 @@ This example script computes the efficient density matrix
 evaluation using both numerical integration and complex pole
 summation. It serves as a demonstration and a validation of
 the pole summation method. For the given parameters below,
-the numerical energy grid contains 348 energy points and the
-complex pole summation contains only 26. Not only do these
+the numerical energy grid contains 441 energy points and the
+complex pole summation contains only 33. Not only do these
 results agree within 1 part in 10,000 at 1/13th the compu-
 tational cost, due to its construction, the complex pole sum-
 mation is more accurate. Where possible, the complex pole
@@ -61,7 +61,7 @@ h_l, h_0, h_r = h.get_hamiltonians()
 
 Emin = -3.98
 ChemPot = -3.91
-kT = 0.010
+kT = 0.005
 reltol = 10**-8
 p = np.ceil(-np.log(reltol))  # Integer number of kT away to get the desired relative tolerance.
 
@@ -71,7 +71,6 @@ numE = round((ChemPot - Emin + p*kT)/(0.075*kT)) + 1
 # We generate our grid for numerical integration, paying mind about the FD tails at muL-p*kT and muR + p*kT.
 energy = np.linspace(Emin, ChemPot + p*kT, numE)
 
-
 # Initialize the storage of the surface Green's funs.
 sgf_l = []
 sgf_r = []
@@ -79,7 +78,7 @@ sgf_r = []
 # We compute the numerical evaluation of the Green's
 # function on the real energy grid. This is by far
 # the most expensive part of this example.
-
+#
 for E in energy:
     # Note that though the surface Green's function technique is very fast, it can
     # have slight errors due to choice of numerical cutoffs, if the solution is

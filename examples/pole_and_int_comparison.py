@@ -3,9 +3,9 @@ This example script computes the finite difference density
 derivative using both numerical integration and complex pole
 summation. It serves as a demonstration and a validation of
 the pole summation method. For the given parameters below,
-the numerical energy grid contains 348 energy points (it would
+the numerical energy grid contains 708 energy points (it would
 be larger if the lower bound wasn't truncated by Emin) and the
-complex pole summation contains only 21. Not only do these
+complex pole summation contains only 26. Not only do these
 results agree within 1 part in 10,000 at 1/16th the compu-
 tational cost, due to its construction, the complex pole sum-
 mation is more accurate. Where possible, the complex pole
@@ -68,7 +68,7 @@ Emin = -3.98
 muL = -3.9175
 muR = -3.9025
 muC = 0.5*(muL + muR)  # This is the energy the derivative is being evaluated at
-kT = 0.010
+kT = 0.001
 reltol = 10**-8
 p = np.ceil(-np.log(reltol))  # Integer number of kT away to get the desired relative tolerance.
 
@@ -76,6 +76,7 @@ lowbnd = max(Emin, muL - p*kT)
 uppbnd = muR + p*kT
 # We chose to have our energy spacing be at most 3*kT/40
 numE = round((uppbnd-lowbnd)/(0.075*kT)) + 1
+
 # numE = round((muR - muL + 2*p*kT)/(0.075*kT)) + 1
 
 # We generate our grid for numerical integration, paying mind about the FD tails at muL-p*kT and muR + p*kT.
@@ -201,8 +202,8 @@ LDOS = -2*np.imag(LDOS)
 # Works
 plt.plot(backwardsint, color='#951158', linestyle='dashed')
 plt.plot(backwardspole, color='#D40F7D')
-plt.plot(forwardspole, color='#00808B', linestyle='dashed')
-plt.plot(forwardsint, color='#00AEC7')
+plt.plot(forwardsint, color='#00808B', linestyle='dashed')
+plt.plot(forwardspole, color='#00AEC7')
 plt.plot(centralint, color='#899600', linestyle='dashed')
 plt.plot(centralpole, color='#C4D600')
 
