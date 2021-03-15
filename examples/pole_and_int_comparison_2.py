@@ -3,8 +3,8 @@ This example script computes the efficient density matrix
 evaluation using both numerical integration and complex pole
 summation. It serves as a demonstration and a validation of
 the pole summation method. For the given parameters below,
-the numerical energy grid contains 441 energy points and the
-complex pole summation contains only 33. Not only do these
+the numerical energy grid contains easily 10x the energy
+points of complex pole summation. Not only do these
 results agree within 1 part in 10,000 at 1/13th the compu-
 tational cost, due to its construction, the complex pole sum-
 mation is more accurate. Where possible, the complex pole
@@ -62,11 +62,11 @@ h_l, h_0, h_r = h.get_hamiltonians()
 Emin = -3.98
 ChemPot = -3.91
 kT = 0.005
-reltol = 10**-8
+reltol = 10**-10
 p = np.ceil(-np.log(reltol))  # Integer number of kT away to get the desired relative tolerance.
 
 # We chose to have our energy spacing be at most 3*kT/40
-numE = round((ChemPot - Emin + p*kT)/(0.075*kT)) + 1
+numE = round((ChemPot - Emin + p*kT)/(0.05*kT)) + 1
 
 # We generate our grid for numerical integration, paying mind about the FD tails at muL-p*kT and muR + p*kT.
 energy = np.linspace(Emin, ChemPot + p*kT, numE)
@@ -169,8 +169,9 @@ densitypole = -2*np.imag(densitypole)
 LDOS = -2*np.imag(LDOS)
 
 #
-plt.plot(densityint, color='#951158', linestyle='dashed')
 plt.plot(densitypole, color='#00AEC7')
+plt.plot(densityint, color='#951158', linestyle='dashed')
+
 
 plt.show()
 
