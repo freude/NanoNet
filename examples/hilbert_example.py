@@ -24,6 +24,11 @@ phi = make_hilbert_weights(E)
 
 realfun = 1/(E**2 + 1)      # The function we are going to transform
 imagfun = E/(E**2 + 1)      # Its analytical hilbert transform
+
+#Alternative example using Sinc, choose W = 15
+#realfun = np.sinc(E)**2      # The function we are going to transform
+#imagfun = 0.5*(2*np.pi*E-np.sin(2*np.pi*E))/(np.pi*E)**2      # Its analytical hilbert transform
+
 hilbfun = realfun.dot(phi)  # Our numerical hilbert transform
 
 # To compute using the fourier transform we need the data on an
@@ -49,3 +54,6 @@ plt.show()  # Note the slight deviations at the end are
             # ed a satisfactory amount. Note how the FFT
             # method erroneously clamps the function to
             # the edges/zero to maintain periodicity
+
+
+asdf = 1
