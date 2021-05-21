@@ -127,8 +127,8 @@ def graphene_third_nearest_neighbour_with_overlaps():
 
     # --------------------------- Hamiltonian -------------------------
 
-    h = tb.Hamiltonian(xyz=coords, nn_distance=3.1, comp_overlap=True)
-    h.initialize(radial_dep)
+    h = tb.Hamiltonian(xyz=coords, nn_distance=[1.5, 2.5, 3.1], comp_overlap=True)
+    h.initialize()
     h.set_periodic_bc(period)
 
     band_structure = np.zeros((sum(num_points), h.h_matrix.shape[0]))
@@ -191,8 +191,8 @@ def graphene_nanoribbons_zigzag():
 
     # --------------------------- Hamiltonian -------------------------
 
-    h = tb.Hamiltonian(xyz=coords, nn_distance=3.1, comp_overlap=True)
-    h.initialize(radial_dep)
+    h = tb.Hamiltonian(xyz=coords, nn_distance=[1.5, 2.5, 3.1], comp_overlap=True)
+    h.initialize()
     h.set_periodic_bc(period)
 
     k_points = np.linspace(0.0, np.pi/period[0][1], 20)
@@ -256,8 +256,8 @@ def graphene_nanoribbons_armchair():
 
     # --------------------------- Hamiltonian -------------------------
 
-    h = tb.Hamiltonian(xyz=coords, nn_distance=3.1, comp_overlap=True)
-    h.initialize(radial_dep)
+    h = tb.Hamiltonian(xyz=coords, nn_distance=[1.5, 2.5, 3.1], comp_overlap=True)
+    h.initialize()
     h.set_periodic_bc(period)
 
     k_points = np.linspace(0.0, np.pi/period[0][1], 20)
