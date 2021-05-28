@@ -58,6 +58,14 @@ class StructDesignerXYZ(AbstractStructureDesigner):
 
         labels, coords = xyz2np(reader)
 
+        offset = 1e-3
+
+        min_x = np.min(coords[:, 0]) - offset
+        min_y = np.min(coords[:, 1]) - offset
+        min_z = np.min(coords[:, 2]) - offset
+
+        coords -= np.array([min_x, min_y, min_z])
+
         num_lines = reader.count('\n')
         if num_lines > 11:
             logging.info("The xyz-file:\n {}".format('\n'.join(reader.split('\n')[:11])))

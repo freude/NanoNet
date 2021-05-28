@@ -163,8 +163,20 @@ class Hamiltonian(BasisTB):
     """
 
     def __init__(self, **kwargs):
+        """
+
+        Parameters
+        ----------
+        nn_distance : float, list
+            Nearest neighbour distance of distances
+            if the tight-binding method is beyond the first-nearest neighbour approximation (Default value = 2.39)
+        radial_dep : func
+             Radial dependence function (Default value = None)
+        """
 
         nn_distance = kwargs.get('nn_distance', 2.39)
+        self.int_radial_dependence = None
+        nn_distance = self._set_nn_distances(nn_distance)
         self.compute_overlap = kwargs.get('comp_overlap', False)
         self.compute_angular = kwargs.get('comp_angular_dep', True)
 
@@ -193,7 +205,6 @@ class Hamiltonian(BasisTB):
         self.k_vector = 0  # default value of the wave vector
         self.ct = None
         self.radial_dependence = None
-        self.int_radial_dependence = None
         self.so_coupling = kwargs.get('so_coupling', 0.0)
         self.log_outputed = False
         self.unique_distances = set()
@@ -210,21 +221,7 @@ class Hamiltonian(BasisTB):
             self.ov_matrix = np.zeros((self.basis_size, self.basis_size), dtype=np.complex)
             self.ov_matrix_bc_add = np.zeros((self.basis_size, self.basis_size), dtype=np.complex)
 
-    def initialize(self, int_radial_dep=None, radial_dep=None):
-        """Compute matrix elements of the Hamiltonian.
-
-        Parameters
-        ----------
-        int_radial_dep : func
-             Integer radial dependence function (Default value = None)
-        radial_dep : func
-             Radial dependence function (Default value = None)
-
-        Returns
-        -------
-        type Hamiltonian
-            Returns the instance of the class Hamiltonian
-        """
+        radial_dep = kwargs.get('radial_dep', None)
 
         if radial_dep is None:
             logging.info('Radial dependence function: None')
@@ -233,15 +230,16 @@ class Hamiltonian(BasisTB):
             logging.info('Radial dependence function:\n\n{}'.format(inspect.getsource(radial_dep)))
             logging.info("\n---------------------------------\n")
 
-        if int_radial_dep is None:
-            logging.info('Discrete radial dependence function: None')
-            logging.info("\n---------------------------------\n")
-        else:
-            logging.info('Discrete radial dependence function:\n\n{}'.format(inspect.getsource(int_radial_dep)))
-            logging.info("\n---------------------------------\n")
-
         self.radial_dependence = radial_dep
-        self.int_radial_dependence = int_radial_dep
+
+    def initialize(self):
+        """Compute matrix elements of the Hamiltonian.
+
+        Returns
+        -------
+        type Hamiltonian
+            Returns the instance of the class Hamiltonian
+        """
 
         self._initialize()
 
@@ -360,6 +358,36 @@ class Hamiltonian(BasisTB):
         ind = np.argsort(vals)
 
         return vals[ind], vects[:, ind]
+
+    def _set_nn_distances(self, nn_dist):
+        if nn_dist is not None:
+            if isinstance(nn_dist, list):
+                logging.info('{} nearest neighbour interactions are taken into account.'.format(len(nn_dist)))
+                logging.info("\n---------------------------------\n")
+                nn_dist.sort()
+                self._nn_distance = nn_dist[-1]
+
+                def int_radial_dep(coords):
+                    """
+                        Step-wise radial dependence function
+                    """
+                    norm_of_coords = np.linalg.norm(coords)
+
+                    ans = sum([norm_of_coords > item for item in nn_dist]) + 1
+
+                    if norm_of_coords > nn_dist[-1]:
+                        return 100
+                    else:
+                        return ans
+
+                self.int_radial_dependence = int_radial_dep
+            else:
+                self._nn_distance = nn_dist
+        else:
+            logging.info('The first nearest-neighbour approximation is used.')
+            logging.info("\n---------------------------------\n")
+
+        return self._nn_distance
 
     def _ind2atom(self, ind):
         """

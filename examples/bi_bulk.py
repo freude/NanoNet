@@ -66,8 +66,8 @@ def main():
     set_tb_params(PARAMS_BI_BI1=PAR1, PARAMS_BI_BI2=PAR2, PARAMS_BI_BI3=PAR3)
 
     # compute Hamiltonian matrices
-    h = Hamiltonian(xyz=path_to_xyz_file, nn_distance=4.6, so_coupling=1.5)
-    h.initialize(radial_dep)
+    h = Hamiltonian(xyz=path_to_xyz_file, nn_distance=[3.3, 3.7, 4.6], so_coupling=1.5)
+    h.initialize()
     h.set_periodic_bc(primitive_cell)
 
     # define wave vectors
