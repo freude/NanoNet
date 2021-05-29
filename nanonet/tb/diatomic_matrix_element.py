@@ -356,6 +356,10 @@ def me_qsymm(atom1, ll1, atom2, ll2, coords):
         M = coords[1] / norm
         N = coords[2] / norm
 
+        # L = coords[0]
+        # M = coords[1]
+        # N = coords[2]
+
         ans = list(family[0].data.values())[0] * 0.0
 
         for j, item in enumerate(family):

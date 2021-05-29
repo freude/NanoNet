@@ -36,6 +36,7 @@ def set_tb_params(**kwargs):
                                     kwargs['symm'],
                                     kwargs['norbs'],
                                     bloch_model=True)
+        qsymm.display_family(family)
         setattr(dme, 'family', family[2:])
 
 

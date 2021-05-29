@@ -8,6 +8,7 @@ from nanonet.tb import get_k_coords, set_tb_params
 import matplotlib.pyplot as plt
 import qsymm
 from nanonet.tb.hamiltonian_qsymm import HamiltonianQsymm
+from nanonet.tb.hamiltonian_sym import HamiltonianSym
 
 
 def main():
@@ -253,36 +254,31 @@ def main2():
     Bp = np.array([0.86925, 0.43743, 0.0])
     Bd = np.array([0.86925, -1.99968, 0.0])
 
-    # Ad = np.array([0.86925, 1.99968, 0.0])
-    # Ap = np.array([0.86925, -0.43743, 0.0])
-    # Bp = np.array([-0.86925, 0.43743, 0.0])
-    # Bd = np.array([-0.86925, -1.99968, 0.0])
-    rAp_rBd = (Bd - Ap)
-    rBp_rAp = -(Bp - Ap)
-    rBd_rAd = -(Bd - Ad) - np.array([0.0, b, 0.0])
+    rAp_rBd = (Bd - Ap)                              # t0AB
+    rBp_rAp = -(Bp - Ap)                             # pAB
+    rBd_rAd = -(Bd - Ad)                             # dAB
     # rAd_rAp = Ad - Ap
     # rAd_rAp1 = np.array([0.0, b, 0.0]) - (Ad - Ap)
-    rAd_rAp2 = np.array([a, 0, 0.0]) - (Ad - Ap)
-    rAp_rBd1 = (Ap-Bd) - np.array([a, 0, 0.0])
+    rAd_rAp2 = -np.array([a, 0, 0.0]) - (Ad - Ap)     # t0x
+    rAp_rBd1 = -(Bd - Ap) - np.array([a, 0, 0.0])       # t0ABx
 
     hopping_vectors = [
-        ('Bd', 'Bd', np.array([1, 0, 0])),
-        ('Ap', 'Ap', np.array([1, 0, 0])),
-        ('Ap', 'Ap', np.array([0, 1, 0])),
-        ('Bd', 'Ap', rAp_rBd),
-        ('Ap', 'Bp', rBp_rAp),
-        ('Ad', 'Bd', rBd_rAd),
-        ('Bd', 'Ap', rAp_rBd1),
-        ('Ad', 'Ap', rAd_rAp2)
+        ('Bd', 'Bd', np.array([a, 0, 0])),   # tdx
+        ('Ap', 'Ap', np.array([a, 0, 0])),   # tpx
+        ('Ap', 'Ap', np.array([0, b, 0])),   # tpy
+        ('Bd', 'Ap', rAp_rBd),               # t0AB
+        ('Ap', 'Bp', rBp_rAp),               # pAB
+        ('Ad', 'Bd', rBd_rAd),               # dAB
+        ('Bd', 'Ap', rAp_rBd1),              # t0ABx
+        ('Ad', 'Ap', rAd_rAp2)               # t0x
     ]
-    
 
     hopping_vectors = [(item[0], item[1], item[2] / np.linalg.norm(item[2])) for item in hopping_vectors]
     hopping_vectors = [(item[0], item[1], item[2][:2]) for item in hopping_vectors]
 
     # Inversion
     perm_inv = {'Ad': 'Bd', 'Ap': 'Bp', 'Bd': 'Ad', 'Bp': 'Ap'}
-    onsite_inv = {site: (1 if site in ['Ad', 'Bd'] else -1) * np.eye(1) for site in sites}
+    onsite_inv = {site: (1 if site in ['Ad', 'Bd'] else 1) * np.eye(1) for site in sites}
     inversion = qsymm.groups.symmetry_from_permutation(-np.eye(2), perm_inv, norbs, onsite_inv)
 
     onsite_inv1 = {site: (1 if site in ['Ad', 'Bd'] else 1) * np.eye(1) for site in sites}
@@ -303,14 +299,13 @@ def main2():
     tdx = -0.41
     tpAB = 0.40
     tdAB = 0.51
-    t0AB = 0.39
-    t0ABx = 0.29
+    t0ABx = 0.39
+    t0AB = 0.29
     t0x = 0.14
     tpy = 0.13
 
-    params = [tdx, tpx, t0AB, t0ABx, tpy, tdAB, tpAB, t0x]
-    params = [tpx, tdx, tpAB, tdAB, t0AB, t0ABx, t0x, tpy]
     params = [tdx, tpx, t0ABx, t0AB, tpy, tdAB, tpAB, t0x]
+    # params = [tdx, tpx,tdAB, tpAB, tpy, t0ABx, t0AB, t0x]
 
     set_tb_params(hopping_vectors=hopping_vectors,
                   symm=symmetries,
@@ -336,7 +331,8 @@ def main2():
                  """.format(0.25*a, 0.32*b, 0.07*b)
 
     # compute Hamiltonian matrices
-    h = HamiltonianQsymm(xyz=input_file, nn_distance=1.1*b)
+    h = HamiltonianQsymm(xyz=input_file, nn_distance=1.1 * b)
+    # h = HamiltonianSym(xyz=input_file, nn_distance=1.01 * b)
     h.initialize()
     period = np.array([[a, 0.0, 0.0],
                        [0.0, b, 0.0]])
@@ -374,6 +370,145 @@ def main2():
     plt.show()
 
 
+# def main3():
+#     # Define 4 sites with one orbital each
+#     sites = ['Ad', 'Ap', 'Bd', 'Bp']
+#     norbs = [(site, 1) for site in sites]
+#
+#     # Define symbolic coordinates for orbitals
+#     rAp = qsymm.sympify('[x_Ap, y_Ap]')
+#     rAd = qsymm.sympify('[x_Ad, y_Ad]')
+#     rBp = qsymm.sympify('[x_Bp, y_Bp]')
+#     rBd = qsymm.sympify('[x_Bd, y_Bd]')
+#
+#     a = 3.477
+#     b = 6.249
+#
+#     # Ad = np.array([-0.86925, 1.99968, 0.0])
+#     # Ap = np.array([-0.86925, -0.43743, 0.0])
+#     # Bp = np.array([0.86925, 0.43743, 0.0])
+#     # Bd = np.array([0.86925, -1.99968, 0.0])
+#
+#     # Ad = np.array([0.86925, 1.99968, 0.0])
+#     # Ap = np.array([0.86925, -0.43743, 0.0])
+#     # Bp = np.array([-0.86925, 0.43743, 0.0])
+#     # Bd = np.array([-0.86925, -1.99968, 0.0])
+#     rAp_rBd = (rBd - rAp)
+#     rBp_rAp = -(rBp - rAp)
+#     rBd_rAd = -(rBd - rAd) - np.array([0.0, b, 0.0])
+#     # rAd_rAp = Ad - Ap
+#     # rAd_rAp1 = np.array([0.0, b, 0.0]) - (Ad - Ap)
+#     rAd_rAp2 = np.array([a, 0, 0.0]) - (Ad - Ap)
+#     rAp_rBd1 = (Ap - Bd) - np.array([a, 0, 0.0])
+#
+#     hopping_vectors = [
+#         ('Bd', 'Bd', np.array([1, 0, 0])),
+#         ('Ap', 'Ap', np.array([1, 0, 0])),
+#         ('Ap', 'Ap', np.array([0, 1, 0])),
+#         ('Bd', 'Ap', rAp_rBd),
+#         ('Ap', 'Bp', rBp_rAp),
+#         ('Ad', 'Bd', rBd_rAd),
+#         ('Bd', 'Ap', rAp_rBd1),
+#         ('Ad', 'Ap', rAd_rAp2)
+#     ]
+#
+#     hopping_vectors = [(item[0], item[1], item[2] / np.linalg.norm(item[2])) for item in hopping_vectors]
+#     hopping_vectors = [(item[0], item[1], item[2][:2]) for item in hopping_vectors]
+#
+#     # Inversion
+#     perm_inv = {'Ad': 'Bd', 'Ap': 'Bp', 'Bd': 'Ad', 'Bp': 'Ap'}
+#     onsite_inv = {site: (1 if site in ['Ad', 'Bd'] else -1) * np.eye(1) for site in sites}
+#     inversion = qsymm.groups.symmetry_from_permutation(-np.eye(2), perm_inv, norbs, onsite_inv)
+#
+#     onsite_inv1 = {site: (1 if site in ['Ad', 'Bd'] else 1) * np.eye(1) for site in sites}
+#     inversion1 = qsymm.groups.symmetry_from_permutation(-np.eye(2), perm_inv, norbs, onsite_inv1)
+#
+#     # Glide
+#     perm_glide = {site: site for site in sites}
+#     onsite_glide = {site: (1 if site in ['Ad', 'Bd'] else -1) * np.eye(1) for site in sites}
+#     glide = qsymm.groups.symmetry_from_permutation(np.array([[-1, 0], [0, 1]]), perm_glide, norbs, onsite_glide)
+#     glide1 = qsymm.groups.symmetry_from_permutation(np.array([[1, 0], [0, -1]]), perm_glide, norbs, onsite_glide)
+#
+#     # TR
+#     time_reversal = qsymm.time_reversal(2, np.eye(4))
+#
+#     symmetries = {glide, inversion, time_reversal}
+#
+#     tpx = 1.13
+#     tdx = -0.41
+#     tpAB = 0.40
+#     tdAB = 0.51
+#     t0AB = 0.39
+#     t0ABx = 0.29
+#     t0x = 0.14
+#     tpy = 0.13
+#
+#     params = [tdx, tpx, t0AB, t0ABx, tpy, tdAB, tpAB, t0x]
+#     params = [tpx, tdx, tpAB, tdAB, t0AB, t0ABx, t0x, tpy]
+#     params = [tdx, tpx, t0ABx, t0AB, tpy, tdAB, tpAB, t0x]
+#
+#     set_tb_params(hopping_vectors=hopping_vectors,
+#                   symm=symmetries,
+#                   norbs=norbs,
+#                   params=params)
+#
+#     # define the basis set - one s-type orbital
+#     mo_orb = tb.Orbitals('WA')
+#     mo_orb.add_orbital('wannier', energy=0.74, tag=0)
+#     mo_orb = tb.Orbitals('TeA')
+#     mo_orb.add_orbital('wannier', energy=-1.75, tag=1)
+#     mo_orb = tb.Orbitals('WB')
+#     mo_orb.add_orbital('wannier', energy=0.74, tag=2)
+#     mo_orb = tb.Orbitals('TeB')
+#     mo_orb.add_orbital('wannier', energy=-1.75, tag=3)
+#
+#     input_file = """4
+#                     WTe2
+#                     WA   -{0}   {1}   0.0
+#                     TeA   -{0}  -{2}   0.0
+#                     WB    {0}  -{1}   0.0
+#                     TeB    {0}  {2}   0.0
+#                  """.format(0.25 * a, 0.32 * b, 0.07 * b)
+#
+#     # compute Hamiltonian matrices
+#     h = HamiltonianQsymm(xyz=input_file, nn_distance=1.1 * b)
+#     h.initialize()
+#     period = np.array([[a, 0.0, 0.0],
+#                        [0.0, b, 0.0]])
+#
+#     h.set_periodic_bc(period)
+#
+#     special_k_points = {
+#         'GAMMA': [0, 0, 0],
+#         'Y': [0, np.pi / b, 0],
+#         'X': [np.pi / a, 0, 0],
+#         'M': [np.pi / a, np.pi / b, 0]
+#     }
+#
+#     # aaa = h.get_tb_matrix(special_k_points['K'])
+#
+#     # define wave vector coordinates
+#     sym_points = ['X', 'GAMMA', 'Y', 'M', 'GAMMA']
+#     num_points = [25, 15, 15, 15]
+#     k_points = get_k_coords(sym_points, num_points, special_k_points)
+#
+#     # compute band structure
+#     band_structure = np.zeros((sum(num_points), h.h_matrix.shape[0]), dtype=np.complex)
+#
+#     for jj, item in enumerate(k_points):
+#         band_structure[jj, :], _ = h.diagonalize(item)
+#
+#     # visualize
+#     ax = plt.axes()
+#     ax.set_title(r'Band structure of MoS$_2$ layer')
+#     ax.set_ylabel('Energy (eV)')
+#     ax.plot(np.sort(np.real(band_structure))[:, :8], 'k')
+#     ax.plot([0, band_structure.shape[0]], [0, 0], '--', color='k', linewidth=0.5)
+#     plt.xticks(np.insert(np.cumsum(num_points) - 1, 0, 0), labels=sym_points)
+#     ax.xaxis.grid()
+#     plt.show()
+
+
 if __name__ == '__main__':
 
-    main2()
+    main()

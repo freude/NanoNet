@@ -187,12 +187,12 @@ def graphene_third_nearest_neighbour_with_overlaps_eigenvectors():
 
     # --------------------------- Hamiltonian -------------------------
 
-    h = tb.Hamiltonian(xyz=coords, nn_distance=3.1, comp_overlap=True)
-    h.initialize(radial_dep)
+    h = tb.Hamiltonian(xyz=coords, nn_distance=[1.5, 2.5, 3.1], comp_overlap=True)
+    h.initialize()
     h.set_periodic_bc(period)
 
-    kx = np.linspace(-0.9*np.pi / a2, 0.9*np.pi / a2, 50)
-    ky = np.linspace(-0.9*np.pi / a2, 0.9*np.pi / a2, 50)
+    kx = np.linspace(-0.9*np.pi / a2, 0.9*np.pi / a2, 20)
+    ky = np.linspace(-0.9*np.pi / a2, 0.9*np.pi / a2, 20)
 
     # compute band structure
     band_structure = np.zeros((len(kx), len(ky), h.h_matrix.shape[0]), dtype=np.complex)

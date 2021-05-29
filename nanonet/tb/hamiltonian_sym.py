@@ -13,6 +13,7 @@ from nanonet.tb.orbitals import Orbitals
 import nanonet.verbosity as verbosity
 from nanonet.tb.hamiltonian import Hamiltonian
 from nanonet.tb.hamiltonian import unique_distances
+from sympy import init_printing
 
 
 init_printing(use_unicode=True)
@@ -402,8 +403,8 @@ def main():
     wv = np.linspace(0, 2*np.pi/per, 50)
 
     for item in wv:
-
         M = h.get_tb_matrix(np.array([0, 0, item]))
+        # M = h.get_tb_matrix(Symbol('kx'))
         pprint(M)
         # pprint(M.eigenvals())
 

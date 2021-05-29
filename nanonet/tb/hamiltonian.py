@@ -209,6 +209,17 @@ class Hamiltonian(BasisTB):
         self.log_outputed = False
         self.unique_distances = set()
 
+        radial_dep = kwargs.get('radial_dep', None)
+
+        if radial_dep is None:
+            logging.info('Radial dependence function: None')
+            logging.info("\n---------------------------------\n")
+        else:
+            logging.info('Radial dependence function:\n\n{}'.format(inspect.getsource(radial_dep)))
+            logging.info("\n---------------------------------\n")
+
+        self.radial_dependence = radial_dep
+
     def _initialize(self):
 
         self._coords = [0 for _ in range(self.basis_size)]
@@ -220,17 +231,6 @@ class Hamiltonian(BasisTB):
         if self.compute_overlap:
             self.ov_matrix = np.zeros((self.basis_size, self.basis_size), dtype=np.complex)
             self.ov_matrix_bc_add = np.zeros((self.basis_size, self.basis_size), dtype=np.complex)
-
-        radial_dep = kwargs.get('radial_dep', None)
-
-        if radial_dep is None:
-            logging.info('Radial dependence function: None')
-            logging.info("\n---------------------------------\n")
-        else:
-            logging.info('Radial dependence function:\n\n{}'.format(inspect.getsource(radial_dep)))
-            logging.info("\n---------------------------------\n")
-
-        self.radial_dependence = radial_dep
 
     def initialize(self):
         """Compute matrix elements of the Hamiltonian.
@@ -666,7 +666,6 @@ class Hamiltonian(BasisTB):
                 logging.info("Unique distances: \n    {}".format("\n    ".join(self.unique_distances)))
                 logging.info("---------------------------------\n")
                 self.log_outputed = True
-
 
     def get_hamiltonians(self):
         """Return a list of Hamiltonian matrices. For 1D systems, the list is [Hl, Hc, Hr],
