@@ -291,7 +291,7 @@ class Hamiltonian(BasisTB):
         else:
             self.ct = None
 
-    def diagonalize(self):
+    def diagonalize(self, k_vector=None):
         """Diagonalize the Hamiltonian matrix for the finite isolated system
         (without periodic boundary conditions)
 
@@ -303,11 +303,18 @@ class Hamiltonian(BasisTB):
             Eigenvectors
         """
 
-        vals, vects = scipy.linalg.eigh(self.h_matrix, self.ov_matrix)
-        vals = np.real(vals)
-        ind = np.argsort(vals)
+        if self.ct is not None:
+            if k_vector is None:
+                k_vector = [0, 0, 0]
+            vals, vects = self.diagonalize_periodic_bc(k_vector)
+        else:
+            vals, vects = scipy.linalg.eigh(self.h_matrix, self.ov_matrix)
+            vals = np.real(vals)
+            ind = np.argsort(vals)
+            vals = vals[ind]
+            vects = vects[:, ind]
 
-        return vals[ind], vects[:, ind]
+        return vals, vects
 
     def diagonalize_periodic_bc(self, k_vector):
         """Diagonalize the Hamiltonian matrix with the periodic boundary conditions
@@ -336,10 +343,16 @@ class Hamiltonian(BasisTB):
             self._compute_h_matrix_bc_add(overlap=self.compute_overlap)
 
         if self.compute_overlap:
-            vals, vects = scipy.linalg.eigh(self.h_matrix_bc_factor * self.h_matrix + self.h_matrix_bc_add,
-                                            self.h_matrix_bc_factor * self.ov_matrix + self.ov_matrix_bc_add)
+
+            hhh = self.h_matrix_bc_factor * self.h_matrix + self.h_matrix_bc_add
+            ov = self.h_matrix_bc_factor * self.ov_matrix + self.ov_matrix_bc_add
+
+            hhh = np.triu(hhh, k = 1) + np.tril(np.transpose(np.conjugate(hhh)))
+            ov = np.triu(ov, k=1) + np.tril(np.transpose(np.conjugate(ov)))
+
+            vals, vects = scipy.linalg.eigh(hhh, ov)
         else:
-            vals, vects = np.linalg.eigh(self.h_matrix_bc_factor * self.h_matrix + self.h_matrix_bc_add)
+            vals, vects = scipy.linalg.eig(self.h_matrix_bc_factor * self.h_matrix + self.h_matrix_bc_add)
 
         vals = np.real(vals)
         ind = np.argsort(vals)

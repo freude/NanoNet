@@ -2,6 +2,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 from nanonet.tb import get_k_coords
 import nanonet.tb as tb
+from nanonet.tb.visualize import plot_bs_path, plot_bs_1D
+
+
+plt.style.use('plots.mplstyle')
 
 # --------------------- vectors (in Angstroms) --------------------
 
@@ -24,13 +28,11 @@ special_k_points = {
 }
 
 sym_points = ['GAMMA', 'M', 'K', 'GAMMA']
-num_points = [25, 25, 25]
+num_points = [50, 50, 50]
+
 k_points = get_k_coords(sym_points, num_points, special_k_points)
 
 # ------------------------------------------------------------------
-
-fig_counter = 1
-
 
 def graphene_first_nearest_neighbour():
 
@@ -61,18 +63,10 @@ def graphene_first_nearest_neighbour():
     for jj, item in enumerate(k_points):
         band_structure[jj, :], _ = h.diagonalize_periodic_bc(item)
 
-    # visualize
-    global fig_counter
-    plt.figure(fig_counter)
-    fig_counter += 1
-    ax = plt.axes()
-    ax.set_title(r'Band structure of graphene, 1st NN')
-    ax.set_ylabel('Energy (eV)')
-    ax.plot(np.sort(band_structure), 'k')
-    ax.plot([0, band_structure.shape[0]], [0, 0], '--', color='k', linewidth=0.5)
-    plt.xticks(np.insert(np.cumsum(num_points) - 1, 0, 0), labels=sym_points)
-    ax.xaxis.grid()
-    plt.show()
+    plot_bs_path(band_structure, num_points=num_points, point_labels=sym_points,
+               title=r'Band structure of graphene, 1st NN')
+
+    return band_structure
 
 
 def radial_dep(coords):
@@ -137,17 +131,10 @@ def graphene_third_nearest_neighbour_with_overlaps():
         band_structure[jj, :], _ = h.diagonalize_periodic_bc(item)
 
     # visualize
-    global fig_counter
-    plt.figure(fig_counter)
-    fig_counter += 1
-    ax = plt.axes()
-    ax.set_title('Band structure of graphene, 3d NN \n after Reich et al, Phys. Rev. B 66, 035412 (2002)')
-    ax.set_ylabel('Energy (eV)')
-    ax.plot(np.sort(band_structure), 'k')
-    ax.plot([0, band_structure.shape[0]], [0, 0], '--', color='k', linewidth=0.5)
-    plt.xticks(np.insert(np.cumsum(num_points) - 1, 0, 0), labels=sym_points)
-    ax.xaxis.grid()
-    plt.show()
+    plot_bs_path(band_structure, num_points=num_points, point_labels=sym_points,
+               title='Band structure of graphene, 3d NN \n after Reich et al, Phys. Rev. B 66, 035412 (2002)')
+
+    return band_structure
 
 
 def graphene_nanoribbons_zigzag():
@@ -202,17 +189,12 @@ def graphene_nanoribbons_zigzag():
         band_structure[jj, :], _ = h.diagonalize_periodic_bc([0.0, item, 0.0])
 
     # visualize
-    ax = plt.axes()
-    ax.set_title('Graphene nanoribbon, zigzag 11')
-    ax.set_ylabel('Energy (eV)')
-    ax.set_xlabel(r'Wave vector ($\frac{\pi}{a}$)')
-    ax.plot(k_points, np.sort(band_structure), 'k')
-    ax.xaxis.grid()
-    plt.show()
 
-    ax1 = plot_atoms(atoms, show_unit_cell=2, rotation='90x,0y,00z')
-    ax1.axis('off')
-    plt.show()
+    plot_bs_1D(k_points, band_structure,
+               title='Graphene nanoribbon, zigzag 11',
+               atoms=atoms)
+
+    return band_structure
 
 
 def graphene_nanoribbons_armchair():
@@ -267,17 +249,12 @@ def graphene_nanoribbons_armchair():
         band_structure[jj, :], _ = h.diagonalize_periodic_bc([0.0, item, 0.0])
 
     # visualize
-    ax = plt.axes()
-    ax.set_title('Graphene nanoribbon, armchair 11')
-    ax.set_ylabel('Energy (eV)')
-    ax.set_xlabel(r'Wave vector ($\frac{\pi}{a}$)')
-    ax.plot(k_points, np.sort(band_structure), 'k')
-    ax.xaxis.grid()
-    plt.show()
 
-    ax1 = plot_atoms(atoms, show_unit_cell=2, rotation='90x,0y,00z')
-    ax1.axis('off')
-    plt.show()
+    plot_bs_1D(k_points, band_structure,
+               title='Graphene nanoribbon, armchair 11',
+               atoms=atoms)
+
+    return band_structure
 
 
 def graphene_nanotube():
@@ -329,17 +306,12 @@ def graphene_nanotube():
         band_structure[jj, :], _ = h.diagonalize_periodic_bc([0.0, item, 0.0])
 
     # visualize
-    ax = plt.axes()
-    ax.set_title('Band structure of carbon nanotube, ({0}, {1}) \n 1st nearest neighbour approximation'.format(n, m))
-    ax.set_ylabel('Energy (eV)')
-    ax.set_xlabel(r'Wave vector ($\frac{\pi}{a}$)')
-    ax.plot(k_points, np.sort(band_structure), 'k')
-    ax.xaxis.grid()
-    plt.show()
 
-    ax1 = plot_atoms(atoms, show_unit_cell=2, rotation='10x,50y,30z')
-    ax1.axis('off')
-    plt.show()
+    plot_bs_1D(k_points, band_structure,
+               title='Band structure of carbon nanotube, ({0}, {1}) \n 1st nearest neighbour approximation'.format(n, m),
+               atoms=atoms)
+
+    return band_structure
 
 
 if __name__ == '__main__':
@@ -349,4 +321,3 @@ if __name__ == '__main__':
     graphene_nanoribbons_zigzag()
     graphene_nanoribbons_armchair()
     graphene_nanotube()
-
