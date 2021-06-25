@@ -1,8 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from ase.visualize.plot import plot_atoms
-from ase.visualize import view
-from ase import Atoms
+from ase import Atoms, Atom
 
 
 def make_atoms(**kwargs):
@@ -46,11 +45,31 @@ def unfold_atoms(atoms):
 
 def ham2atoms(ham):
 
-    atoms = Atoms()
-    atoms.set_positions(np.array(ham.atom_list.values()).T)
-    atoms.set_chemical_symbols(list(ham.atom_list.keys()))
+    labels = []
+    for item in list(ham.atom_list.keys()):
+        labels.append(''.join(i for i in item if not i.isdigit()))
 
-    return atoms
+    atoms = Atoms(labels, list(ham.atom_list.values()))
+
+    virtual = Atoms()
+    interface = Atoms()
+
+    if ham.ct is not None:
+        vac = np.array([50, 50, 50])
+        mask = np.nonzero(np.sum(np.abs(ham.ct.pcv), axis=0))[0]
+        vac_diag = np.diag(np.array([50, 50, 50]))
+        vac[mask] = 0
+        cell = np.vstack((ham.ct.pcv, vac_diag[np.nonzero(vac)[0]]))
+        atoms.set_cell(cell)
+
+        for key, item in ham.ct.virtual_and_interfacial_atoms.items():
+            if key.startswith('*'):
+                virtual += Atom('He', item)
+            else:
+                interface += Atom('Ne', item)
+
+    return atoms, virtual, interface
+
 
 def visualize_hamiltonian(atoms):
     fig, ax = plt.subplots()

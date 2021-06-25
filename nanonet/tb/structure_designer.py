@@ -58,7 +58,7 @@ class StructDesignerXYZ(AbstractStructureDesigner):
 
         labels, coords = xyz2np(reader)
 
-        offset = 1e-3
+        offset = 1e-4
 
         min_x = np.min(coords[:, 0]) - offset
         min_y = np.min(coords[:, 1]) - offset
@@ -75,7 +75,7 @@ class StructDesignerXYZ(AbstractStructureDesigner):
             logging.info("There are {} more coordinates".format(str(num_lines-10)))
         else:
             logging.info("The xyz-file:\n {}".format(reader))
-        logging.info("---------------------------------\n")
+        logging.info("-------------------------------------------------------\n")
 
         # ------------- count species and nodes --------------
         self._nn_distance = kwargs.get('nn_distance', 0)           # maximal distance to a neighbor
@@ -228,7 +228,7 @@ class CyclicTopology(AbstractStructureDesigner):
         logging.info("Primitive_cell_vectors: \n {} \n".format(primitive_cell_vectors))
         logging.debug("Virtual and interfacial atoms: \n "
                       "{} ".format(print_dict(self.virtual_and_interfacial_atoms)))
-        logging.info("---------------------------------\n")
+        logging.info("-------------------------------------------------------\n")
 
     @property
     def atom_list(self):
@@ -332,12 +332,16 @@ class CyclicTopology(AbstractStructureDesigner):
 
         """
 
-        try_coords = atom_coords + cell_vector
+        order = 1
 
-        if not is_in_coords(try_coords, penalty_coords) and \
-                not is_in_coords(try_coords, np.array(list(self.virtual_and_interfacial_atoms.values()))):
-            self.virtual_and_interfacial_atoms.update({"*_" + str(count) + label: try_coords})
-            count += 1
+        for index in range(order):
+
+            try_coords = atom_coords + cell_vector * (1.0 + index)
+
+            if not is_in_coords(try_coords, penalty_coords) and \
+                    not is_in_coords(try_coords, np.array(list(self.virtual_and_interfacial_atoms.values()))):
+                self.virtual_and_interfacial_atoms.update({"*_" + str(count) + label: try_coords})
+                count += 1
 
         return count
 
@@ -364,21 +368,25 @@ class CyclicTopology(AbstractStructureDesigner):
 
         for vec in self.pcv:
 
-            try_coords = atom_coords + cell_vector + vec
+            order = 1
 
-            if not is_in_coords(try_coords, penalty_coords) and \
-                    not is_in_coords(try_coords, np.array(list(self.virtual_and_interfacial_atoms.values()))):
+            for index in range(order):
 
-                self.virtual_and_interfacial_atoms.update({"**_" + str(count) + label: try_coords})
-                count += 1
+                try_coords = atom_coords + cell_vector + vec * (index + 1)
 
-            try_coords = atom_coords + cell_vector - vec
+                if not is_in_coords(try_coords, penalty_coords) and \
+                        not is_in_coords(try_coords, np.array(list(self.virtual_and_interfacial_atoms.values()))):
 
-            if not is_in_coords(try_coords, penalty_coords) and \
-                    not is_in_coords(try_coords, np.array(list(self.virtual_and_interfacial_atoms.values()))):
+                    self.virtual_and_interfacial_atoms.update({"**_" + str(count) + label: try_coords})
+                    count += 1
 
-                self.virtual_and_interfacial_atoms.update({"**_" + str(count) + label: try_coords})
-                count += 1
+                try_coords = atom_coords + cell_vector - vec * (index + 1)
+
+                if not is_in_coords(try_coords, penalty_coords) and \
+                        not is_in_coords(try_coords, np.array(list(self.virtual_and_interfacial_atoms.values()))):
+
+                    self.virtual_and_interfacial_atoms.update({"**_" + str(count) + label: try_coords})
+                    count += 1
 
         return count
 
@@ -433,6 +441,95 @@ class CyclicTopology(AbstractStructureDesigner):
             flag = 'R'
 
         return flag
+
+
+class CyclicTopologyDense(CyclicTopology):
+    """The class provides functionality for determining
+    the periodic boundary conditions for a crystal cell.
+    The object of the class is instantiated by
+    a set of the primitive cell vectors.
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+
+    """
+
+    def _generate_atom_list(self, labels, coords):
+        """
+
+        Parameters
+        ----------
+        labels :
+            labels of atoms
+        coords :
+            coordinates of atoms
+
+        Returns
+        -------
+
+        """
+
+        order = len(self.pcv)
+
+        for j, coord in enumerate(coords):        # for each atom in the unit cell
+            self.virtual_and_interfacial_atoms.update({str(j) + "_" + labels[j]: coord})
+            self.interfacial_atoms_ind.append(j)
+            label = "_" + str(j) + "_" + labels[j]
+            self._translate(coord, label, order, coords)
+
+        # remove non-unique elements
+        self.interfacial_atoms_ind = list(set(self.interfacial_atoms_ind))
+
+    def _translate(self, coord, label, order, penalty_coords):
+        """
+
+        Parameters
+        ----------
+        atom_coords :
+
+        cell_vector :
+
+        label :
+
+        penalty_coords :
+
+        count :
+
+
+        Returns
+        -------
+
+        """
+
+        min_vect = np.linalg.norm(self.pcv, axis=0)
+        min_vect = min_vect[min_vect > 0.0001]
+        min_vect = np.min(min_vect)
+
+        translate_order = int(3*self._nn_distance // min_vect) + 1
+        count = 0
+        ind = np.arange(-translate_order, translate_order)
+
+        if order == 1:
+            ind = np.expand_dims(ind, axis=1)
+        elif order == 2:
+            ind_x, ind_y = np.meshgrid(ind, ind)
+            ind = np.vstack((ind_x.flatten(), ind_y.flatten())).T
+        else:
+            ind_x, ind_y, ind_z = np.meshgrid(ind, ind, ind)
+            ind = np.vstack((ind_x.flatten(), ind_y.flatten(), ind_z.flatten())).T
+
+        for item in ind:
+            try_coords = coord + np.dot(item, self.pcv)
+
+            if not is_in_coords(try_coords, penalty_coords) and \
+                    not is_in_coords(try_coords, list(self.virtual_and_interfacial_atoms.values())):
+                self.virtual_and_interfacial_atoms.update({"*_" + str(count) + label: try_coords})
+                count += 1
+
+        return count
 
 
 if __name__ == '__main__':

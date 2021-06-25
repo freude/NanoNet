@@ -5,7 +5,7 @@ from ase.visualize.plot import plot_atoms
 
 
 plt.style.use('plots.mplstyle')
-
+col = ['k', 'k--', 'r', 'r--']
 
 def plot_bs_1D(k_points, band_structure, **kwargs):
 
@@ -39,7 +39,10 @@ def plot_bs_1D(k_points, band_structure, **kwargs):
 
 def plot_bs_path(band_structure, **kwargs):
 
-    size = band_structure
+    if not isinstance(band_structure, list):
+        band_structure = [band_structure]
+
+    size = band_structure[0].shape
 
     num_points = kwargs.get('num_points', [size[0]])
     point_labels = kwargs.get('point_labels', None)
@@ -50,10 +53,11 @@ def plot_bs_path(band_structure, **kwargs):
     ax = plt.axes()
     ax.set_title(title)
     ax.set_ylabel('Energy (eV)')
-    ax.plot(np.sort(band_structure), 'k')
+    for jj, item in enumerate(band_structure):
+        ax.plot(np.sort(item), col[jj])
 
     if isinstance(point_labels, list) and len(point_labels) != 0:
-        ax.plot([0, band_structure.shape[0]], [0, 0], '--', color='k', linewidth=0.5)
+        ax.plot([0, size[0]], [0, 0], '--', color='k', linewidth=0.5)
         plt.xticks(np.insert(np.cumsum(num_points) - 1, 0, 0), labels=point_labels)
     ax.xaxis.grid()
     plt.ylim(ylim)

@@ -3,6 +3,7 @@ The module contains a library of classes facilitating computations of Hamiltonia
 """
 from __future__ import print_function, division
 from __future__ import absolute_import
+from datetime import datetime
 from collections import OrderedDict
 from functools import reduce
 import logging
@@ -11,7 +12,8 @@ from operator import mul
 import numpy as np
 import scipy
 from nanonet.tb.abstract_interfaces import AbstractBasis
-from nanonet.tb.structure_designer import StructDesignerXYZ, CyclicTopology
+from nanonet.tb.structure_designer import StructDesignerXYZ
+from nanonet.tb.structure_designer import CyclicTopologyDense, CyclicTopology
 from nanonet.tb.diatomic_matrix_element import me
 from nanonet.tb.orbitals import Orbitals
 from nanonet.tb.aux_functions import dict2xyz
@@ -88,7 +90,7 @@ class BasisTB(AbstractBasis, StructDesignerXYZ):
         logging.info("Basis set \n Num of species {} \n".format(self.num_of_species))
         for key, label in self._orbitals_dict.items():
             logging.info("\n {} {} ".format(key, label.generate_info()))
-        logging.info("---------------------------------\n")
+        logging.info("-------------------------------------------------------\n")
 
     def qn2ind(self, qn):
         """Computes a matrix index of an matrix element from the index of atom and the index of atomic orbital.
@@ -180,10 +182,12 @@ class Hamiltonian(BasisTB):
         self.compute_overlap = kwargs.get('comp_overlap', False)
         self.compute_angular = kwargs.get('comp_angular_dep', True)
 
+        logging.info('*******************************************************')
+        logging.info('Computations have started at {}'.format(datetime.now()))
         logging.info('The verbosity level is {}'.format(verbosity.VERBOSITY))
-        logging.info('The radius of the neighbourhood is {} Ang'.format(nn_distance))
-        logging.info("\n---------------------------------\n")
+        logging.info("*******************************************************\n")
 
+        logging.info('The radius of the neighbourhood is {} Ang'.format(nn_distance))
         kwargs['nn_distance'] = nn_distance
 
         if not isinstance(kwargs['xyz'], str):
@@ -211,12 +215,13 @@ class Hamiltonian(BasisTB):
 
         if radial_dep is None:
             logging.info('Radial dependence function: None')
-            logging.info("\n---------------------------------\n")
+            logging.info("\n-------------------------------------------------------\n")
         else:
             logging.info('Radial dependence function:\n\n{}'.format(inspect.getsource(radial_dep)))
-            logging.info("\n---------------------------------\n")
+            logging.info("\n-------------------------------------------------------\n")
 
         self.radial_dependence = radial_dep
+        self.radial_dependence_ov = kwargs.get('radial_dep_ov', None)
 
     def initialize(self):
         """Compute matrix elements of the Hamiltonian.
@@ -270,7 +275,7 @@ class Hamiltonian(BasisTB):
                                 self.ov_matrix[ind1, ind2] = self._get_me(j1, j2, l1, l2, overlap=True)
 
         logging.info("Unique distances: \n    {}".format("\n    ".join(unique_distances)))
-        logging.info("---------------------------------\n")
+        logging.info("\n-------------------------------------------------------\n")
 
         return self
 
@@ -283,11 +288,26 @@ class Hamiltonian(BasisTB):
         primitive_cell : list
             list of vectors defining a primitive cell
         """
+
+        min_vect = np.linalg.norm(primitive_cell, axis=0)
+        min_vect = min_vect[min_vect > 0.0001]
+        min_vect = np.min(min_vect)
+
         if list(primitive_cell):
-            self.ct = CyclicTopology(primitive_cell,
-                                     list(self.atom_list.keys()),
-                                     list(self.atom_list.values()),
-                                     self._nn_distance)
+            if 2 * self._nn_distance < min_vect:
+                logging.info('Sparse translate')
+                logging.info("-------------------------------------------------------")
+                self.ct = CyclicTopology(primitive_cell,
+                                         list(self.atom_list.keys()),
+                                         list(self.atom_list.values()),
+                                         self._nn_distance)
+            else:
+                logging.info('Dense translate')
+                logging.info("-------------------------------------------------------")
+                self.ct = CyclicTopologyDense(primitive_cell,
+                                              list(self.atom_list.keys()),
+                                              list(self.atom_list.values()),
+                                              self._nn_distance)
         else:
             self.ct = None
 
@@ -347,7 +367,7 @@ class Hamiltonian(BasisTB):
             hhh = self.h_matrix_bc_factor * self.h_matrix + self.h_matrix_bc_add
             ov = self.h_matrix_bc_factor * self.ov_matrix + self.ov_matrix_bc_add
 
-            hhh = np.triu(hhh, k = 1) + np.tril(np.transpose(np.conjugate(hhh)))
+            hhh = np.triu(hhh, k=1) + np.tril(np.transpose(np.conjugate(hhh)))
             ov = np.triu(ov, k=1) + np.tril(np.transpose(np.conjugate(ov)))
 
             vals, vects = scipy.linalg.eigh(hhh, ov)
@@ -363,7 +383,7 @@ class Hamiltonian(BasisTB):
         if nn_dist is not None:
             if isinstance(nn_dist, list):
                 logging.info('{} nearest neighbour interactions are taken into account.'.format(len(nn_dist)))
-                logging.info("\n---------------------------------\n")
+                logging.info("\n-------------------------------------------------------\n")
                 nn_dist.sort()
                 self._nn_distance = nn_dist[-1]
 
@@ -385,7 +405,7 @@ class Hamiltonian(BasisTB):
                 self._nn_distance = nn_dist
         else:
             logging.info('The first nearest-neighbour approximation is used.')
-            logging.info("\n---------------------------------\n")
+            logging.info("\n-------------------------------------------------------\n")
 
         return self._nn_distance
 
@@ -473,7 +493,13 @@ class Hamiltonian(BasisTB):
             if self.radial_dependence is None:
                 factor = 1.0
             else:
-                factor = self.radial_dependence(norm)
+                if overlap:
+                    if self.radial_dependence_ov is not None:
+                        factor = self.radial_dependence_ov(norm)
+                    else:
+                        factor = 1.0
+                else:
+                    factor = self.radial_dependence(norm)
 
             # compute directional cosines
             if self.compute_angular:

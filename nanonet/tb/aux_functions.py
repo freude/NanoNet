@@ -3,6 +3,7 @@ The module contains a set of auxiliary functions facilitating the tight-binding 
 """
 from __future__ import print_function
 from __future__ import absolute_import
+import re
 from itertools import product
 import numpy as np
 import yaml
@@ -680,6 +681,42 @@ def is_in_coords(coord, coords):
     ans = False
 
     for xyz in list(coords):
-        ans += (np.linalg.norm(coord - xyz) < 0.01)
+        ans += (np.linalg.norm(coord - xyz) < 0.001)
 
     return ans
+
+
+def parse_bands(feig, npl=10):
+    # feig : filband in bands.x input file
+    # npl : number per line, 10 for bands.x, 6 for phonon
+
+    f = open(feig, 'r')
+    lines = f.readlines()
+
+    header = lines[0].strip()
+    line = header.strip('\n')
+    shape = re.split('[,=/]', line)
+    nbnd = int(shape[1])
+    nks = int(shape[3])
+    eig = np.zeros((nks, nbnd + 1), dtype=np.float32)
+
+    dividend = nbnd
+    divisor = npl
+    div = nbnd // npl + 1 if nbnd % npl == 0 else nbnd // npl + 2
+    kinfo = []
+    for index, value in enumerate(lines[1:]):
+        value = value.strip(' \n')
+        quotient = index // div
+        remainder = index % div
+
+        if remainder == 0:
+            kinfo.append(value)
+        else:
+            value = re.split('[ ]+', value)
+            a = (remainder - 1) * npl
+            b = a + len(value)
+            eig[quotient][a:b] = value
+
+    f.close()
+
+    return eig, nbnd, nks, kinfo

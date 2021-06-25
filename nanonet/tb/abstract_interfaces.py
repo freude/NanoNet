@@ -31,7 +31,7 @@ class AbstractStructureDesigner(with_metaclass(ABCMeta, object)):
 
         if isinstance(query, list) or isinstance(query, np.ndarray):
             ans = self._kd_tree.query(query,
-                                      k=25,
+                                      k=55,
                                       distance_upper_bound=self._nn_distance)
         elif isinstance(query, int):
 
