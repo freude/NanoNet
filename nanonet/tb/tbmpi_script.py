@@ -1,14 +1,17 @@
 #!/usr/bin/env python
 from __future__ import print_function
 from __future__ import absolute_import
-from mpi4py import MPI
+try:
+    from mpi4py import MPI
+
+    comm = MPI.COMM_WORLD
+    rank = comm.Get_rank()
+    size = comm.Get_size()
+except ImportError:
+    rank = 0
+    size = 1
 import nanonet.tb as tb
-from .tb_script import create_parser, preprocess_data, postprocess_data
-
-
-comm = MPI.COMM_WORLD
-rank = comm.Get_rank()
-size = comm.Get_size()
+from nanonet.tb.tb_script import create_parser, preprocess_data, postprocess_data
 
 
 def main1(param_file, k_points_file, xyz, show, save, code_name):
@@ -50,7 +53,8 @@ def main1(param_file, k_points_file, xyz, show, save, code_name):
         band_structure.append({'id': j, 'wave_vector': jj, 'eigenvalues': vals, 'eigenvectors': vects})
         print('#{} '.format(j), " ".join(['{:.3f} '.format(element) for element in vals]))
 
-    band_structure = comm.reduce(band_structure, root=0)
+    if size > 1:
+        band_structure = comm.reduce(band_structure, root=0)
 
     if rank == 0:
         postprocess_data(wave_vector, band_structure, show, save, code_name)
