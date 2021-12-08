@@ -37,9 +37,9 @@ class HamiltonianSp(Hamiltonian):
         """The function computes matrix elements of the Hamiltonian."""
 
         # initialize Hamiltonian matrices
-        self.h_matrix = sp.lil_matrix((self.basis_size, self.basis_size), dtype=np.complex)
-        self.h_matrix_bc_add = sp.lil_matrix((self.basis_size, self.basis_size), dtype=np.complex)
-        self.h_matrix_bc_factor = np.ones((self.basis_size, self.basis_size), dtype=np.complex)
+        self.h_matrix = sp.lil_matrix((self.basis_size, self.basis_size), dtype=complex)
+        self.h_matrix_bc_add = sp.lil_matrix((self.basis_size, self.basis_size), dtype=complex)
+        self.h_matrix_bc_factor = np.ones((self.basis_size, self.basis_size), dtype=complex)
         self.h_matrix_bc_factor = sp.lil_matrix(self.h_matrix_bc_factor)
 
         # loop over all nodes
@@ -132,8 +132,8 @@ class HamiltonianSp(Hamiltonian):
 
         """
 
-        self.h_matrix_bc_add = sp.lil_matrix((self.basis_size, self.basis_size), dtype=np.complex)
-        self.h_matrix_bc_factor = np.ones((self.basis_size, self.basis_size), dtype=np.complex)
+        self.h_matrix_bc_add = sp.lil_matrix((self.basis_size, self.basis_size), dtype=complex)
+        self.h_matrix_bc_factor = np.ones((self.basis_size, self.basis_size), dtype=complex)
         self.h_matrix_bc_factor = sp.lil_matrix(self.h_matrix_bc_factor)
         self.k_vector = None
 
@@ -142,8 +142,8 @@ class HamiltonianSp(Hamiltonian):
 
         self.k_vector = [0.0, 0.0, 0.0]
 
-        self.h_matrix_left_lead = sp.lil_matrix((self.basis_size, self.basis_size), dtype=np.complex)
-        self.h_matrix_right_lead = sp.lil_matrix((self.basis_size, self.basis_size), dtype=np.complex)
+        self.h_matrix_left_lead = sp.lil_matrix((self.basis_size, self.basis_size), dtype=complex)
+        self.h_matrix_right_lead = sp.lil_matrix((self.basis_size, self.basis_size), dtype=complex)
 
         self._compute_h_matrix_bc_add(split_the_leads=True)
         self.k_vector = None

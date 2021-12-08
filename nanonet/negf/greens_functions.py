@@ -53,8 +53,8 @@ def surface_greens_function_poles(hl, h0, hr):
 
     full_matrix_size = 2 * matix_size
     identity = np.identity(matix_size)
-    main_matrix = np.zeros((full_matrix_size, full_matrix_size), dtype=np.complex)
-    overlap_matrix = np.zeros((full_matrix_size, full_matrix_size), dtype=np.complex)
+    main_matrix = np.zeros((full_matrix_size, full_matrix_size), dtype=complex)
+    overlap_matrix = np.zeros((full_matrix_size, full_matrix_size), dtype=complex)
     main_matrix[0:matix_size, matix_size:2 * matix_size] = identity
     overlap_matrix[0:matix_size, 0:matix_size] = identity
     main_matrix[matix_size:matix_size+hl[-1].shape[0], matix_size-hl[-1].shape[1]:matix_size] = -hl[-1]
@@ -198,8 +198,8 @@ def surface_greens_function(E, h_l, h_0, h_r, iterate=False, damp=0.0001j):
 
     full_matrix_size = 2 * matrix_size
     identity = np.identity(matrix_size)
-    main_matrix = np.zeros((full_matrix_size, full_matrix_size), dtype=np.complex)
-    overlap_matrix = np.zeros((full_matrix_size, full_matrix_size), dtype=np.complex)
+    main_matrix = np.zeros((full_matrix_size, full_matrix_size), dtype=complex)
+    overlap_matrix = np.zeros((full_matrix_size, full_matrix_size), dtype=complex)
     main_matrix[0:matrix_size, matrix_size:2 * matrix_size] = identity
     overlap_matrix[0:matrix_size, 0:matrix_size] = identity
     main_matrix[matrix_size:matrix_size+h_l[-1].shape[0], matrix_size-h_l[-1].shape[1]:matrix_size] = -h_l[-1]

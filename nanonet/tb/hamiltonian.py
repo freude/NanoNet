@@ -229,13 +229,13 @@ class Hamiltonian(BasisTB):
 
         self._coords = [0 for _ in range(self.basis_size)]
         # initialize Hamiltonian matrices
-        self.h_matrix = np.zeros((self.basis_size, self.basis_size), dtype=np.complex)
-        self.h_matrix_bc_add = np.zeros((self.basis_size, self.basis_size), dtype=np.complex)
-        self.h_matrix_bc_factor = np.ones((self.basis_size, self.basis_size), dtype=np.complex)
+        self.h_matrix = np.zeros((self.basis_size, self.basis_size), dtype=complex)
+        self.h_matrix_bc_add = np.zeros((self.basis_size, self.basis_size), dtype=complex)
+        self.h_matrix_bc_factor = np.ones((self.basis_size, self.basis_size), dtype=complex)
 
         if self.compute_overlap:
-            self.ov_matrix = np.zeros((self.basis_size, self.basis_size), dtype=np.complex)
-            self.ov_matrix_bc_add = np.zeros((self.basis_size, self.basis_size), dtype=np.complex)
+            self.ov_matrix = np.zeros((self.basis_size, self.basis_size), dtype=complex)
+            self.ov_matrix_bc_add = np.zeros((self.basis_size, self.basis_size), dtype=complex)
 
         # loop over all nodes
         for j1 in range(self.num_of_nodes):
@@ -552,9 +552,9 @@ class Hamiltonian(BasisTB):
 
         """
 
-        self.h_matrix_bc_add = np.zeros((self.basis_size, self.basis_size), dtype=np.complex)
-        self.ov_matrix_bc_add = np.zeros((self.basis_size, self.basis_size), dtype=np.complex)
-        self.h_matrix_bc_factor = np.ones((self.basis_size, self.basis_size), dtype=np.complex)
+        self.h_matrix_bc_add = np.zeros((self.basis_size, self.basis_size), dtype=complex)
+        self.ov_matrix_bc_add = np.zeros((self.basis_size, self.basis_size), dtype=complex)
+        self.h_matrix_bc_factor = np.ones((self.basis_size, self.basis_size), dtype=complex)
         self.k_vector = None
 
     def _compute_h_matrix_bc_factor(self):
@@ -663,8 +663,8 @@ class Hamiltonian(BasisTB):
 
         self.k_vector = [0.0, 0.0, 0.0]
 
-        self.h_matrix_left_lead = np.zeros((self.basis_size, self.basis_size), dtype=np.complex)
-        self.h_matrix_right_lead = np.zeros((self.basis_size, self.basis_size), dtype=np.complex)
+        self.h_matrix_left_lead = np.zeros((self.basis_size, self.basis_size), dtype=complex)
+        self.h_matrix_right_lead = np.zeros((self.basis_size, self.basis_size), dtype=complex)
 
         self._compute_h_matrix_bc_add(split_the_leads=True)
         self.k_vector = None

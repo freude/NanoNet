@@ -251,8 +251,8 @@ class CyclicTopology(AbstractStructureDesigner):
         """
 
         # matrices of distances between atoms and interfaces
-        distances1 = np.empty((len(coords), len(self.pcv)), dtype=np.float)
-        distances2 = np.empty((len(coords), len(self.pcv)), dtype=np.float)
+        distances1 = np.empty((len(coords), len(self.pcv)), dtype=float)
+        distances2 = np.empty((len(coords), len(self.pcv)), dtype=float)
 
         for j1, coord in enumerate(coords):    # for each atom in the unit cell
             for j2, basis_vec in enumerate(self.pcv):    # for lattice basis vector

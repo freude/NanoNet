@@ -15,13 +15,13 @@ class Test(unittest.TestCase):
 
         args = self.parser.parse_args(['./examples/input_samples/input.yaml', '-S=0'])
         ans = tb_script.main1(args.param_file, args.k_points_file, args.xyz, args.show, args.save, args.code_name)
-        self.assertEquals(ans, 0)
+        self.assertEqual(ans, 0)
 
     def test_tb_without_mpi_sparse(self):
         """ """
         args = self.parser.parse_args(['./examples/input_samples/input.yaml', '-S=0'])
         ans = tbmpi_script.main1(args.param_file, args.k_points_file, args.xyz, args.show, args.save, args.code_name)
-        self.assertEquals(ans, 0)
+        self.assertEqual(ans, 0)
 
 
 if __name__ == '__main__':

@@ -105,7 +105,7 @@ def test_bulk_silicon():
     k = tb.get_k_coords(sym_points, num_points, 'Si')
     band_sructure = []
 
-    vals = np.zeros((sum(num_points), h.h_matrix.shape[0]), dtype=np.complex)
+    vals = np.zeros((sum(num_points), h.h_matrix.shape[0]), dtype=complex)
 
     for jj, item in enumerate(k):
         vals[jj, :], _ = h.diagonalize_periodic_bc(item)

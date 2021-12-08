@@ -32,8 +32,8 @@ def surface_greens_function_poles(h_list):
     full_matrix_size = pr_order * matix_size
     identity = np.identity(matix_size)
 
-    main_matrix = np.zeros((full_matrix_size, full_matrix_size), dtype=np.complex)
-    overlap_matrix = np.zeros((full_matrix_size, full_matrix_size), dtype=np.complex)
+    main_matrix = np.zeros((full_matrix_size, full_matrix_size), dtype=complex)
+    overlap_matrix = np.zeros((full_matrix_size, full_matrix_size), dtype=complex)
 
     for j in range(pr_order):
 
@@ -51,7 +51,7 @@ def surface_greens_function_poles(h_list):
 
     alpha, betha, _, eigenvects, _, _ = linalg.lapack.cggev(main_matrix, overlap_matrix)
 
-    eigenvals = np.zeros(alpha.shape, dtype=np.complex128)
+    eigenvals = np.zeros(alpha.shape, dtype=complex128)
 
     for j, item in enumerate(zip(alpha, betha)):
 
@@ -169,10 +169,10 @@ def surface_greens_function(E, h_l, h_0, h_r, iterate=False):
     vals, vects = surface_greens_function_poles(h_list)
     vals = np.diag(vals)
 
-    u_right = np.zeros(h_0.shape, dtype=np.complex)
-    u_left = np.zeros(h_0.shape, dtype=np.complex)
-    lambda_right = np.zeros(h_0.shape, dtype=np.complex)
-    lambda_left = np.zeros(h_0.shape, dtype=np.complex)
+    u_right = np.zeros(h_0.shape, dtype=complex)
+    u_left = np.zeros(h_0.shape, dtype=complex)
+    lambda_right = np.zeros(h_0.shape, dtype=complex)
+    lambda_left = np.zeros(h_0.shape, dtype=complex)
 
     alpha = 0.001
 

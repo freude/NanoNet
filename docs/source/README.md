@@ -115,7 +115,7 @@ the class Hamiltonian with proper arguments.
 6. Find the eigenvalues and eigenstates of the Hamiltonian for each wave vector.
     
     ```python
-    vals = np.zeros((sum(num_points), h.h_matrix.shape[0]), dtype=np.complex)
+    vals = np.zeros((sum(num_points), h.h_matrix.shape[0]), dtype=complex)
     
     for jj, i in enumerate(k):
         vals[jj, :], _ = h.diagonalize_periodic_bc(list(i))

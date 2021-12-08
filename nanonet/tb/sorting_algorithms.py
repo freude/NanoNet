@@ -79,14 +79,14 @@ def sort_capacitance(coords, mat, left_lead, right_lead, **kwargs):
     
     """
 
-    charge = np.zeros(coords.shape[0], dtype=np.complex)
+    charge = np.zeros(coords.shape[0], dtype=complex)
     charge[left_lead] = 1e3
     charge[right_lead] = -1e3
 
     x = coords[:, 1].T
     y = coords[:, 0].T
 
-    mat = (mat != 0.0).astype(np.float)
+    mat = (mat != 0.0).astype(float)
     mat = 10 * (mat - np.diag(np.diag(mat)))
     mat = mat - np.diag(np.sum(mat, axis=1)) + 0.001 * np.identity(mat.shape[0])
 
