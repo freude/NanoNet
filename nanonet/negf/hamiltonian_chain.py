@@ -1,27 +1,7 @@
 import numpy as np
 from scipy.linalg import block_diag
-from nanonet.tb.aux_functions import yaml_parser
 from nanonet.negf.field import Field
-
-
-def fd(energy, ef, temp):
-    """
-
-    Parameters
-    ----------
-    energy :
-        
-    ef :
-        
-    temp :
-        
-
-    Returns
-    -------
-
-    """
-    kb = 8.61733e-5       # Boltzmann constant in eV
-    return 1.0 / (1.0 + np.exp((energy - ef) / (kb * temp)))
+from nanonet.tb.aux_functions import fd
 
 
 class HamiltonianChain(object):

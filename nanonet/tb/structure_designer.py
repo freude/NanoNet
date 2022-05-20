@@ -58,14 +58,6 @@ class StructDesignerXYZ(AbstractStructureDesigner):
 
         labels, coords = xyz2np(reader)
 
-        offset = 1e-3
-
-        min_x = np.min(coords[:, 0]) - offset
-        min_y = np.min(coords[:, 1]) - offset
-        min_z = np.min(coords[:, 2]) - offset
-
-        coords -= np.array([min_x, min_y, min_z])
-
         num_lines = reader.count('\n')
         if num_lines > 11:
             logging.info("The xyz-file:\n {}".format('\n'.join(reader.split('\n')[:11])))
@@ -185,7 +177,10 @@ class StructDesignerXYZ(AbstractStructureDesigner):
 
         ans = self._get_neighbours(query)
 
-        ans1 = [ans[1][0]]
+        if ans[0][0] == np.inf:
+            ans1 = []
+        else:
+            ans1 = [ans[1][0]]
 
         for item in zip(ans[0], ans[1]):
             if self._nn_distance * 0.1 < item[0] < self._nn_distance:
@@ -220,6 +215,9 @@ class CyclicTopology(AbstractStructureDesigner):
 
         self.interfacial_atoms_ind = []
         self.virtual_and_interfacial_atoms = OrderedDict()
+
+        self.shift = np.zeros(3)
+
         self._generate_atom_list(labels, coords)
 
         self._kd_tree = scipy.spatial.cKDTree(list(self.virtual_and_interfacial_atoms.values()),
@@ -258,9 +256,20 @@ class CyclicTopology(AbstractStructureDesigner):
             for j2, basis_vec in enumerate(self.pcv):    # for lattice basis vector
 
                 # compute distance to the primary plane of the unit cell
-                distances1[j1, j2] = np.inner(coord, basis_vec) / self.sizes[j2]
+                distances1[j1, j2] = np.inner(coord - self.shift, basis_vec) / self.sizes[j2]
                 # compute distance to the adjacent plane of the  unit cell
-                distances2[j1, j2] = np.inner(coord - basis_vec, basis_vec) / self.sizes[j2]
+                distances2[j1, j2] = np.inner(coord - self.shift - basis_vec, basis_vec) / self.sizes[j2]
+
+        for item in distances1.T:
+            self.shift += coords[np.argmin(item)]
+
+        for j1, coord in enumerate(coords):    # for each atom in the unit cell
+            for j2, basis_vec in enumerate(self.pcv):    # for lattice basis vector
+
+                # compute distance to the primary plane of the unit cell
+                distances1[j1, j2] = np.inner(coord - self.shift, basis_vec) / self.sizes[j2]
+                # compute distance to the adjacent plane of the  unit cell
+                distances2[j1, j2] = np.inner(coord - self.shift - basis_vec, basis_vec) / self.sizes[j2]
 
         # transform distance to the boolean variable defining whether atom belongs to the interface or not
         distances1 = np.abs(distances1 - np.min(distances1)) < self._nn_distance * 0.25
@@ -406,8 +415,7 @@ class CyclicTopology(AbstractStructureDesigner):
 
         return ans1
 
-    @staticmethod
-    def atom_classifier(coords, leads):
+    def atom_classifier(self, coords, leads):
         """
 
         Parameters
@@ -422,8 +430,8 @@ class CyclicTopology(AbstractStructureDesigner):
 
         """
 
-        distance_to_surface1 = np.inner(coords, leads) / np.linalg.norm(leads)
-        distance_to_surface2 = np.inner(coords - leads, leads) / np.linalg.norm(leads)
+        distance_to_surface1 = np.inner(coords - self.shift, leads) / np.linalg.norm(leads)
+        distance_to_surface2 = np.inner(coords - self.shift - leads, leads) / np.linalg.norm(leads)
 
         flag = None
 
