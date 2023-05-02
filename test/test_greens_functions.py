@@ -7,8 +7,6 @@ from nanonet.negf.recursive_greens_functions import recursive_gf
 from nanonet.negf.greens_functions import simple_iterative_greens_function
 
 
-np.warnings.filterwarnings('ignore')
-
 
 def simple_chain_greens_function(energy, h_0, h_r):
     """Analytical expression for the chain response function
