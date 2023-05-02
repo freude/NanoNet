@@ -10,7 +10,7 @@ from __future__ import absolute_import
 from __future__ import division
 import sys
 import math
-from .constants import *
+from nanonet.tb.constants import *
 import warnings
 from nanonet.tb import tb_params
 
@@ -46,14 +46,6 @@ def me_diatomic(bond, n, l_min, l_max, m, which_neighbour, overlap=False):
 
     label = n[0] + ORBITAL_QN[l_min] + n[1] + ORBITAL_QN[l_max] + '_' + M_QN[m]
 
-    # if n == '00':
-    #     label = ORBITAL_QN[l_min] + ORBITAL_QN[l_max] + '_' + M_QN[m]
-    # elif n == '01':
-    #     label = 'c' + ORBITAL_QN[l_max] + '_' + M_QN[m]
-    # elif n == '11':
-    #     label = 'cc' + '_' + M_QN[m]
-    # else:
-    #     raise ValueError('Wrong value of the value variable')
 
     if overlap:
         flag = 'OV_'
@@ -93,15 +85,16 @@ def d_me(N, l, m1, m2):
 
     """
 
-    if N == -1.0 and m1 == m2:
-        prefactor = math.sqrt(math.factorial(l + m2) * math.factorial(l - m2) *
-                              math.factorial(l + m1) * math.factorial(l - m1))
-    else:
-        prefactor = ((0.5 * (1 + N)) ** l) * (((1 - N) / (1 + N)) ** (m1 * 0.5 - m2 * 0.5)) * \
+    if N == -1:
+       N += sys.float_info.epsilon
+
+
+    prefactor = ((0.5 * (1 + N)) ** l) * (((1 - N) / (1 + N)) ** (m1 * 0.5 - m2 * 0.5)) * \
             math.sqrt(math.factorial(l + m2) * math.factorial(l - m2) *
                       math.factorial(l + m1) * math.factorial(l - m1))
 
     ans = 0
+
     for t in range(2 * l + 2):
         if l + m2 - t >= 0 and l - m1 - t >= 0 and t + m1 - m2 >= 0:
             if N == -1.0 and t == 0:
@@ -113,7 +106,7 @@ def d_me(N, l, m1, m2):
                        (math.factorial(l + m2 - t) * math.factorial(l - m1 - t) *
                         math.factorial(t) * math.factorial(t + m1 - m2))
 
-    return np.nan_to_num(ans * prefactor)
+    return ans * prefactor
 
 
 def tau(m):
@@ -313,7 +306,7 @@ def me(atom1, ll1, atom2, ll2, coords, which_neighbour=0, overlap=False):
 if __name__ == "__main__":
 
     x0 = np.array([0, 0, 0], dtype=float)
-    x1 = np.array([1, 1, 1], dtype=float)
+    x1 = np.array([0, 0, 1], dtype=float)
 
     coords = x0 - x1
     coords /= np.linalg.norm(coords)
@@ -329,14 +322,18 @@ if __name__ == "__main__":
     print(d_me(-coords[2], 2, 1, 0))
     print(d_me(-coords[2], 2, 0, 1))
     print(d_me(-coords[2], 2, 2, 1))
-    print(d_me(-coords[2], 2, 1, 2))
+    print(d_me(-coords[2], 2, 2, 1))
+    print(d_me(-coords[2], 2, -1, 2))
+    print(d_me(-coords[2], 2, 1, -2))
     print("-----------------------------")
     print(d_me(coords[2], 1, 1, 0))
     print(d_me(coords[2], 1, 0, 1))
     print(d_me(coords[2], 2, 1, 0))
     print(d_me(coords[2], 2, 0, 1))
     print(d_me(coords[2], 2, 2, 1))
-    print(d_me(coords[2], 2, 1, 2))
+    print(d_me(coords[2], 2, 2, 1))
+    print(d_me(coords[2], 2, -1, 2))
+    print(d_me(coords[2], 2, 1, -2))
     # print d_me(-coords[2], 1, -1, 0)
     # print d_me(-coords[2], 1, 0, -1)
     # print d_me(-coords[2], 1, -1, -1)
