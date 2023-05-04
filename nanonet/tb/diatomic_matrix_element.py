@@ -313,10 +313,6 @@ if __name__ == "__main__":
 
     print(coords)
 
-    # print d_me(coords[2], 0, 0, 0)
-    # print d_me(-coords[2], 0, 0, 0)
-    # print d_me(-coords[2], 1, 0, 0)
-
     print(d_me(-coords[2], 1, 1, 0))
     print(d_me(-coords[2], 1, 0, 1))
     print(d_me(-coords[2], 2, 1, 0))
