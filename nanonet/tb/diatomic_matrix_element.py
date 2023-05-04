@@ -110,7 +110,7 @@ def d_me(N, l, m1, m2):
 
 
 def tau(m):
-    """
+    """Auxiliary function
 
     Parameters
     ----------
