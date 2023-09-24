@@ -25,10 +25,10 @@ jobs:
         pip install -r requirements.txt
     - name: Extract tag name
       id: tag
-      run: echo TAG_NAME=$(echo $GITHUB_REF | cut -d / -f 3) >> $GITHUB_OUTPUT
+      run: export TAG_VAR="$(git describe --tags --abbrev=0)"
     - name: Update version in setup.py
       run: >-
-        sed -i "s/{{VERSION_PLACEHOLDER}}/${{ steps.tag.outputs.TAG_NAME }}/g" setup.py; cat setup.py
+        sed -i "s/{{VERSION_PLACEHOLDER}}/$TAG_VAR/g" setup.py; cat setup.py
     - name: Install Nanonet
       run: |
         pip install .
