@@ -2,7 +2,6 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![](https://github.com/freude/NanoNet/workflows/Nanonet%20tests/badge.svg)](https://github.com/freude/NanoNet/actions?query=workflow%3A%22Nanonet+tests%22)
-[![Coverage Status](https://coveralls.io/repos/github/freude/NanoNet/badge.svg?branch=master)](https://coveralls.io/github/freude/NanoNet?branch=master)
 [![codecov](https://codecov.io/gh/freude/NanoNet/graph/badge.svg?token=A765CQUD6R)](https://codecov.io/gh/freude/NanoNet)
 [![CodeFactor](https://www.codefactor.io/repository/github/freude/nanonet/badge/master)](https://www.codefactor.io/repository/github/freude/nanonet/overview/master)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/090d663fd8d6482c8c2a4c4c7358d223)](https://app.codacy.com/gh/freude/NanoNet/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
