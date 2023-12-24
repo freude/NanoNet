@@ -1,5 +1,13 @@
 from setuptools import setup, find_namespace_packages
 
+
+version='{{VERSION_PLACEHOLDER}}'
+
+try:
+    float(version)
+except ValueError:
+    version = 1.5
+
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
@@ -7,7 +15,7 @@ with open('requirements.txt') as fp:
     install_requires = fp.read().splitlines()
 
 setup(name='nano-net',
-      version='{{VERSION_PLACEHOLDER}}',
+      version=version,
       description='Python framework for tight-binding computations',
       long_description=long_description,
       long_description_content_type="text/markdown",
