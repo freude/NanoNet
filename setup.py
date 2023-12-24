@@ -6,7 +6,7 @@ version='{{VERSION_PLACEHOLDER}}'
 try:
     float(version)
 except ValueError:
-    version = 1.5
+    version = '1.5'
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
