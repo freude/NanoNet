@@ -181,7 +181,7 @@ atoms per unit cell:
 
 ## Authors
 
-- Mykhailo V. Klymenko (mike.klymenko@rmit.edu.au)
+- Mykhailo V. Klymenko (misha.klymenko@gmail.com)
 - Jackson S. Smith
 - Jesse A. Vaitkus
 - Jared H. Cole
