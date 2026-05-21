@@ -3,7 +3,7 @@ matplotlib
 numpy
 scipy
 PyYAML
-nose
+pynose
 mpi4py
 future
 pyfiglet
