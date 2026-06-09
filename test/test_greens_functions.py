@@ -7,7 +7,6 @@ from nanonet.negf.recursive_greens_functions import recursive_gf
 from nanonet.negf.greens_functions import simple_iterative_greens_function
 
 
-
 def simple_chain_greens_function(energy, h_0, h_r):
     """Analytical expression for the chain response function
     according to []
@@ -30,11 +29,11 @@ def simple_chain_greens_function(energy, h_0, h_r):
 
     for j, E in enumerate(energy):
         if E - h_0 <= -2 * h_r:
-            gf[0, j] = gf[0, j] + 1.0 / (2 * h_r ** 2) * np.sqrt((E - h_0) ** 2 - 4 * h_r ** 2)
+            gf[0, j] = gf[0, j] + (1.0 / (2 * h_r ** 2) * np.sqrt((E - h_0) ** 2 - 4 * h_r ** 2)).item()
         elif E - h_0 >= 2 * h_r:
-            gf[0, j] = gf[0, j] - 1.0 / (2 * h_r ** 2) * np.sqrt((E - h_0) ** 2 - 4 * h_r ** 2)
+            gf[0, j] = gf[0, j] - (1.0 / (2 * h_r ** 2) * np.sqrt((E - h_0) ** 2 - 4 * h_r ** 2)).item()
         else:
-            gf[0, j] = gf[0, j] - 1.0j / (2 * h_r ** 2) * np.sqrt(4 * h_r ** 2 - (E - h_0) ** 2)
+            gf[0, j] = gf[0, j] - (1.0j / (2 * h_r ** 2) * np.sqrt(4 * h_r ** 2 - (E - h_0) ** 2)).item()
 
     return gf
 
@@ -860,10 +859,11 @@ def test_simple_iterative_greens_function():
 
 
 if __name__ == '__main__':
+    test_single_atom_chain()
     # test_double_barrier_density_recursive()
     # test_gf_complex_chain_several_periods()
     # test_gf_single_atom_chain_several_periods()
-    test_double_barrier_density_recursive(complex_chain, 20)
+    # test_double_barrier_density_recursive(complex_chain, 20)
     # test_complex_chain()
     # test_gf_complex_chain_several_periods_recursive()
     # test_single_atom_chain()
