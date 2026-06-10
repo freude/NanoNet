@@ -57,14 +57,14 @@ def surface_greens_function_poles(hl, h0, hr):
     overlap_matrix = np.zeros((full_matrix_size, full_matrix_size), dtype=complex)
     main_matrix[0:matix_size, matix_size:2 * matix_size] = identity
     overlap_matrix[0:matix_size, 0:matix_size] = identity
-    main_matrix[matix_size:matix_size+hl[-1].shape[0], matix_size-hl[-1].shape[1]:matix_size] = -hl[-1]
-    overlap_matrix[2*matix_size-hr[-1].shape[0]:2*matix_size, matix_size:matix_size+hr[-1].shape[1]] = hr[-1]
+    main_matrix[matix_size:matix_size + hl[-1].shape[0], matix_size - hl[-1].shape[1]:matix_size] = -hl[-1]
+    overlap_matrix[2 * matix_size - hr[-1].shape[0]:2 * matix_size, matix_size:matix_size + hr[-1].shape[1]] = hr[-1]
 
     offfset = matix_size
 
     for j in range(num_blocks):
 
-        main_matrix[offfset:offfset+h0[j].shape[0], offfset:offfset+h0[j].shape[0]] = -h0[j]
+        main_matrix[offfset:offfset + h0[j].shape[0], offfset:offfset + h0[j].shape[0]] = -h0[j]
 
         if j > 0:
             main_matrix[offfset:offfset + hl[j - 1].shape[0], offfset - hl[j - 1].shape[1]:offfset] = hl[j - 1]
@@ -202,14 +202,15 @@ def surface_greens_function(E, h_l, h_0, h_r, iterate=False, damp=0.0001j):
     overlap_matrix = np.zeros((full_matrix_size, full_matrix_size), dtype=complex)
     main_matrix[0:matrix_size, matrix_size:2 * matrix_size] = identity
     overlap_matrix[0:matrix_size, 0:matrix_size] = identity
-    main_matrix[matrix_size:matrix_size+h_l[-1].shape[0], matrix_size-h_l[-1].shape[1]:matrix_size] = -h_l[-1]
-    overlap_matrix[2*matrix_size-h_r[-1].shape[0]:2*matrix_size, matrix_size:matrix_size+h_r[-1].shape[1]] = h_r[-1]
+    main_matrix[matrix_size:matrix_size + h_l[-1].shape[0], matrix_size - h_l[-1].shape[1]:matrix_size] = -h_l[-1]
+    overlap_matrix[2 * matrix_size - h_r[-1].shape[0]:2 * matrix_size, matrix_size:matrix_size + h_r[-1].shape[1]] = \
+    h_r[-1]
 
     offset = matrix_size
 
     for j in range(num_blocks):
 
-        main_matrix[offset:offset+h_0[j].shape[0], offset:offset+h_0[j].shape[0]] = -h_0[j]
+        main_matrix[offset:offset + h_0[j].shape[0], offset:offset + h_0[j].shape[0]] = -h_0[j]
 
         if j > 0:
             main_matrix[offset:offset + h_l[j - 1].shape[0], offset - h_l[j - 1].shape[1]:offset] = -h_l[j - 1]
@@ -217,8 +218,8 @@ def surface_greens_function(E, h_l, h_0, h_r, iterate=False, damp=0.0001j):
 
         offset += h_0[j].shape[0]
 
-    main_matrix[matrix_size:2*matrix_size, matrix_size:2*matrix_size] = \
-        (E + damp) * np.identity(matrix_size) + main_matrix[matrix_size:2*matrix_size, matrix_size:2*matrix_size]
+    main_matrix[matrix_size:2 * matrix_size, matrix_size:2 * matrix_size] = \
+        (E + damp) * np.identity(matrix_size) + main_matrix[matrix_size:2 * matrix_size, matrix_size:2 * matrix_size]
 
     alpha, betha, _, vects, _, _ = linalg.lapack.cggev(main_matrix, overlap_matrix)
 
@@ -239,9 +240,9 @@ def surface_greens_function(E, h_l, h_0, h_r, iterate=False, damp=0.0001j):
     lambda_right = np.diag(vals[:num_eigs // 2])
     lambda_left = np.diag(vals[num_eigs - 1:num_eigs // 2 - 1:-1])
 
-    h0 = -main_matrix[matrix_size:2*matrix_size, matrix_size:2*matrix_size] + (E + damp) * np.identity(matrix_size)
-    hl = -main_matrix[matrix_size:2*matrix_size, 0:matrix_size]
-    hr = overlap_matrix[matrix_size:2*matrix_size, matrix_size:2*matrix_size]
+    h0 = -main_matrix[matrix_size:2 * matrix_size, matrix_size:2 * matrix_size] + (E + damp) * np.identity(matrix_size)
+    hl = -main_matrix[matrix_size:2 * matrix_size, 0:matrix_size]
+    hr = overlap_matrix[matrix_size:2 * matrix_size, matrix_size:2 * matrix_size]
 
     sgf_l = hr.dot(u_right).dot(lambda_right).dot(np.linalg.pinv(u_right))
     sgf_r = hl.dot(u_left).dot(np.linalg.inv(lambda_left)).dot(np.linalg.pinv(u_left))
@@ -434,37 +435,36 @@ def sancho_rubio_iterative_greens_function(E, h_l, h_0, h_r, **kwargs):
     K0 = (E + 1j * damp) * s_0 - h_0
     KR = (E + 1j * damp) * s_r - h_r
 
-    #Seed values
+    # Seed values
     alpha0 = KR
     beta0 = KL
     esOld = K0
     eOld = esOld
     alpha = alpha0
-    beta  = beta0
+    beta = beta0
 
-    itr = 0        # initialise iteration check
+    itr = 0  # initialise iteration check
     normcheck = 1  # initialise normalisation check
-    maxiter=100
+    maxiter = 100
 
     while (itr < maxiter) & (normcheck > nconv):
         itr = itr + 1
-        
+
         lu, piv = linalg.lu_factor(eOld)
         a = linalg.lu_solve((lu, piv), alpha)
         b = linalg.lu_solve((lu, piv), beta)
-        
+
         alphab = alpha.dot(b)
         esNew = esOld - alphab
         eNew = eOld - beta.dot(a) - alphab
         alpha = alpha.dot(a)
         beta = beta.dot(b)
-        normcheck = linalg.norm(esNew-esOld, 2)
-        eOld  = eNew
+        normcheck = linalg.norm(esNew - esOld, 2)
+        eOld = eNew
         esOld = esNew
         # print(normcheck) #for debugging
- 
-    
+
     lu, piv = linalg.lu_factor(esNew)
-    SelfEnergy = alpha0.dot( linalg.lu_solve( (lu, piv), beta0) )
+    SelfEnergy = alpha0.dot(linalg.lu_solve((lu, piv), beta0))
 
     return SelfEnergy

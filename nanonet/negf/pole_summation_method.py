@@ -99,9 +99,7 @@ def pole_order_one(Emin, ChemPot, kT, p):
 
 
 def pole_minimizer_one(Emin, ChemPot, kT, p):
-    """
-    This function is minimizing the problem:
-    N = N_AB + N_BC + N_CD, where:
+    """This function is minimizing the problem N = N_AB + N_BC + N_CD.
     N_AB = (muIm + p*kTIm)/(2*pi*kT)
     N_BC = ( (mu + p*kT) - (muRe - p*kTre) )/(2*pi*kTIm)
     N_CD = (muIm + p*kTIm)/(2*pi*kTRe)
@@ -172,9 +170,7 @@ def pole_order_two(Emin, ChemPot, kT, p):
 
 
 def pole_minimizer_two(Emin, ChemPot, kT, p):
-    """
-    This function is minimizing the problem:
-    N = N_AB + N_BC + N_CD + N_DE + N_EF, where:
+    """This function is minimizing the problem N = N_AB + N_BC + N_CD + N_DE + N_EF.
     N_AB =
     N_BC =
     N_CD =
@@ -206,8 +202,7 @@ def pole_minimizer_two(Emin, ChemPot, kT, p):
 
 
 def pole_finite_difference(muL, muR, kT, reltol):
-    """
-    For computing the finite difference derivative using pole summation, see Vaitkus thesis.
+    """For computing the finite difference derivative using pole summation, see Vaitkus thesis.
 
     By using 2x one-sided differences, we can get the forwards, backwards, and centred
     first derivatives and the centred second derivative. The poles will be written as a vector
@@ -318,8 +313,7 @@ def pole_finite_difference(muL, muR, kT, reltol):
 
 
 def fermi_fun(E, mu, kT):
-    """
-    Computes the Fermi-Dirac distribution function. Auxiliary function just to tidy the workspace.
+    """Computes the Fermi-Dirac distribution function. Auxiliary function just to tidy the workspace.
 
     Parameters
     ----------
@@ -367,8 +361,7 @@ def fermi_fun(E, mu, kT):
 
 
 def fermi_deriv(E, mu, kT):
-    """
-    Computes the Fermi-Dirac distribution function derivative. Auxiliary function just to tidy the workspace.
+    """Computes the Fermi-Dirac distribution function derivative. Auxiliary function just to tidy the workspace.
 
     Parameters
     ----------
@@ -389,8 +382,7 @@ def fermi_deriv(E, mu, kT):
 
 
 def fermi_deriv2(E, mu, kT):
-    """
-    Computes the Fermi-Dirac distribution function second derivative. Auxiliary function just to tidy the workspace.
+    """Computes the Fermi-Dirac distribution function second derivative. Auxiliary function just to tidy the workspace.
 
     Parameters
     ----------
