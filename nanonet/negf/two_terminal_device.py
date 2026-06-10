@@ -353,9 +353,7 @@ class TwoTerminalDevice(object):
         return ans
 
     def visualize(self):
-        """ """
 
-        import matplotlib.pyplot as plt
         from matplotlib import cm
 
         vals = np.zeros(len(self.fields[0])*len(self.fields[0][0]))

@@ -365,8 +365,6 @@ class Field1D(object):
 
 
 def main():
-    """ """
-    import matplotlib.pyplot as plt
 
     fl = Field(path='/home/mk/gaussian_swarm/gauss_comp/out_neutral.cube')
 
@@ -425,8 +423,6 @@ def laplacian(input_mat, dx):
 
 
 def main1():
-    """ """
-    import matplotlib.pyplot as plt
 
     # fl = Field(path='/home/mk/gaussian_swarm/gauss_comp/wB_ion.cube')
     # fl = Field(path='../cubefil.cube')
