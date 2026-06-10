@@ -60,8 +60,7 @@ cd NanoNet
 pip install -r requirements.txt
 ```
 
-In order to install the package `Nanonet` just invoke
-the following line in the bash from within the source directory:
+To install the `Nanonet` package, run the following command in a Bash terminal from within the source directory:
 
 ```
 pip install .
@@ -72,7 +71,7 @@ pip install .
 If the source distribution is available, all tests may be run by invoking the following command in the root directory:
 
 ```
-nosetests --with-doctest
+pytest
 ```
 
 ### Examples of usage
