@@ -32,9 +32,10 @@ jobs:
     - name: Install Nanonet
       run: |
         pip install .
-    - name: Test with nose
+        pip install pytest
+    - name: Test with pytest
       run: |
-        nosetests
+        pytest
     - name: Run tests and collect coverage
       run: |
          pip install pytest pytest-cov
