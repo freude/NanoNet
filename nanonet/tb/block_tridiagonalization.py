@@ -9,7 +9,7 @@ import math
 import scipy
 
 
-def accum(accmap, input, func=None, size=None, fill_value=0, dtype=None):
+def accum(accmap, inp, func=None, size=None, fill_value=0, dtype=None):
     """An accumulation function similar to Matlab's `accumarray` function.
 
     Parameters
@@ -25,7 +25,7 @@ def accum(accmap, input, func=None, size=None, fill_value=0, dtype=None):
         a 2D, then `accmap` must have shape (15,4,2).  The value in the
         last dimension give indices into the output array. If the output is
         1D, then the shape of `accmap` can be either (15,4) or (15,4,1)
-    input : ndarray
+    inp : ndarray
         The input data to be accumulated.
     func : callable or None
         The accumulation function.  The function will be passed a list
@@ -47,15 +47,15 @@ def accum(accmap, input, func=None, size=None, fill_value=0, dtype=None):
     """
 
     # Check for bad arguments and handle the defaults.
-    if accmap.shape[:input.ndim] != input.shape:
+    if accmap.shape[:inp.ndim] != inp.shape:
         raise ValueError("The initial dimensions of accmap must be the same as a.shape")
     if func is None:
         func = np.sum
     if dtype is None:
-        dtype = input.dtype
-    if accmap.shape == input.shape:
+        dtype = inp.dtype
+    if accmap.shape == inp.shape:
         accmap = np.expand_dims(accmap, -1)
-    adims = tuple(range(input.ndim))
+    adims = tuple(range(inp.ndim))
     if size is None:
         size = 1 + np.squeeze(np.apply_over_axes(np.max, accmap, axes=adims))
     size = np.atleast_1d(size)
@@ -64,9 +64,9 @@ def accum(accmap, input, func=None, size=None, fill_value=0, dtype=None):
     vals = np.empty(size, dtype='O')
     for s in product(*[range(k) for k in size]):
         vals[s] = []
-    for s in product(*[range(k) for k in input.shape]):
+    for s in product(*[range(k) for k in inp.shape]):
         indx = tuple(accmap[s])
-        val = input[s]
+        val = inp[s]
         vals[indx].append(val)
 
     # Create the output array.

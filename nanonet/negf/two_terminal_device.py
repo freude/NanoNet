@@ -363,7 +363,6 @@ class TwoTerminalDevice(object):
 
         vals /= np.max(vals)
 
-        from mpl_toolkits.mplot3d import Axes3D
         fig = plt.figure()
         ax = fig.add_subplot(111, projection='3d')
         norm = cm.colors.Normalize(vmax=np.abs(np.max(vals)), vmin=-np.abs(np.min(vals)))
