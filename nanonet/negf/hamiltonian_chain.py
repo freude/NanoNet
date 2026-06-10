@@ -1,3 +1,4 @@
+import numpy as np
 from scipy.linalg import block_diag
 from nanonet.negf.field import Field
 from nanonet.tb.aux_functions import fd
