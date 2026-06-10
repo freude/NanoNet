@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import nanonet.tb as tb
 from nanonet.tb.reduced_mode_space import bs, reduce_mode_space
-import pickle
+#import pickle
 
 
 if __name__ == '__main__':
