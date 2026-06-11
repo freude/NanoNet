@@ -1,6 +1,6 @@
 [build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
+requires = ["setuptools>=61.0.0"]
+build-backend = "setuptools.build_meta"
 
 [project]
 name = "nano-net"
@@ -16,9 +16,11 @@ authors = [
     { name = "J. H. Cole" },
 ]
 classifiers = [
-    "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: Physics",
 ]
 dependencies = [
     "ase",
@@ -40,7 +42,6 @@ tbmpi = "tb.tbmpi_script:main"
 [project.urls]
 Homepage = "https://github.com/freude/NanoNet"
 
-[tool.hatch.build.targets.sdist]
-include = [
-    "/nanonet",
-]
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["nanonet*"]
