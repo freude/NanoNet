@@ -25,9 +25,6 @@ jobs:
     - name: Extract tag name
       id: tag
       run: echo "tag=${GITHUB_REF#refs/*/}" >> $GITHUB_OUTPUT
-    - name: Update version in setup.py
-      run: >-
-        sed -i "s/{{VERSION_PLACEHOLDER}}/${{ steps.vars.outputs.tag }}/g" setup.py; cat setup.py
     - name: Install Nanonet
       run: |
         pip install .
