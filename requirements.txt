@@ -1,9 +1,0 @@
-setuptools
-matplotlib
-numpy
-scipy
-PyYAML
-mpi4py
-future
-pyfiglet
-ase

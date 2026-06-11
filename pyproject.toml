@@ -1,0 +1,49 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "nano-net"
+dynamic = ["version"]
+description = "Python framework for tight-binding computations"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.6"
+authors = [
+    { name = "M. V. Klymenko", email = "mike.klymenko@rmit.edu.au" },
+    { name = "J. A. Vaitkus" },
+    { name = "J. S. Smith" },
+    { name = "J. H. Cole" },
+]
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+]
+dependencies = [
+    "ase",
+    "future",
+    "matplotlib",
+    "mpi4py",
+    "numpy",
+    "pyfiglet",
+    "PyYAML",
+    "scipy",
+    "setuptools",
+]
+
+[project.scripts]
+gf = "tb.gf_script:main"
+tb = "tb.tb_script:main"
+tbmpi = "tb.tbmpi_script:main"
+
+[project.urls]
+Homepage = "https://github.com/freude/NanoNet"
+
+[tool.hatch.version]
+path = "nanonet/__init__.py"
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/nanonet",
+]

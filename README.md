@@ -52,14 +52,6 @@ git clone https://github.com/freude/NanoNet.git
 cd NanoNet
 ```
 
-
- All other dependencies can be installed at once by invoking the following command
- from within the source directory:
-
-```bash
-pip install -r requirements.txt
-```
-
 To install the `Nanonet` package, run the following command in a Bash terminal from within the source directory:
 
 ```
