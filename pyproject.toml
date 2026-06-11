@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "nano-net"
-dynamic = ["version"]
+version = "1.9.9"
 description = "Python framework for tight-binding computations"
 readme = "README.md"
 license = "MIT"
@@ -39,9 +39,6 @@ tbmpi = "tb.tbmpi_script:main"
 
 [project.urls]
 Homepage = "https://github.com/freude/NanoNet"
-
-[tool.hatch.version]
-path = "nanonet/__init__.py"
 
 [tool.hatch.build.targets.sdist]
 include = [
