@@ -8,6 +8,7 @@ import numpy as np
 import scipy.spatial
 from nanonet.tb.abstract_interfaces import AbstractStructureDesigner
 from nanonet.tb.aux_functions import xyz2np, count_species, is_in_coords, print_dict
+from nanonet.tb.aux_functions import generate_translation_vectors, generate_vectors
 
 
 class StructDesignerXYZ(AbstractStructureDesigner):
@@ -246,14 +247,6 @@ class CyclicTopology(AbstractStructureDesigner):
         distances1 = np.empty((len(coords), len(self.pcv)), dtype=float)
         distances2 = np.empty((len(coords), len(self.pcv)), dtype=float)
 
-        for j1, coord in enumerate(coords):  # for each atom in the unit cell
-            for j2, basis_vec in enumerate(self.pcv):  # for lattice basis vector
-
-                # compute distance to the primary plane of the unit cell
-                distances1[j1, j2] = np.inner(coord - self.shift, basis_vec) / self.sizes[j2]
-                # compute distance to the adjacent plane of the  unit cell
-                distances2[j1, j2] = np.inner(coord - self.shift - basis_vec, basis_vec) / self.sizes[j2]
-
         for item in distances1.T:
             self.shift += coords[np.argmin(item)]
 
@@ -266,48 +259,25 @@ class CyclicTopology(AbstractStructureDesigner):
                 distances2[j1, j2] = np.inner(coord - self.shift - basis_vec, basis_vec) / self.sizes[j2]
 
         # transform distance to the boolean variable defining whether atom belongs to the interface or not
-        distances1 = np.abs(distances1 - np.min(distances1)) < self._nn_distance * 0.25
-        distances2 = np.abs(np.abs(distances2) - np.min(np.abs(distances2))) < self._nn_distance * 0.25
+        distances1 = np.abs(distances1 - np.min(distances1)) < self._nn_distance * 0.5
+        distances2 = np.abs(np.abs(distances2) - np.min(np.abs(distances2))) < self._nn_distance * 0.5
 
-        # distances1 = np.ones(distances1.shape)
-        # distances2 = np.ones(distances1.shape)
+        num_translations = np.ceil(np.min(self.sizes) / self._nn_distance * 2).astype(int)
 
         # form new lists of atoms
         count = 0
         for j, item in enumerate(coords):
-
-            if any(distances1[j]):
+            dist = np.concatenate((distances1[j], distances2[j]))
+            if any(dist):
                 self.virtual_and_interfacial_atoms.update({str(j) + "_" + labels[j]: item})
                 self.interfacial_atoms_ind.append(j)
 
-                for surf in np.where(distances1[j])[0]:
+                for surf in generate_translation_vectors(dist, num_translations):
                     count = self._translate_atom_1st_order(item,
-                                                           np.array(self.pcv[surf]),
+                                                           surf @ self.pcv,
                                                            "_" + str(j) + "_" + labels[j],
                                                            coords,
                                                            count)
-
-                    count = self._translate_atom_2d_order(item,
-                                                          np.array(self.pcv[surf]),
-                                                          "_" + str(j) + "_" + labels[j],
-                                                          coords,
-                                                          count)
-
-            if any(distances2[j]):
-                self.virtual_and_interfacial_atoms.update({str(j) + "_" + labels[j]: item})
-                self.interfacial_atoms_ind.append(j)
-                for surf in np.where(distances2[j])[0]:
-                    count = self._translate_atom_1st_order(item,
-                                                           -1 * np.array(self.pcv[surf]),
-                                                           "_" + str(j) + "_" + labels[j],
-                                                           coords,
-                                                           count)
-
-                    count = self._translate_atom_2d_order(item,
-                                                          -1 * np.array(self.pcv[surf]),
-                                                          "_" + str(j) + "_" + labels[j],
-                                                          coords,
-                                                          count)
 
         # remove non-unique elements
         self.interfacial_atoms_ind = list(set(self.interfacial_atoms_ind))
@@ -339,45 +309,6 @@ class CyclicTopology(AbstractStructureDesigner):
                 not is_in_coords(try_coords, np.array(list(self.virtual_and_interfacial_atoms.values()))):
             self.virtual_and_interfacial_atoms.update({"*_" + str(count) + label: try_coords})
             count += 1
-
-        return count
-
-    def _translate_atom_2d_order(self, atom_coords, cell_vector, label, penalty_coords, count):
-        """
-
-        Parameters
-        ----------
-        atom_coords :
-            
-        cell_vector :
-            
-        label :
-            
-        penalty_coords :
-            
-        count :
-            
-
-        Returns
-        -------
-
-        """
-
-        for vec in self.pcv:
-
-            try_coords = atom_coords + cell_vector + vec
-
-            if not is_in_coords(try_coords, penalty_coords) and \
-                    not is_in_coords(try_coords, np.array(list(self.virtual_and_interfacial_atoms.values()))):
-                self.virtual_and_interfacial_atoms.update({"**_" + str(count) + label: try_coords})
-                count += 1
-
-            try_coords = atom_coords + cell_vector - vec
-
-            if not is_in_coords(try_coords, penalty_coords) and \
-                    not is_in_coords(try_coords, np.array(list(self.virtual_and_interfacial_atoms.values()))):
-                self.virtual_and_interfacial_atoms.update({"**_" + str(count) + label: try_coords})
-                count += 1
 
         return count
 
