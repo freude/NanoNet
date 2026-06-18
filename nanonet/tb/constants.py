@@ -5,6 +5,8 @@ import numpy as np
 
 
 PI = 3.14159
+kB = 1.38064852e-23
+kB_eV = 8.617333262e-5
 
 # The codes for labeling the orbitals
 
