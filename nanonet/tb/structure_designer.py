@@ -2,9 +2,6 @@
 The module contains classes defining
 geometrical structure and boundary conditions for the tight-binding model.
 """
-from __future__ import print_function
-from __future__ import absolute_import
-from __future__ import division
 from collections import OrderedDict
 import logging
 import numpy as np
@@ -29,13 +26,13 @@ class StructDesignerXYZ(AbstractStructureDesigner):
     Attributes
     ----------
     nn_distance : float
-        nearest neighbour search radius (default 0)
+        nearest-neighbours search radius (default 0)
     num_of_species : int
         number of chemical elements corresponding to the number of distinct basis sets.
     atom_list : OrderedDict
         list of atomic species and their coordinates
     kd_tree : scipy.spatial.ckdtree.cKDTree
-        kd-tree for fast nearest-neighbour search
+        kd-tree for fast nearest-neighbours search
     left_lead : list
         list of atomic indices connected to the left lead,
         needed for sorting atomic coordinates (default [])
@@ -64,16 +61,16 @@ class StructDesignerXYZ(AbstractStructureDesigner):
             logging.info("                  .                    ")
             logging.info("                  .                    ")
             logging.info("                  .                    ")
-            logging.info("There are {} more coordinates".format(str(num_lines-10)))
+            logging.info("There are {} more coordinates".format(str(num_lines - 10)))
         else:
             logging.info("The xyz-file:\n {}".format(reader))
         logging.info("---------------------------------\n")
 
         # ------------- count species and nodes --------------
-        self._nn_distance = kwargs.get('nn_distance', 0)           # maximal distance to a neighbor
-        self._num_of_species = count_species(labels)               # dictionary of elements and
-                                                                   # their number per unit cell
+        self._nn_distance = kwargs.get('nn_distance', 0)  # maximal distance to a neighbor
+        self._num_of_species = count_species(labels)   # dictionary of elements and their number in the unit cell
         self._num_of_nodes = sum(self.num_of_species.values())
+
         # ------- make list of coordinates and kd-tree -------
         self._atom_list = OrderedDict(list(zip(labels, coords)))
         self._kd_tree = scipy.spatial.cKDTree(np.array(list(self._atom_list.values())),
@@ -205,21 +202,18 @@ class CyclicTopology(AbstractStructureDesigner):
 
     def __init__(self, primitive_cell_vectors, labels, coords, nn_distance):
 
+        super().__init__()
+
         self._nn_distance = nn_distance
         self.pcv = primitive_cell_vectors
 
         # compute vectors' lengths
-        self.sizes = []
-        for item in self.pcv:
-            self.sizes.append(np.linalg.norm(item))
+        self.sizes = [np.linalg.norm(item) for item in self.pcv]
 
         self.interfacial_atoms_ind = []
         self.virtual_and_interfacial_atoms = OrderedDict()
-
         self.shift = np.zeros(3)
-
         self._generate_atom_list(labels, coords)
-
         self._kd_tree = scipy.spatial.cKDTree(list(self.virtual_and_interfacial_atoms.values()),
                                               leafsize=100, balanced_tree=True)
 
@@ -252,8 +246,8 @@ class CyclicTopology(AbstractStructureDesigner):
         distances1 = np.empty((len(coords), len(self.pcv)), dtype=float)
         distances2 = np.empty((len(coords), len(self.pcv)), dtype=float)
 
-        for j1, coord in enumerate(coords):    # for each atom in the unit cell
-            for j2, basis_vec in enumerate(self.pcv):    # for lattice basis vector
+        for j1, coord in enumerate(coords):  # for each atom in the unit cell
+            for j2, basis_vec in enumerate(self.pcv):  # for lattice basis vector
 
                 # compute distance to the primary plane of the unit cell
                 distances1[j1, j2] = np.inner(coord - self.shift, basis_vec) / self.sizes[j2]
@@ -263,8 +257,8 @@ class CyclicTopology(AbstractStructureDesigner):
         for item in distances1.T:
             self.shift += coords[np.argmin(item)]
 
-        for j1, coord in enumerate(coords):    # for each atom in the unit cell
-            for j2, basis_vec in enumerate(self.pcv):    # for lattice basis vector
+        for j1, coord in enumerate(coords):  # for each atom in the unit cell
+            for j2, basis_vec in enumerate(self.pcv):  # for lattice basis vector
 
                 # compute distance to the primary plane of the unit cell
                 distances1[j1, j2] = np.inner(coord - self.shift, basis_vec) / self.sizes[j2]
@@ -287,7 +281,6 @@ class CyclicTopology(AbstractStructureDesigner):
                 self.interfacial_atoms_ind.append(j)
 
                 for surf in np.where(distances1[j])[0]:
-
                     count = self._translate_atom_1st_order(item,
                                                            np.array(self.pcv[surf]),
                                                            "_" + str(j) + "_" + labels[j],
@@ -304,7 +297,6 @@ class CyclicTopology(AbstractStructureDesigner):
                 self.virtual_and_interfacial_atoms.update({str(j) + "_" + labels[j]: item})
                 self.interfacial_atoms_ind.append(j)
                 for surf in np.where(distances2[j])[0]:
-
                     count = self._translate_atom_1st_order(item,
                                                            -1 * np.array(self.pcv[surf]),
                                                            "_" + str(j) + "_" + labels[j],
@@ -377,7 +369,6 @@ class CyclicTopology(AbstractStructureDesigner):
 
             if not is_in_coords(try_coords, penalty_coords) and \
                     not is_in_coords(try_coords, np.array(list(self.virtual_and_interfacial_atoms.values()))):
-
                 self.virtual_and_interfacial_atoms.update({"**_" + str(count) + label: try_coords})
                 count += 1
 
@@ -385,7 +376,6 @@ class CyclicTopology(AbstractStructureDesigner):
 
             if not is_in_coords(try_coords, penalty_coords) and \
                     not is_in_coords(try_coords, np.array(list(self.virtual_and_interfacial_atoms.values()))):
-
                 self.virtual_and_interfacial_atoms.update({"**_" + str(count) + label: try_coords})
                 count += 1
 
@@ -444,8 +434,7 @@ class CyclicTopology(AbstractStructureDesigner):
 
 
 if __name__ == '__main__':
-
-    sd = StructDesignerXYZ(xyz='/home/mk/TB_project/input_samples/SiNW2.xyz')
+    sd = StructDesignerXYZ(xyz='../../examples/input_samples/SiNW2.xyz')
     sd._sort([np.argmin(np.array(list(sd.atom_list.values()))[:, 2])],
              [np.argmax(np.array(list(sd.atom_list.values()))[:, 2])])
     print("Done!")
