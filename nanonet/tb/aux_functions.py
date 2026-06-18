@@ -6,6 +6,7 @@ from __future__ import absolute_import
 from itertools import product
 import numpy as np
 import yaml
+from itertools import combinations
 
 
 def accum(accmap, input, func=None, size=None, fill_value=0, dtype=None):
@@ -704,3 +705,33 @@ def fd(energy, ef, temp):
     """
     kb = 8.61733e-5  # Boltzmann constant in eV
     return 1.0 / (1.0 + np.exp((energy - ef) / (kb * temp)))
+
+
+def generate_vectors(v, values):
+    values = list(range(values + 1))
+
+    active = [i for i, x in enumerate(v) if x]
+    result = []
+
+    for combo in product(values, repeat=len(active)):
+        if all(x == 0 for x in combo):
+            continue  # remove all-zero vector
+
+        new = [0] * len(v)
+        for i, val in zip(active, combo):
+            new[i] = val
+
+        result.append(new)
+
+    return np.array(result)
+
+
+def generate_translation_vectors(v, values):
+
+    half = len(v) // 2
+
+    result = generate_vectors(v, values)
+    result = np.unique(result[:, :half] - result[:, half:], axis=0)
+    result  = result[np.any(result != 0, axis=1)]
+
+    return result
