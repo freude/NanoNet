@@ -46,7 +46,6 @@ def me_diatomic(bond, n, l_min, l_max, m, which_neighbour, overlap=False):
 
     label = n[0] + ORBITAL_QN[l_min] + n[1] + ORBITAL_QN[l_max] + '_' + M_QN[m]
 
-
     if overlap:
         flag = 'OV_'
     else:
@@ -59,7 +58,7 @@ def me_diatomic(bond, n, l_min, l_max, m, which_neighbour, overlap=False):
             return 0
         else:
             return getattr(sys.modules[tb_params.__name__], flag + bond + str(which_neighbour))[label]
-    except KeyError:
+    except (KeyError, AttributeError):
         return 0
 
 
@@ -86,12 +85,11 @@ def d_me(N, l, m1, m2):
     """
 
     if N == -1:
-       N += sys.float_info.epsilon
-
+        N += sys.float_info.epsilon
 
     prefactor = ((0.5 * (1 + N)) ** l) * (((1 - N) / (1 + N)) ** (m1 * 0.5 - m2 * 0.5)) * \
-            math.sqrt(math.factorial(l + m2) * math.factorial(l - m2) *
-                      math.factorial(l + m1) * math.factorial(l - m1))
+                math.sqrt(math.factorial(l + m2) * math.factorial(l - m2) *
+                          math.factorial(l + m1) * math.factorial(l - m1))
 
     ans = 0
 
@@ -146,7 +144,7 @@ def a_coef(m, gamma):
         return 1.0 / math.sqrt(2)
     else:
         return ((-1) ** abs(m)) * \
-               (tau(m) * math.cos(abs(m) * gamma) - tau(-m) * math.sin(abs(m) * gamma))
+            (tau(m) * math.cos(abs(m) * gamma) - tau(-m) * math.sin(abs(m) * gamma))
 
 
 def b_coef(m, gamma):
@@ -165,7 +163,7 @@ def b_coef(m, gamma):
     """
 
     return ((-1) ** abs(m)) * \
-           (tau(m) * math.sin(abs(m) * gamma) + tau(-m) * math.cos(abs(m) * gamma))
+        (tau(m) * math.sin(abs(m) * gamma) + tau(-m) * math.cos(abs(m) * gamma))
 
 
 def s_me(N, l, m1, m2, gamma):
@@ -189,8 +187,8 @@ def s_me(N, l, m1, m2, gamma):
 
     """
 
-    return a_coef(m1, gamma) * \
-           (((-1) ** abs(m2)) * d_me(N, l, abs(m1), abs(m2)) + d_me(N, l, abs(m1), -abs(m2)))
+    return np.nan_to_num(a_coef(m1, gamma) * \
+                         (((-1) ** abs(m2)) * d_me(N, l, abs(m1), abs(m2)) + d_me(N, l, abs(m1), -abs(m2))), nan=0)
 
 
 def t_me(N, l, m1, m2, gamma):
@@ -218,7 +216,7 @@ def t_me(N, l, m1, m2, gamma):
         return 0
     else:
         return b_coef(m1, gamma) * \
-               (((-1) ** abs(m2)) * d_me(N, l, abs(m1), abs(m2)) - d_me(N, l, abs(m1), -abs(m2)))
+            (((-1) ** abs(m2)) * d_me(N, l, abs(m1), abs(m2)) - d_me(N, l, abs(m1), -abs(m2)))
 
 
 def me(atom1, ll1, atom2, ll2, coords, which_neighbour=0, overlap=False):
@@ -290,10 +288,10 @@ def me(atom1, ll1, atom2, ll2, coords, which_neighbour=0, overlap=False):
 
         prefactor = (-1) ** ((l1 - l2 + abs(l1 - l2)) * 0.5)
         ans = 2 * a_coef(m1, gamma) * a_coef(m2, gamma) * \
-            d_me(N, l1, abs(m1), 0) * d_me(N, l2, abs(m2), 0) * \
-            me_diatomic(atoms, code, l_min, l_max, 0, which_neighbour, overlap=overlap)
+              d_me(N, l1, abs(m1), 0) * d_me(N, l2, abs(m2), 0) * \
+              me_diatomic(atoms, code, l_min, l_max, 0, which_neighbour, overlap=overlap)
 
-        for m in range(1, l_min+1):
+        for m in range(1, l_min + 1):
             ans += (s_me(N, l1, m1, m, gamma) * s_me(N, l2, m2, m, gamma) +
                     t_me(N, l1, m1, m, gamma) * t_me(N, l2, m2, m, gamma)) * \
                    me_diatomic(atoms, code, l_min, l_max, m, which_neighbour, overlap=overlap)
@@ -304,7 +302,6 @@ def me(atom1, ll1, atom2, ll2, coords, which_neighbour=0, overlap=False):
 
 
 if __name__ == "__main__":
-
     x0 = np.array([0, 0, 0], dtype=float)
     x1 = np.array([0, 0, 1], dtype=float)
 

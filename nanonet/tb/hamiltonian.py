@@ -1,8 +1,6 @@
 """
 The module contains a library of classes facilitating computations of Hamiltonian matrices.
 """
-from __future__ import print_function, division
-from __future__ import absolute_import
 from collections import OrderedDict
 from functools import reduce
 import logging
@@ -269,8 +267,9 @@ class Hamiltonian(BasisTB):
                             if self.compute_overlap:
                                 self.ov_matrix[ind1, ind2] = self._get_me(j1, j2, l1, l2, overlap=True)
 
-        logging.info("Unique distances: \n    {}".format("\n    ".join(unique_distances)))
-        logging.info("---------------------------------\n")
+        if verbosity.VERBOSITY > 0:
+            logging.info("Unique distances: \n    {}".format("\n    ".join(unique_distances)))
+            logging.info("---------------------------------\n")
 
         return self
 
@@ -288,6 +287,21 @@ class Hamiltonian(BasisTB):
                                      list(self.atom_list.keys()),
                                      list(self.atom_list.values()),
                                      self._nn_distance)
+
+            if verbosity.VERBOSITY > 0:
+                for j1 in self.ct.interfacial_atoms_ind:
+                    list_of_neighbours = self.ct.get_neighbours(list(self.atom_list.values())[j1])
+                    for j2 in list_of_neighbours:
+                        coords = np.array(list(self.atom_list.values())[j1]) - \
+                                 np.array(list(self.ct.virtual_and_interfacial_atoms.values())[j2])
+                        ind = int(list(self.ct.virtual_and_interfacial_atoms.keys())[j2].split('_')[2])
+                        for l1 in range(self.orbitals_dict[list(self.atom_list.keys())[j1]].num_of_orbitals):
+                            for l2 in range(self.orbitals_dict[list(self.atom_list.keys())[ind]].num_of_orbitals):
+                                self._get_me(j1, ind, l1, l2, coords)
+
+                logging.info("Unique distances with periodic boundary conditions: \n    {}".format("\n    ".join(unique_distances)))
+                logging.info("---------------------------------\n")
+
         else:
             self.ct = None
 

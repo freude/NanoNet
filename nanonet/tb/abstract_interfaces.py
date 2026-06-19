@@ -30,7 +30,7 @@ class AbstractStructureDesigner(ABC):
 
         if isinstance(query, list) or isinstance(query, np.ndarray):
             ans = self._kd_tree.query(query,
-                                      k=25,
+                                      k=50,
                                       distance_upper_bound=self._nn_distance)
         elif isinstance(query, int):
 
@@ -40,11 +40,11 @@ class AbstractStructureDesigner(ABC):
                 query = np.append(query, 0)
 
             ans = self._kd_tree.query(query,
-                                      k=25,
+                                      k=50,
                                       distance_upper_bound=self._nn_distance)
         elif isinstance(query, str):
             ans = self._kd_tree.query(self.atom_list[query],
-                                      k=25,
+                                      k=50,
                                       distance_upper_bound=self._nn_distance)
         else:
             raise TypeError('Wrong input type for query')
