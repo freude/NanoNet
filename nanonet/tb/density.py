@@ -117,9 +117,9 @@ if __name__=="__main__":
     from examples.graphene_bilayer_rect import make_hamiltonian, make_band_structure
 
     h = make_hamiltonian(0.0, 0.0)
-    ham = np.load("/Users/mykhailoklymenko/Monash_work/data/h.npy")
-    print(ham)
-    print(h.h_matrix_bc_factor - ham)
+    # ham = np.load("/Users/mykhailoklymenko/Monash_work/data/h.npy")
+    # print(ham)
+    # print(h.h_matrix_bc_factor - ham)
     ec, ev = make_band_structure(h, visualize=True)
     print(ec - ev)
     dens1, dens2, ev, ec = compute_density(h, 0.0, 0.0, 300, print_all=True)
