@@ -32,6 +32,7 @@ dependencies = [
     "PyYAML",
     "scipy",
     "setuptools",
+    "sisl",
 ]
 
 [project.scripts]
