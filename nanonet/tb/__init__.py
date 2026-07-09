@@ -3,7 +3,7 @@ from importlib.metadata import version
 
 __version__ = version('nano-net')
 __author__ = "Mike Klymenko"
-__email__ = "mike.klymenko@rmit.edu.au"
+__email__ = "mike.klymenko@monash.edu"
 
 from .orbitals import Orbitals
 from .hamiltonian import Hamiltonian
@@ -17,5 +17,5 @@ from pyfiglet import Figlet
 
 logging.basicConfig(format='%(message)s', level=logging.INFO)
 logging.StreamHandler(stream=None)
-logging.info(Figlet(font='standard').renderText('NanoNet'))
+logging.info(Figlet(font='standard').renderText('NanoNET'))
 logging.info("Vesion " + __version__)

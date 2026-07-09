@@ -1,5 +1,6 @@
 import sys
 import matplotlib.pyplot as plt
+import matplotlib.colors as colors
 import numpy as np
 from nanonet.negf.hamiltonian_chain import HamiltonianChain
 from nanonet.negf.recursive_greens_functions import recursive_gf
@@ -44,7 +45,7 @@ def complex_chain():
     sgf_r = []
 
     for E in energy:
-        left_se, right_se = negf.surface_greens_function(E, h_l, h_0, h_r, iterate=5, damp=0.05j)
+        left_se, right_se = negf.surface_greens_function(E, h_l, h_0, h_r, iterate=5, damp=0.0005j)
         sgf_l.append(left_se)
         sgf_r.append(right_se)
 
@@ -104,8 +105,8 @@ def z_dependence(coord):
     -------
 
     """
-    coords_of_steps = [-14.0, -11.0, 11.0, 14.0]
-    jumps = [-1.7, 1.7, -1.7, 1.7]
+    coords_of_steps = [-11.0, -9.0, 9.0, 11.0]
+    jumps = [-0.7, 0.7, -0.7, 0.7]
 
     return qw(coord, coords_of_steps, jumps)
 
@@ -150,13 +151,13 @@ for j, E in enumerate(energy):
 
     for jj in range(num_periods):
         dos1[j] = dos1[j] + np.real(np.trace(1j * (grd[jj] - grd[jj].conj().T))) / num_periods
-        dens[j, jj] = 2 * np.trace(gnd[jj])
-
+        # dens[j, jj] = 2 * np.trace((gnd[jj]))
+        dens[j, jj] = -2 * np.trace(np.imag(grd[jj]))
 
 plt.figure(1)
-plt.contourf(dens)
+plt.contourf(dens, 100, cmap='inferno', norm=colors.PowerNorm(gamma=0.5))
+plt.show()
 
 plt.figure(2)
 plt.plot(dos1)
-
 plt.show()

@@ -3,10 +3,15 @@ The module contains auxiliary global variables.
 """
 import numpy as np
 
-
+e = 1.6e-19
+eps0 = 8.85e-12
+h = 6.626e-34
+hbar = 1.05457e-34
+m0 = 9.1e-31
 PI = 3.14159
 kB = 1.38064852e-23
 kB_eV = 8.617333262e-5
+G0 = 2 * e * e / h
 
 # The codes for labeling the orbitals
 

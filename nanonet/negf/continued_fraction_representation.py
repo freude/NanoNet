@@ -1,6 +1,6 @@
 import numpy as np
 from scipy.linalg import eig, eigh_tridiagonal
-from nanonet.negf.hamiltonian_chain import fd
+from nanonet.transport.aux_functions import fd
 import time
 
 
@@ -204,7 +204,7 @@ def bf_integration(Ef, tempr, gf=test_gf):
     # Ef = 2.1
 
     energy = np.linspace(-R+Ef, R+Ef, int(3e5))
-    ans = np.imag(np.trapz(test_gf(energy + 1j * 10e-4) * fd(energy, Ef, tempr), energy))
+    ans = np.imag(np.trapezoid(test_gf(energy + 1j * 10e-4) * fd(energy, Ef, tempr), energy))
 
     return -1.0 / np.pi * ans
 
@@ -214,7 +214,7 @@ if __name__=='__main__':
     import matplotlib.pyplot as plt
     # ans = bf_integration(gf=test_gf)
 
-    Ef = np.linspace(-70, 70, 150)
+    Ef = np.linspace(-70, 70, 1000)
     ans = []
     ans1 = []
 
@@ -241,7 +241,7 @@ if __name__=='__main__':
 
     print(a5, b5)
 
-    energy = np.linspace(-5.7, 5.7, 3000)
+    energy = np.linspace(-5.7, 5.7, 300)
 
     temp = 300
     fd0 = fd(energy, 0, temp)

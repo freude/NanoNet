@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.linalg import block_diag
 from nanonet.negf.field import Field
-from nanonet.tb.aux_functions import fd
+from nanonet.transport.aux_functions import fd
 
 
 class HamiltonianChain(object):
@@ -215,7 +215,7 @@ class HamiltonianChain(object):
             coord_map = np.zeros(coords.shape)
 
             for j, item in enumerate(unique_coords):
-                coord_map[np.abs(coords-item) < 0.001] = j
+                coord_map[np.abs(coords - item) < 0.001] = j
 
             self._z_coords_map = coord_map
 
@@ -237,7 +237,6 @@ class HamiltonianChain(object):
             return self.h_0
 
         for j in range(len(self.h_l)):
-
             s1, s2 = self.h_0[j].shape
 
             matrix[j * s1:(j + 1) * s1, (j + 1) * s2:(j + 2) * s2] = self.h_r[j]
@@ -251,7 +250,7 @@ class HamiltonianChain(object):
         import matplotlib.pyplot as plt
         from matplotlib import cm
 
-        vals = np.zeros(len(self.fields[0])*len(self.fields[0][0]))
+        vals = np.zeros(len(self.fields[0]) * len(self.fields[0][0]))
 
         for field in self.fields:
             vals += np.hstack(tuple([item for item in field]))
@@ -290,7 +289,8 @@ class HamiltonianChainComposer(HamiltonianChain):
                 field = list(item.keys())[0]
 
                 if field in self.dict_of_fields:
-                    self.dict_of_fields[field].set_origin(self.dict_of_fields[field].mean_coords + np.array(item[field]))
+                    self.dict_of_fields[field].set_origin(
+                        self.dict_of_fields[field].mean_coords + np.array(item[field]))
                 else:
                     self.dict_of_fields[field] = Field(path=params['fields'][field])
                     # angle = 1.13446
@@ -309,62 +309,17 @@ class HamiltonianChainComposer(HamiltonianChain):
                     mol_z_length = mol_y_length0 * np.cos(angle)
 
                     self.dict_of_fields[field].mean_coords = np.array([0.5 * (size_x_max - np.abs(size_y_min)),
-                                                                  size_y_max + 0.5 * mol_y_length +
-                                                                  params['fields']['spacing'],
-                                                                  0.5 * mol_z_length])
+                                                                       size_y_max + 0.5 * mol_y_length +
+                                                                       params['fields']['spacing'],
+                                                                       0.5 * mol_z_length])
 
-                    self.dict_of_fields[field].set_origin(self.dict_of_fields[field].mean_coords + np.array(item[field]))
+                    self.dict_of_fields[field].set_origin(
+                        self.dict_of_fields[field].mean_coords + np.array(item[field]))
 
                 if isinstance(params['fields']['eps'], list):
-                    self.dict_of_fields[field].add_screening(params['fields']['eps'], mol_y_length0, params['fields']['spacing'])
+                    self.dict_of_fields[field].add_screening(params['fields']['eps'], mol_y_length0,
+                                                             params['fields']['spacing'])
                     # self.add_field(self.dict_of_fields[field], eps=params['fields']['eps'][3])
                     self.add_field(self.dict_of_fields[field], eps=1.0)
                 else:
                     self.add_field(self.dict_of_fields[field], eps=params['fields']['eps'])
-
-
-if __name__ == '__main__':
-
-    # fields_config = """
-    #
-    # unit_cell:        [[0, 0, 5.50]]
-    #
-    # left_translations:     3
-    # right_translations:    3
-    #
-    # fields:
-    #
-    #     eps = 3.8
-    #
-    #     cation:      '/home/mk/tetracene_dft_wB_pcm_38_32_cation.cube'
-    #
-    #     angle:       1.13446
-    #     spacing:     5.0
-    #
-    #     xyz:
-    #         - cation:       [0.0000000000,    0.0000000000,    0.0000000000]
-    #
-    # """
-    #
-    # params = yaml_parser(fields_config)
-    # print('hi')
-    import numpy as np
-    from matplotlib import pyplot
-
-    fig = pyplot.figure()
-    ax = fig.add_axes((0.1, 0.1, 0.8, 0.8), autoscale_on=False)
-
-    # Empty data plot
-    points = ax.scatter([], [], color='r', zorder=2)
-    # ax properties
-    ax.set_xlim(-10, 10)
-    ax.set_ylim(5e-2, 5e3)
-    ax.set_yscale("log")
-
-    # Example data points
-    x_data = [-5, -3, 0, 3, 5]
-    y_data = [1, 10, 1000, 10, 1]
-    # Set data points
-    points.set_offsets(np.hstack((x_data, y_data)).T)
-
-    pyplot.show()

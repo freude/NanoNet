@@ -13,9 +13,11 @@ from nanonet.tb.structure_designer import StructDesignerXYZ, CyclicTopology
 from nanonet.tb.diatomic_matrix_element import me
 from nanonet.tb.orbitals import Orbitals
 from nanonet.tb.aux_functions import dict2xyz
-from nanonet.tb.block_tridiagonalization import find_nonzero_lines, split_into_subblocks_optimized, cut_in_blocks, split_into_subblocks
+from nanonet.tb.block_tridiagonalization import find_nonzero_lines, split_into_subblocks_optimized, cut_in_blocks, \
+    split_into_subblocks
 import nanonet.verbosity as verbosity
-
+from nanonet.tb.interface2ase import hamiltonian2aroms
+from nanonet.tb.interface2sisl import hamiltonian2geom
 
 unique_distances = set()
 
@@ -131,6 +133,7 @@ class BasisTB(AbstractBasis, StructDesignerXYZ):
 
         class MyDict(dict):
             """ """
+
             def __getitem__(self, key):
                 key = ''.join([i for i in key if not i.isdigit()])
                 return super(MyDict, self).__getitem__(key)
@@ -299,7 +302,8 @@ class Hamiltonian(BasisTB):
                             for l2 in range(self.orbitals_dict[list(self.atom_list.keys())[ind]].num_of_orbitals):
                                 self._get_me(j1, ind, l1, l2, coords)
 
-                logging.info("Unique distances with periodic boundary conditions: \n    {}".format("\n    ".join(unique_distances)))
+                logging.info("Unique distances with periodic boundary conditions: \n    {}".format(
+                    "\n    ".join(unique_distances)))
                 logging.info("---------------------------------\n")
 
         else:
@@ -740,3 +744,9 @@ class Hamiltonian(BasisTB):
             hr1.append(hr[-right:, :left])
 
         return hl1, h01, hr1, subblocks
+
+    def to_ase_atoms(self):
+        return hamiltonian2aroms(self)
+
+    def to_sisl_geom(self):
+        return hamiltonian2geom(self)

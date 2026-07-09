@@ -686,27 +686,6 @@ def is_in_coords(coord, coords):
     return ans
 
 
-def fd(energy, ef, temp):
-    """
-    Fermi-Dirac function
-
-    Parameters
-    ----------
-    energy :
-
-    ef :
-
-    temp :
-
-
-    Returns
-    -------
-
-    """
-    kb = 8.61733e-5  # Boltzmann constant in eV
-    return 1.0 / (1.0 + np.exp((energy - ef) / (kb * temp)))
-
-
 def generate_vectors(v, values):
     values = list(range(values + 1))
 

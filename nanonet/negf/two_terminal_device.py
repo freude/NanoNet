@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from nanonet.tb.hamiltonian import Hamiltonian
 import nanonet.tb as tb
 import nanonet.negf as negf
-from nanonet.tb.aux_functions import fd
+from nanonet.transport.aux_functions import fd
 from nanonet.tb.diatomic_matrix_element import me
 from nanonet.negf.recursive_greens_functions import recursive_gf
 from nanonet.negf.hamiltonian_chain import HamiltonianChain
