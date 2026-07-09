@@ -109,8 +109,8 @@ def make_band_structure(h, visualize=True):
     # band_gap = ec - ev
 
     # dos = np.load('/Users/mykhailoklymenko/Monash_work/NanoNet/nanonet/tb/dos.npy')
-    # band_structure1 = np.load('/Users/mykhailoklymenko/Monash_work/data/bs.npy')
-    energy = np.linspace(-12, 10, len(dos))
+    band_structure1 = np.load('/Users/mykhailoklymenko/Monash_work/data/bs1.npy')
+    # energy = np.linspace(-12, 10, len(dos))
 
     if visualize:
 
@@ -118,7 +118,7 @@ def make_band_structure(h, visualize=True):
         ax = plt.axes()
         ax.set_ylabel('Energy (eV)')
         ax.plot(band_structure, 'k')
-        # ax.plot(band_structure1, '--')
+        ax.plot(band_structure1, '--')
         plt.xticks(np.insert(np.cumsum(num_points) - 1, 0, 0), labels=sym_points)
         ax.xaxis.grid()
 

@@ -33,6 +33,7 @@ dependencies = [
     "scipy",
     "setuptools",
     "sisl",
+    "pytest",
 ]
 
 [project.scripts]

@@ -230,13 +230,13 @@ class Hamiltonian(BasisTB):
 
         self._coords = [0 for _ in range(self.basis_size)]
         # initialize Hamiltonian matrices
-        self.h_matrix = np.zeros((self.basis_size, self.basis_size), dtype=complex)
-        self.h_matrix_bc_add = np.zeros((self.basis_size, self.basis_size), dtype=complex)
-        self.h_matrix_bc_factor = np.ones((self.basis_size, self.basis_size), dtype=complex)
+        self.h_matrix = np.zeros((self.basis_size, self.basis_size), dtype=np.complex128)
+        self.h_matrix_bc_add = np.zeros((self.basis_size, self.basis_size), dtype=np.complex128)
+        self.h_matrix_bc_factor = np.ones((self.basis_size, self.basis_size), dtype=np.complex128)
 
         if self.compute_overlap:
-            self.ov_matrix = np.zeros((self.basis_size, self.basis_size), dtype=complex)
-            self.ov_matrix_bc_add = np.zeros((self.basis_size, self.basis_size), dtype=complex)
+            self.ov_matrix = np.zeros((self.basis_size, self.basis_size), dtype=np.complex128)
+            self.ov_matrix_bc_add = np.zeros((self.basis_size, self.basis_size), dtype=np.complex128)
 
         # loop over all nodes
         for j1 in range(self.num_of_nodes):
@@ -357,7 +357,7 @@ class Hamiltonian(BasisTB):
             vals, vects = scipy.linalg.eigh(self.h_matrix_bc_factor * self.h_matrix + self.h_matrix_bc_add,
                                             self.h_matrix_bc_factor * self.ov_matrix + self.ov_matrix_bc_add)
         else:
-            vals, vects = np.linalg.eigh(self.h_matrix_bc_factor * self.h_matrix + self.h_matrix_bc_add)
+            vals, vects = scipy.linalg.eigh(self.h_matrix_bc_factor * self.h_matrix + self.h_matrix_bc_add)
 
         vals = np.real(vals)
         ind = np.argsort(vals)
@@ -570,9 +570,9 @@ class Hamiltonian(BasisTB):
 
         """
 
-        self.h_matrix_bc_add = np.zeros((self.basis_size, self.basis_size), dtype=complex)
-        self.ov_matrix_bc_add = np.zeros((self.basis_size, self.basis_size), dtype=complex)
-        self.h_matrix_bc_factor = np.ones((self.basis_size, self.basis_size), dtype=complex)
+        self.h_matrix_bc_add = np.zeros((self.basis_size, self.basis_size), dtype=np.complex128)
+        self.ov_matrix_bc_add = np.zeros((self.basis_size, self.basis_size), dtype=np.complex128)
+        self.h_matrix_bc_factor = np.ones((self.basis_size, self.basis_size), dtype=np.complex128)
         self.k_vector = None
 
     def _compute_h_matrix_bc_factor(self):
@@ -681,8 +681,8 @@ class Hamiltonian(BasisTB):
 
         self.k_vector = [0.0, 0.0, 0.0]
 
-        self.h_matrix_left_lead = np.zeros((self.basis_size, self.basis_size), dtype=complex)
-        self.h_matrix_right_lead = np.zeros((self.basis_size, self.basis_size), dtype=complex)
+        self.h_matrix_left_lead = np.zeros((self.basis_size, self.basis_size), dtype=np.complex128)
+        self.h_matrix_right_lead = np.zeros((self.basis_size, self.basis_size), dtype=np.complex128)
 
         self._compute_h_matrix_bc_add(split_the_leads=True)
         self.k_vector = None
