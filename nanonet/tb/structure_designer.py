@@ -244,8 +244,8 @@ class CyclicTopology(AbstractStructureDesigner):
         """
 
         # matrices of distances between atoms and interfaces
-        distances1 = np.empty((len(coords), len(self.pcv)), dtype=np.float64)
-        distances2 = np.empty((len(coords), len(self.pcv)), dtype=np.float64)
+        distances1 = np.zeros((len(coords), len(self.pcv)), dtype=np.float64)
+        distances2 = np.zeros((len(coords), len(self.pcv)), dtype=np.float64)
 
         for item in distances1.T:
             self.shift += coords[np.argmin(item)]
@@ -261,7 +261,6 @@ class CyclicTopology(AbstractStructureDesigner):
         # transform distance to the boolean variable defining whether atom belongs to the interface or not
         distances1 = np.abs(distances1 - np.min(distances1)) < self._nn_distance * 0.5
         distances2 = np.abs(np.abs(distances2) - np.min(np.abs(distances2))) < self._nn_distance * 0.5
-
         num_translations = np.ceil(np.min(self.sizes) / self._nn_distance * 2).astype(int)
 
         # form new lists of atoms
