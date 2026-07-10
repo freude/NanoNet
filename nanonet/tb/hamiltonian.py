@@ -455,8 +455,8 @@ class Hamiltonian(BasisTB):
 
             # compute radius vector pointing from one atom to another
             if coords is None:
-                coords1 = np.array(list(self.atom_list.values())[atom1], dtype=float) - \
-                          np.array(list(self.atom_list.values())[atom2], dtype=float)
+                coords1 = np.array(list(self.atom_list.values())[atom1], dtype=np.float64) - \
+                          np.array(list(self.atom_list.values())[atom2], dtype=np.float64)
             else:
                 coords1 = coords.copy()
 
@@ -584,8 +584,8 @@ class Hamiltonian(BasisTB):
 
             for j2 in list_of_neighbours:
                 if j1 != j2:
-                    coords = np.array(list(self.atom_list.values())[j1], dtype=float) - \
-                             np.array(list(self.atom_list.values())[j2], dtype=float)
+                    coords = np.array(list(self.atom_list.values())[j1], dtype=np.float64) - \
+                             np.array(list(self.atom_list.values())[j2], dtype=np.float64)
                     phase = np.exp(1j * np.dot(self.k_vector, coords))
 
                     for l1 in range(self.orbitals_dict[list(self.atom_list.keys())[j1]].num_of_orbitals):

@@ -10,6 +10,8 @@ except ImportError:
     comm = None
     rank = 0
     size = 1
+    MPI = None
+
 
 print("MPI available: ", mpi_available)
 

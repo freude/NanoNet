@@ -5,6 +5,8 @@ from ase.dft.kpoints import monkhorst_pack
 from sisl.physics import MonkhorstPack
 from nanonet.config import comm, rank, size, mpi_available, MPI, set_mpi
 # set_mpi(False)
+import numpy as np
+np.show_config()
 
 
 def delta(energy):
@@ -118,7 +120,7 @@ if __name__=="__main__":
     # ham = np.load("/Users/mykhailoklymenko/Monash_work/data/h.npy")
     # print(ham)
     # print(h.h_matrix_bc_factor - ham)
-    ec, ev = make_band_structure(h, visualize=False)
+    ec, ev = make_band_structure(h, visualize=True)
     print(ec - ev)
     dens1, dens2, ev, ec = compute_density(h, 0.0, 0.0, 300, print_all=True)
     print(dens1)

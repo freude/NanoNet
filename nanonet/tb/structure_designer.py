@@ -244,8 +244,8 @@ class CyclicTopology(AbstractStructureDesigner):
         """
 
         # matrices of distances between atoms and interfaces
-        distances1 = np.empty((len(coords), len(self.pcv)), dtype=float)
-        distances2 = np.empty((len(coords), len(self.pcv)), dtype=float)
+        distances1 = np.empty((len(coords), len(self.pcv)), dtype=np.float64)
+        distances2 = np.empty((len(coords), len(self.pcv)), dtype=np.float64)
 
         for item in distances1.T:
             self.shift += coords[np.argmin(item)]
