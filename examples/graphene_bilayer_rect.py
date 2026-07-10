@@ -3,6 +3,8 @@ import numpy as np
 from nanonet.tb import get_k_coords
 import nanonet.tb as tb
 from nanonet.verbosity import set_verbosity
+from nanonet.config import rank
+
 
 set_verbosity(0)
 
@@ -112,7 +114,7 @@ def make_band_structure(h, visualize=True):
     band_structure1 = np.load('/Users/mykhailoklymenko/Monash_work/data/bs1.npy')
     # energy = np.linspace(-12, 10, len(dos))
 
-    if visualize:
+    if visualize and rank==0:
 
         plt.figure(1)
         ax = plt.axes()
