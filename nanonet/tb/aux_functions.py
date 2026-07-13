@@ -6,6 +6,8 @@ from __future__ import absolute_import
 from itertools import product
 import numpy as np
 import yaml
+from functools import wraps
+from pathlib import Path
 from itertools import combinations
 
 
@@ -714,3 +716,24 @@ def generate_translation_vectors(v, values):
     result  = result[np.any(result != 0, axis=1)]
 
     return result
+
+
+def autosave_npy(directory=".", suffix=".npy"):
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            save = kwargs.get('save_data', True)
+            result = func(*args, **kwargs)
+
+            if save:
+                if isinstance(save, (str, Path)):
+                    filename = Path(save)
+                else:
+                    filename = Path(directory) / f"{func.__name__}{suffix}"
+
+                np.save(filename, result)
+
+            return result
+
+        return wrapper
+    return decorator

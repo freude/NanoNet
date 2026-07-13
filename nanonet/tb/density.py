@@ -5,8 +5,7 @@ from ase.dft.kpoints import monkhorst_pack
 from sisl.physics import MonkhorstPack
 from nanonet.config import comm, rank, size, mpi_available, MPI, set_mpi
 # set_mpi(False)
-import numpy as np
-np.show_config()
+
 
 
 def delta(energy):

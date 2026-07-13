@@ -4,6 +4,7 @@ from nanonet.tb import get_k_coords
 import nanonet.tb as tb
 from nanonet.verbosity import set_verbosity
 from nanonet.config import rank
+from nanonet.tb.aux_functions import autosave_npy
 
 
 set_verbosity(0)
@@ -81,7 +82,8 @@ def make_hamiltonian(pot, field):
 
     return h
 
-def make_band_structure(h, visualize=True):
+@autosave_npy()
+def make_band_structure(h, visualize=True, save_visuals=False, save_data=False):
 
     lat_const = 1.42
 
@@ -106,15 +108,12 @@ def make_band_structure(h, visualize=True):
 
     band_structure = np.sort(band_structure)
     occupied = 4
-    ec = np.min(band_structure[:, occupied:])
-    ev = np.max(band_structure[:, :occupied])
-    # band_gap = ec - ev
 
     # dos = np.load('/Users/mykhailoklymenko/Monash_work/NanoNet/nanonet/tb/dos.npy')
     # band_structure1 = np.load('/Users/mykhailoklymenko/Monash_work/data/bs1.npy')
     # energy = np.linspace(-12, 10, len(dos))
 
-    if visualize and rank==0:
+    if (visualize or save_visuals) and rank==0:
 
         plt.figure(1)
         ax = plt.axes()
@@ -131,9 +130,14 @@ def make_band_structure(h, visualize=True):
         ax1.set_xticks(np.insert(np.cumsum(num_points) - 1, 0, 0), labels=sym_points)
         ax1.xaxis.grid()
         # ax2.plot(dos, energy, 'b')
-        plt.show()
+        if save_visuals:
+            plt.savefig('band_structure.pdf')
+        else:
+            plt.show()
 
-    return ec, ev
+
+    return band_structure[:,occupied:], band_structure[:,:occupied]
+
 
 def main():
 
@@ -147,10 +151,11 @@ def main():
     for j, field in enumerate(fields):
         print(j)
         h = make_hamiltonian(0.0, field)
-        ec, ev = make_band_structure(h, visualize=False)
-        eg[j] = ec - ev
-        e_c[j] = ec
-        e_v[j] = ev
+        ec, ev = make_band_structure(h, visualize=False, save_data=True)
+
+        e_c[j] = np.min(ec)
+        e_v[j] = np.max(ev)
+        eg[j] = e_c[j] - e_v[j]
 
     plt.figure(1)
     plt.plot(fields, eg)
@@ -168,20 +173,20 @@ def main():
     #
     # np.save('eg_vs_filed.npy', eg)
 
-    eg = np.load('eg_vs_filed.npy')
-    plt.figure(1)
-    plt.plot(fields, eg)
-    plt.show()
-
-    from scipy import interpolate
-    f = interpolate.interp1d(fields, eg)
-    fields_new = np.linspace(0, 0.5, 50)
-    eg_new = f(fields_new)
-    plt.figure(1)
-    plt.plot(fields_new, eg_new, '-o')
-    plt.xlabel('Field [V/m]')
-    plt.ylabel('Band gap [eV]')
-    plt.show()
+    # eg = np.load('eg_vs_filed.npy')
+    # plt.figure(1)
+    # plt.plot(fields, eg)
+    # plt.show()
+    #
+    # from scipy import interpolate
+    # f = interpolate.interp1d(fields, eg)
+    # fields_new = np.linspace(0, 0.5, 50)
+    # eg_new = f(fields_new)
+    # plt.figure(1)
+    # plt.plot(fields_new, eg_new, '-o')
+    # plt.xlabel('Field [V/m]')
+    # plt.ylabel('Band gap [eV]')
+    # plt.show()
 
 
 def main1():
