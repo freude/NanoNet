@@ -9,7 +9,7 @@ from nanonet.config import comm, rank, size, mpi_available, MPI, set_mpi
 
 def delta(energy):
 
-    broadening = 0.05
+    broadening = 0.03
     dos = (1.0 / (broadening * np.sqrt(np.pi))) * np.exp(-(energy / broadening)**2)
     return dos
 
@@ -82,8 +82,10 @@ def compute_dos(en, hamiltonian, num_kpts):
     kpts, weights = gen_kpts(hamiltonian, num_kpts)
     local_dos = np.zeros_like(en)
 
-    for jj1, kpt in enumerate(kpts):
-        energy, _ = h.diagonalize_periodic_bc(kpt)
+    indices = list(range(rank, kpts.shape[0], size))
+
+    for jj in indices:
+        energy, _ = h.diagonalize_periodic_bc(kpts[jj])
         for e in energy:
             local_dos += delta(en - e)
 
@@ -106,20 +108,22 @@ if __name__=="__main__":
 
     from examples.graphene_bilayer_rect import make_hamiltonian, make_band_structure
 
-    h = make_hamiltonian(0.0, 0.0)
+    h = make_hamiltonian(0.0, 0.1)
     ec, ev = make_band_structure(h, visualize=True)
-    print(ec - ev)
+    print("The computed band gap is ", np.min(ec) - np.max(ev))
     dens1, dens2, ev, ec = compute_density(h, 32, 0.0, 0.0, 300, print_all=True)
     print(dens1)
     print(dens2)
     print(ev)
     print(ec)
 
-    energy = np.linspace(-12.0, 10.0, 2000)
-    dens = compute_dos(energy, h, 128)
+    energy = np.linspace(-2.0, 0.0, 2000)
+    dens = compute_dos(energy, h, 512)
+    np.save('dos1_0d1.npy', dens)
 
+    plt.figure(3)
     plt.plot(energy, dens)
-    plt.show()
+    plt.savefig('dos1_0d1.pdf')
 
     # np.save("dos.npy", dens)
 
