@@ -7,36 +7,28 @@ from nanonet.config import comm, rank, size, mpi_available, MPI, set_mpi
 # set_mpi(False)
 
 
-
 def delta(energy):
 
     broadening = 0.05
     dos = (1.0 / (broadening * np.sqrt(np.pi))) * np.exp(-(energy / broadening)**2)
     return dos
 
-
-def compute_density1(hamiltonian):
-
-    atoms = hamiltonian.to_ase_atoms()
-
-    mp_kpoints = monkhorst_pack([10, 10, 1])
-    cell = atoms.cell.reciprocal() * np.pi * 2
-    kpoints = mp_kpoints @ cell.T
-
-    return 0
-
-
-def compute_density(hamiltonian, pot, ef, tempr, print_all=False):
-
+def gen_kpts(hamiltonian, num_kpts):
     atoms = hamiltonian.to_sisl_geom()
-    nk = atoms.lattice.pbc.astype(int) * 32
+    nk = atoms.lattice.pbc.astype(int) * num_kpts
     nk[nk == 0] = 1
     kpts = MonkhorstPack(atoms.cell, nk, trs=False)
-
     weights = kpts.weight
     kpts = kpts.k
     cell = atoms.lattice.rcell
     kpts = kpts @ cell.T
+
+    return kpts, weights
+
+
+def compute_density(hamiltonian, num_kpts, pot, ef, tempr, print_all=False):
+
+    kpts, weights = gen_kpts(hamiltonian, num_kpts)
 
     local_dens1 = np.array(0, dtype=np.float64)
     local_dens2 = np.array(0, dtype=np.float64)
@@ -85,22 +77,21 @@ def compute_density(hamiltonian, pot, ef, tempr, print_all=False):
         return dens1, dens2
 
 
-def compute_dos(en, hamiltonian):
-    atoms = hamiltonian.to_sisl_geom()
-    nk = atoms.lattice.pbc.astype(int) * 190
-    nk[nk == 0] = 1
-    kpts = MonkhorstPack(atoms.cell, nk, trs=True)
-    weights = kpts.weight
-    kpts = kpts.k
-    cell = atoms.lattice.rcell
-    kpts = kpts @ cell.T
+def compute_dos(en, hamiltonian, num_kpts):
 
-    dos = np.zeros_like(en)
+    kpts, weights = gen_kpts(hamiltonian, num_kpts)
+    local_dos = np.zeros_like(en)
 
     for jj1, kpt in enumerate(kpts):
         energy, _ = h.diagonalize_periodic_bc(kpt)
         for e in energy:
-            dos += delta(en - e)
+            local_dos += delta(en - e)
+
+    dos = np.zeros_like(en)
+    if mpi_available:
+        comm.Allreduce(local_dos, dos, op=MPI.SUM)
+    else:
+        dos = local_dos
 
     return dos
 
@@ -116,22 +107,19 @@ if __name__=="__main__":
     from examples.graphene_bilayer_rect import make_hamiltonian, make_band_structure
 
     h = make_hamiltonian(0.0, 0.0)
-    # ham = np.load("/Users/mykhailoklymenko/Monash_work/data/h.npy")
-    # print(ham)
-    # print(h.h_matrix_bc_factor - ham)
     ec, ev = make_band_structure(h, visualize=True)
     print(ec - ev)
-    dens1, dens2, ev, ec = compute_density(h, 0.0, 0.0, 300, print_all=True)
+    dens1, dens2, ev, ec = compute_density(h, 32, 0.0, 0.0, 300, print_all=True)
     print(dens1)
     print(dens2)
     print(ev)
     print(ec)
 
-    # energy = np.linspace(-12.0, 10.0, 2000)
-    # dens = compute_dos(energy, h)
-    #
-    # plt.plot(energy, dens)
-    # plt.show()
+    energy = np.linspace(-12.0, 10.0, 2000)
+    dens = compute_dos(energy, h, 128)
+
+    plt.plot(energy, dens)
+    plt.show()
 
     # np.save("dos.npy", dens)
 

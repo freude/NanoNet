@@ -722,7 +722,7 @@ def autosave_npy(directory=".", suffix=".npy"):
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
-            save = kwargs.get('save_data', True)
+            save = kwargs.get('save_data', False)
             result = func(*args, **kwargs)
 
             if save:
