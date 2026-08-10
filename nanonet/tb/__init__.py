@@ -14,8 +14,11 @@ from .hamiltonian_initializer import set_tb_params, initializer
 from .reduced_mode_space import reduce_mode_space, bs_vs_e, bs
 import logging
 from pyfiglet import Figlet
+from nanonet.config import rank
 
-logging.basicConfig(format='%(message)s', level=logging.INFO)
-logging.StreamHandler(stream=None)
-logging.info(Figlet(font='standard').renderText('NanoNET'))
-logging.info("Vesion " + __version__)
+
+if rank == 0:
+    logging.basicConfig(format='%(message)s', level=logging.INFO)
+    logging.StreamHandler(stream=None)
+    logging.info(Figlet(font='standard').renderText('NanoNET'))
+    logging.info("Vesion " + __version__)

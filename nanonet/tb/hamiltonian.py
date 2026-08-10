@@ -16,7 +16,7 @@ from nanonet.tb.aux_functions import dict2xyz
 from nanonet.tb.block_tridiagonalization import find_nonzero_lines, split_into_subblocks_optimized, cut_in_blocks, \
     split_into_subblocks
 import nanonet.verbosity as verbosity
-from nanonet.tb.interface2ase import hamiltonian2aroms
+from nanonet.tb.interface2ase import hamiltonian2atoms
 from nanonet.tb.interface2sisl import hamiltonian2geom
 
 unique_distances = set()
@@ -327,7 +327,7 @@ class Hamiltonian(BasisTB):
 
         return vals[ind], vects[:, ind]
 
-    def diagonalize_periodic_bc(self, k_vector):
+    def get_hamiltonian_periodic_bc(self, k_vector):
         """Diagonalize the Hamiltonian matrix with the periodic boundary conditions
         for a certain value of the wave vector k_vector
 
@@ -354,10 +354,34 @@ class Hamiltonian(BasisTB):
             self._compute_h_matrix_bc_add(overlap=self.compute_overlap)
 
         if self.compute_overlap:
-            vals, vects = scipy.linalg.eigh(self.h_matrix_bc_factor * self.h_matrix + self.h_matrix_bc_add,
-                                            self.h_matrix_bc_factor * self.ov_matrix + self.ov_matrix_bc_add)
+            return (self.h_matrix_bc_factor * self.h_matrix + self.h_matrix_bc_add,
+                    self.h_matrix_bc_factor * self.ov_matrix + self.ov_matrix_bc_add)
         else:
-            vals, vects = scipy.linalg.eigh(self.h_matrix_bc_factor * self.h_matrix + self.h_matrix_bc_add)
+            return self.h_matrix_bc_factor * self.h_matrix + self.h_matrix_bc_add
+
+    def diagonalize_periodic_bc(self, k_vector):
+        """Diagonalize the Hamiltonian matrix with the periodic boundary conditions
+        for a certain value of the wave vector k_vector
+
+        Parameters
+        ----------
+        k_vector : numpy.ndarray
+            wave vector
+
+        Returns
+        -------
+        vals : numpy.ndarray
+            Eigenvalues
+        vects : numpy.ndarray
+            Eigenvectors
+        """
+
+        mat = self.get_hamiltonian_periodic_bc(k_vector)
+
+        if self.compute_overlap:
+            vals, vects = scipy.linalg.eigh(mat[0], mat[1])
+        else:
+            vals, vects = scipy.linalg.eigh(mat)
 
         vals = np.real(vals)
         ind = np.argsort(vals)
@@ -746,7 +770,7 @@ class Hamiltonian(BasisTB):
         return hl1, h01, hr1, subblocks
 
     def to_ase_atoms(self):
-        return hamiltonian2aroms(self)
+        return hamiltonian2atoms(self)
 
     def to_sisl_geom(self):
         return hamiltonian2geom(self)

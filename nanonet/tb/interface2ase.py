@@ -2,7 +2,7 @@ import numpy as np
 from ase import Atoms
 
 
-def hamiltonian2aroms(hamiltonian):
+def hamiltonian2atoms(hamiltonian):
 
     atoms = Atoms(positions=np.array(list(hamiltonian.atom_list.values())))
 

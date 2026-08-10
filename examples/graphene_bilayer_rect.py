@@ -199,6 +199,10 @@ def main1():
     kx = np.linspace(lat_const_rec - 0.5, lat_const_rec - 0.35, 100)
     ky = np.linspace(-0.1, 0.1, 100)
 
+    kx = np.linspace(-lat_const_rec, lat_const_rec, 50)
+    ky = np.linspace(-0.6 * lat_const_rec, 0.6 * lat_const_rec, 50)
+
+
     # kx = np.linspace(-lat_const_rec, lat_const_rec, 50)
     # ky = np.linspace(-1.0 / np.sqrt(3) * lat_const_rec,
     #                  1.0 / np.sqrt(3) * lat_const_rec, 50)

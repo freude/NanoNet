@@ -12,9 +12,9 @@ except ImportError:
     size = 1
     MPI = None
 
-
-print("MPI available: ", mpi_available)
-print("The pool size is: ", size)
+if rank == 0:
+    print("MPI available: ", mpi_available)
+    print("The pool size is: ", size)
 
 
 def set_mpi(mpi_switch: bool):
@@ -23,8 +23,11 @@ def set_mpi(mpi_switch: bool):
     global rank
     global size
     mpi_available = mpi_switch
-    print("MPI available: ", mpi_available)
-    print("The pool size is: ", size)
+
+    if rank == 0:
+        print("MPI available: ", mpi_available)
+        print("The pool size is: ", size)
+
     if mpi_available:
         comm = MPI.COMM_WORLD
         rank = comm.Get_rank()
