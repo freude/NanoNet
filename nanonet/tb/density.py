@@ -309,7 +309,7 @@ def greens_function_from_tb_with_mask(energy, h, mask, num_k:int=300, eta:float|
         print(j)
         kpts[:, 2] = en
         mask_bin = mask(kpts)
-        indices_new = indices[mask_bin > 0.2]
+        indices_new = indices[mask_bin > 0.1]
         print("Num. of indices:", len(indices_new), "out of", len(indices), "indicies.")
         kspecdens = np.zeros_like(kpts[:, 0])
 
@@ -322,7 +322,7 @@ def greens_function_from_tb_with_mask(energy, h, mask, num_k:int=300, eta:float|
 
         for j2 in range(len(ky)):
             p, _ = find_peaks(kspecdens.reshape((len(kx), len(ky)))[j2, :],
-                              height=(0.00005, 5.1),
+                              height=(0.0003, 5.1),
                               distance=5)
 
             tr[j] += len(p)
@@ -460,7 +460,8 @@ def main():
     sys.path.append(str(Path(__file__).resolve().parents[2]))
 
     fields = np.linspace(0.0, 0.1, 20)
-    energy_sparce = np.linspace(-2.0, -0.2, 100)
+    fields = np.array([0.01])
+    energy_sparce = np.linspace(-2.0, -0.2, 200)
     energy = np.linspace(-2.0, -0.2, 300)
 
     trs = np.zeros((len(energy), len(fields)))
@@ -468,7 +469,7 @@ def main():
 
     for j, field in enumerate(fields):
         print("==================")
-        print(j, "out of", len(fields))
+        print(j + 1, "out of", len(fields))
         print("==================")
 
         h = make_hamiltonian(0.0, field)
@@ -482,10 +483,12 @@ def main():
     np.save("doss.npy", doss)
 
     plt.plot(energy, trs[:, -1])
-    plt.savefig("trs.pdf")
+    # plt.savefig("trs.pdf")
+    plt.show()
 
     plt.plot(energy, doss[:, -1])
-    plt.savefig("dos.pdf")
+    # plt.savefig("dos.pdf")
+    plt.show()
 
 
 if __name__=="__main__":
