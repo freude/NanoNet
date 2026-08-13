@@ -6,19 +6,9 @@ RUN apt-get update && \
     apt-get install -y libopenmpi-dev && \
     rm -rf /var/lib/apt/lists/*
 
-
-# Create Python virtual environment
-RUN python -m venv /opt/venv
-
-# Use the virtual environment by default
-ENV PATH="/opt/venv/bin:$PATH"
-
 # Clone the repository
 WORKDIR /app
-RUN git clone https://github.com/freude/NanoNet.git && \
-    cd NanoNet && ls
-
-WORKDIR /app/NanoNet
+COPY . .
 
 # Install dependencies
 RUN pip install --upgrade pip && \
