@@ -1,28 +1,27 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.interpolate import RegularGridInterpolator
-from fontTools.merge import cmap
-from numpy.ma.core import identity
-
+from scipy.signal import find_peaks
 from nanonet.transport.aux_functions import fd
-from ase.dft.kpoints import monkhorst_pack
 from sisl.physics import MonkhorstPack
 from nanonet.config import comm, rank, size, mpi_available, MPI, set_mpi
 # set_mpi(False)
 
 
 def delta(energy):
+    """Gaussian approximation to the Dirac delta function with 0.03 eV broadening."""
 
     broadening = 0.03
     dos = (1.0 / (broadening * np.sqrt(np.pi))) * np.exp(-(energy / broadening)**2)
     return dos
+
 
 def gen_kpts(hamiltonian, num_kpts, time_reversal_symemtry=True):
 
     atoms = hamiltonian.to_sisl_geom()
     nk = atoms.lattice.pbc.astype(int) * num_kpts
     nk[nk == 0] = 1
-    kpts = MonkhorstPack(atoms.cell, nk, trs=True)
+    kpts = MonkhorstPack(atoms.cell, nk, trs=time_reversal_symemtry)
 
     x_displ = set(np.abs(np.diff(kpts.k[:, 0])))
     x_displ.discard(0.0)
@@ -32,7 +31,7 @@ def gen_kpts(hamiltonian, num_kpts, time_reversal_symemtry=True):
     y_displ.discard(0.0)
     y_displ = np.min(list(y_displ))
 
-    kpts = MonkhorstPack(atoms.cell, nk, [0.5 * x_displ, 0.5 * y_displ, 0.0], trs=True)
+    kpts = MonkhorstPack(atoms.cell, nk, [0.5 * x_displ, 0.5 * y_displ, 0.0], trs=time_reversal_symemtry)
 
     weights = kpts.weight
     kpts = kpts.k
@@ -43,6 +42,7 @@ def gen_kpts(hamiltonian, num_kpts, time_reversal_symemtry=True):
 
 
 def get_reciprocal_lattice(hamiltonian):
+
     atoms = hamiltonian.to_sisl_geom()
     cell = atoms.lattice.rcell
 
@@ -174,7 +174,7 @@ def compute_dos(en, hamiltonian, num_kpts):
     indices = list(range(rank, kpts.shape[0], size))
 
     for jj in indices:
-        energy, _ = h.diagonalize_periodic_bc(kpts[jj])
+        energy, _ = hamiltonian.diagonalize_periodic_bc(kpts[jj])
         for e in energy:
             local_dos += delta(en - e)
 
@@ -243,9 +243,10 @@ def greens_function_from_tb(energy, h):
     return gf
 
 
-def greens_function_from_tb_with_mask(energy, h, mask):
+def greens_function_from_tb_with_mask(energy, h, mask, num_k=300):
     """
-    Compute the k-averaged retarded Green's function from a tight-binding
+    Compute the k-averaged retarded Green's function, transmission function and
+    density of states from a tight-binding
     Hamiltonian using a k-space mask.
 
     The Green's function is evaluated by sampling the Brillouin zone and
@@ -264,9 +265,10 @@ def greens_function_from_tb_with_mask(energy, h, mask):
         Tight-binding Hamiltonian object providing the periodic
         Hamiltonian matrix for arbitrary k-points.
     mask : callable
-        Callable object that returns a Boolean mask indicating which
-        k-points contribute to the Brillouin-zone integration. The mask
+        Callable object, an interpolant of a Boolean mask. The mask
         may depend on k only or on both k and energy.
+    num_k : int
+        Number of k-points in one dimension.
 
     Returns
     -------
@@ -275,26 +277,14 @@ def greens_function_from_tb_with_mask(energy, h, mask):
         at each energy. The returned array has shape
         ``(len(energy), N, N)``, where ``N`` is the number of orbitals
         (or basis functions) in the Hamiltonian.
+    tr: ndarray
+        Transmission function
+    dos: ndarray
+        Density of states
     """
 
-    num_kpts = 200
-    kpts, weights = gen_kpts(h, num_kpts, time_reversal_symemtry=True)
-    # kpts_fine, weights_fine = gen_kpts(h, num_kpts * 4, time_reversal_symemtry=True)
-
-    #######################
-
-    lat_const = 1.42
-    lat_const_rec = np.pi / (np.sqrt(3) * lat_const)
-
-    kx = np.linspace(lat_const_rec - 0.6, lat_const_rec, 70)
-    ky = np.linspace(-0.2, 0.2, 70)
-    kkx, kky = np.meshgrid(kx, ky)
-    kpts = np.column_stack((kkx.ravel(), kky.ravel(), np.zeros(kkx.size)))
-
-    #######################
-
-    num_kx = 200
-    num_ky = 200
+    num_kx = num_k
+    num_ky = num_k
 
     cell = get_reciprocal_lattice(h)
     kx = np.linspace(-0.0 * cell[0, 0], 0.5 * cell[0, 0], num_kx)
@@ -304,49 +294,56 @@ def greens_function_from_tb_with_mask(energy, h, mask):
     kpts = np.column_stack((kkx.ravel(), kky.ravel(), np.zeros(kkx.size)))
 
     if len(mask.grid) == 2:
-        mask_bin = mask(kpts[:, :2])
-        plt.contourf(mask_bin.reshape((len(kx), len(ky))), 3, cmap='berlin')
+        mask_bin = mask(kpts[:, :2]) > 0.2
+        plt.pcolormesh(mask_bin.reshape((len(kx), len(ky))), cmap='berlin')
         plt.show()
     elif len(mask.grid) == 3:
-        kptss = np.column_stack((kkx.ravel(), kky.ravel(), np.zeros(kkx.size)-1.6))
-        mask_bin = mask(kptss)
-        plt.contourf(mask_bin.reshape((len(kx), len(ky))), 3, cmap='berlin')
+        kptss = np.column_stack((kkx.ravel(), kky.ravel(), np.zeros(kkx.size)-1.4))
+        mask_bin = mask(kptss) > 0.2
+        plt.pcolormesh(mask_bin.reshape((len(kx), len(ky))), cmap='berlin')
         plt.show()
     else:
         pass
 
-    #######################
-
     indices = np.array(list(range(rank, kpts.shape[0], size)))
     print("Num. of indices: ", len(indices))
-    # indices = indices[mask_bin.astype(bool)]
-    # print("Num. of indices: ", len(indices))
+
     eta = 0.01
     IE = np.multiply.outer(energy + 1j * eta, np.identity(len(np.diag(h.h_matrix))), dtype=np.complex128)
     gf = np.zeros_like(IE)
-
     II = np.identity(len(np.diag(h.h_matrix)))
-
-    # for jj in indices:
-    #     mat = h.get_hamiltonian_periodic_bc(np.array([kpts[jj, 0], kpts[jj, 1], 0.0]))
-    #     gf +=  weight * np.linalg.pinv(IE - mat)
-
     kptss = np.column_stack((kkx.ravel(), kky.ravel(), np.zeros(kkx.size)))
     mat = {}
+
+    tr = np.zeros_like(energy)
 
     for j, en in enumerate(energy):
         print(j)
         kptss[:, 2] = en
         mask_bin = mask(kptss)
-        indices_new = indices[mask_bin.astype(bool)]
+        indices_new = indices[mask_bin > 0.2]
         print("Num. of indices:", len(indices_new), "out of", len(indices), "indicies.")
+
+        kspecdens = np.zeros_like(kptss[:, 0])
+
         for jj in indices_new:
             if (kpts[jj, 0], kpts[jj, 1], 0.0) not in mat:
                 mat[(kpts[jj, 0], kpts[jj, 1], 0.0)] = h.get_hamiltonian_periodic_bc(np.array([kpts[jj, 0], kpts[jj, 1], 0.0]))
-            gf[j, :, :] +=  weight * np.linalg.pinv(II * (en + 1j * eta) - mat[(kpts[jj, 0], kpts[jj, 1], 0.0)])
+            kernel = weight * np.linalg.pinv(II * (en + 1j * eta) - mat[(kpts[jj, 0], kpts[jj, 1], 0.0)])
+            gf[j, :, :] += kernel
+            kspecdens[jj] = np.abs(np.imag(np.trace(kernel)))
 
-    return gf
+        for j2 in range(len(ky)):
+            p, _ = find_peaks(kspecdens.reshape((len(kx), len(ky)))[j2, :],
+                              height=(0.00005, 5.1),
+                              distance=5)
 
+            tr[j] += len(p)
+
+    tr *= (ky[2] - ky[1]) / (2 * np.pi)
+    dos = -np.imag(np.trace(gf, axis1=1, axis2=2))
+
+    return gf, tr, dos
 
 
 def greens_function_k_dep(energy,  h):
@@ -378,15 +375,12 @@ def greens_function_k_dep(energy,  h):
         Absolute value of the trace of the Green's function at each
         k-point and energy. The returned array has shape
         ``(len(kx), len(ky), len(energy))``.
-    mask : ndarray of bool
-        Boolean array with the same shape as `intensity`, indicating
-        where the intensity exceeds the threshold used in the function.
     """
 
     num_kx = 25
     num_ky = 25
-    # num_kx = 50
-    # num_ky = 50
+    # num_kx = 120
+    # num_ky = 120
 
 
     cell = get_reciprocal_lattice(h)
@@ -408,11 +402,8 @@ def greens_function_k_dep(energy,  h):
             mat = h.get_hamiltonian_periodic_bc(np.array([k_x, k_y, 0.0]))
             gf[j1, j2, :, :, :] +=  weight * np.linalg.pinv(IE - mat)
 
-    intensity = np.abs(np.trace(gf, axis1=3, axis2=4))
-    mask = intensity > 0.02
+    return kx, ky, gf
 
-    # return -np.imag(np.trace(gf, axis1=2, axis2=3))
-    return kx, ky, np.squeeze(intensity), np.squeeze(mask)
 
 def make_masks(energy, h):
     """
@@ -441,7 +432,10 @@ def make_masks(energy, h):
         when multiple energy values are provided.
     """
 
-    kx, ky, ans, mask = greens_function_k_dep(energy, h)
+    kx, ky, ans = greens_function_k_dep(energy, h)
+    intensity = np.abs(np.trace(ans, axis1=3, axis2=4))
+    mask = intensity > 0.02
+
     if len(energy) == 1:
         masks = RegularGridInterpolator((kx, ky), mask)
     else:
@@ -450,72 +444,34 @@ def make_masks(energy, h):
     return masks
 
 
-if __name__=="__main__":
+def main():
 
     from pathlib import Path
     import sys
-    from ase.visualize import view
+    from examples.graphene_bilayer_rect import make_hamiltonian
 
     sys.path.append(str(Path(__file__).resolve().parents[2]))
 
-    from examples.graphene_bilayer_rect import make_hamiltonian, make_band_structure
-
     h = make_hamiltonian(0.0, 0.1)
-    energy = np.linspace(-12.0, 0.0, 50)
-    kx, ky, ans, mask = greens_function_k_dep(energy, h)
+    energy = np.linspace(-2.0, -0.2, 100)
 
-    plt.contourf(ans[:, :, np.argmin(np.abs(energy + 1.5))], 100, cmap='gist_heat')
-    plt.show()
-
-    plt.contourf(mask[:, :, np.argmin(np.abs(energy + 1.5))], 2, cmap='berlin')
-    plt.show()
-
-    plt.contourf(ans[:, :, np.argmin(np.abs(energy + 5))], 100, cmap='gist_heat')
-    plt.show()
-
-    plt.contourf(mask[:, :, np.argmin(np.abs(energy + 5))], 2, cmap='berlin')
-    plt.show()
-
-
-    #
-    # mask = RegularGridInterpolator((kx, ky), mask)
-
-    # mask = make_masks(np.array([-1.6]), h)
-
-    # energy = np.linspace(-2.0, -1.0, 150)
-    # gf = greens_function_from_tb(energy, h)
-    #
-    # plt.plot(energy, -np.imag(np.trace(gf, axis1=1, axis2=2)))
-    # plt.show()
-
-    energy = np.linspace(-12.0, 0.0, 50)
     masks = make_masks(energy, h)
     print(masks)
     print("Masks are ready")
 
-    energy = np.linspace(-10.2, 0.0, 600)
-    gf = greens_function_from_tb_with_mask(energy, h, masks)
+    energy = np.linspace(-2.0, -0.2, 300)
+    gf, tr, dos = greens_function_from_tb_with_mask(energy, h, masks)
 
-    plt.plot(energy, -np.imag(np.trace(gf, axis1=1, axis2=2)))
+    plt.plot(energy, tr)
     plt.show()
 
-    # ec, ev = make_band_structure(h, visualize=True)
-    # print("The computed band gap is ", np.min(ec) - np.max(ev))
-    # dens1, dens2, ev, ec = compute_density(h, 90, 0.0, 0.0, 300, print_all=True)
-    # print(dens1)
-    # print(dens2)
-    # print(ev)
-    # print(ec)
+    plt.plot(energy, dos)
+    plt.show()
 
-    # energy = np.linspace(-2.0, 0.0, 2000)
-    # dens = compute_dos(energy, h, 512)
-    # # np.save('dos1_0d1.npy', dens)
-    # #
-    # plt.figure(3)
-    # plt.plot(energy, dens)
-    # plt.show()
-    # plt.savefig('dos1_0d1.pdf')
 
-    # np.save("dos.npy", dens)
+if __name__=="__main__":
+
+    main()
+
 
 
