@@ -1,5 +1,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
+from pathlib import Path
+import sys
+from examples.graphene_bilayer_rect import make_hamiltonian
 from scipy.interpolate import RegularGridInterpolator
 from scipy.signal import find_peaks
 from nanonet.transport.aux_functions import fd
@@ -243,7 +246,7 @@ def greens_function_from_tb(energy, h):
     return gf
 
 
-def greens_function_from_tb_with_mask(energy, h, mask, num_k=300):
+def greens_function_from_tb_with_mask(energy, h, mask, num_k:int=300, eta:float|int=0.01):
     """
     Compute the k-averaged retarded Green's function, transmission function and
     density of states from a tight-binding
@@ -269,6 +272,8 @@ def greens_function_from_tb_with_mask(energy, h, mask, num_k=300):
         may depend on k only or on both k and energy.
     num_k : int
         Number of k-points in one dimension.
+    eta : float
+        Green's function infinitesimal values (eV).
 
     Returns
     -------
@@ -285,46 +290,28 @@ def greens_function_from_tb_with_mask(energy, h, mask, num_k=300):
 
     num_kx = num_k
     num_ky = num_k
-
     cell = get_reciprocal_lattice(h)
     kx = np.linspace(-0.0 * cell[0, 0], 0.5 * cell[0, 0], num_kx)
     ky = np.linspace(-0.0 * cell[1, 1], 0.5 * cell[1, 1], num_ky)
     weight = (kx[2] - kx[1]) * (ky[2] - ky[1])
     kkx, kky = np.meshgrid(kx, ky)
     kpts = np.column_stack((kkx.ravel(), kky.ravel(), np.zeros(kkx.size)))
-
-    if len(mask.grid) == 2:
-        mask_bin = mask(kpts[:, :2]) > 0.2
-        plt.pcolormesh(mask_bin.reshape((len(kx), len(ky))), cmap='berlin')
-        plt.show()
-    elif len(mask.grid) == 3:
-        kptss = np.column_stack((kkx.ravel(), kky.ravel(), np.zeros(kkx.size)-1.4))
-        mask_bin = mask(kptss) > 0.2
-        plt.pcolormesh(mask_bin.reshape((len(kx), len(ky))), cmap='berlin')
-        plt.show()
-    else:
-        pass
-
     indices = np.array(list(range(rank, kpts.shape[0], size)))
     print("Num. of indices: ", len(indices))
 
-    eta = 0.01
     IE = np.multiply.outer(energy + 1j * eta, np.identity(len(np.diag(h.h_matrix))), dtype=np.complex128)
     gf = np.zeros_like(IE)
     II = np.identity(len(np.diag(h.h_matrix)))
-    kptss = np.column_stack((kkx.ravel(), kky.ravel(), np.zeros(kkx.size)))
     mat = {}
-
     tr = np.zeros_like(energy)
 
     for j, en in enumerate(energy):
         print(j)
-        kptss[:, 2] = en
-        mask_bin = mask(kptss)
+        kpts[:, 2] = en
+        mask_bin = mask(kpts)
         indices_new = indices[mask_bin > 0.2]
         print("Num. of indices:", len(indices_new), "out of", len(indices), "indicies.")
-
-        kspecdens = np.zeros_like(kptss[:, 0])
+        kspecdens = np.zeros_like(kpts[:, 0])
 
         for jj in indices_new:
             if (kpts[jj, 0], kpts[jj, 1], 0.0) not in mat:
@@ -405,7 +392,7 @@ def greens_function_k_dep(energy,  h):
     return kx, ky, gf
 
 
-def make_masks(energy, h):
+def make_masks(energy, h, vis=True):
     """
     Construct an interpolant for the k-space mask from the k-resolved Green's
     function.
@@ -441,32 +428,64 @@ def make_masks(energy, h):
     else:
         masks = RegularGridInterpolator((kx, ky, energy), mask)
 
+    print("Masks are ready")
+
+    if vis:
+
+        num_kx = 300
+        num_ky = 300
+        cell = get_reciprocal_lattice(h)
+        kx = np.linspace(-0.0 * cell[0, 0], 0.5 * cell[0, 0], num_kx)
+        ky = np.linspace(-0.0 * cell[1, 1], 0.5 * cell[1, 1], num_ky)
+        kkx, kky = np.meshgrid(kx, ky)
+
+        if len(masks.grid) == 2:
+            kpts = np.column_stack((kkx.ravel(), kky.ravel(), np.zeros(kkx.size)))
+            mask_bin = masks(kpts[:, :2]) > 0.2
+            plt.pcolormesh(mask_bin.reshape((len(kx), len(ky))), cmap='berlin')
+            plt.show()
+        elif len(masks.grid) == 3:
+            kpts = np.column_stack((kkx.ravel(), kky.ravel(), np.zeros(kkx.size) - 1.4))
+            mask_bin = masks(kpts) > 0.2
+            plt.pcolormesh(mask_bin.reshape((len(kx), len(ky))), cmap='berlin')
+            plt.show()
+        else:
+            pass
+
     return masks
 
 
 def main():
 
-    from pathlib import Path
-    import sys
-    from examples.graphene_bilayer_rect import make_hamiltonian
-
     sys.path.append(str(Path(__file__).resolve().parents[2]))
 
-    h = make_hamiltonian(0.0, 0.1)
-    energy = np.linspace(-2.0, -0.2, 100)
-
-    masks = make_masks(energy, h)
-    print(masks)
-    print("Masks are ready")
-
+    fields = np.linspace(0.0, 0.1, 20)
+    energy_sparce = np.linspace(-2.0, -0.2, 100)
     energy = np.linspace(-2.0, -0.2, 300)
-    gf, tr, dos = greens_function_from_tb_with_mask(energy, h, masks)
 
-    plt.plot(energy, tr)
-    plt.show()
+    trs = np.zeros((len(energy), len(fields)))
+    doss = np.zeros((len(energy), len(fields)))
 
-    plt.plot(energy, dos)
-    plt.show()
+    for j, field in enumerate(fields):
+        print("==================")
+        print(j, "out of", len(fields))
+        print("==================")
+
+        h = make_hamiltonian(0.0, field)
+        masks = make_masks(energy_sparce, h, vis=False)
+        gf, tr, dos = greens_function_from_tb_with_mask(energy, h, masks)
+
+        trs[:, j] = tr
+        doss[:, j] = dos
+
+    np.save("trs.npy", trs)
+    np.save("doss.npy", doss)
+
+    plt.plot(energy, trs[:, -1])
+    plt.savefig("trs.pdf")
+
+    plt.plot(energy, doss[:, -1])
+    plt.savefig("dos.pdf")
 
 
 if __name__=="__main__":
